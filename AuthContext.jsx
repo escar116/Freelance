@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { db } from "./mockDb";
+import { auth } from "./firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const AuthContext = createContext();
 
@@ -14,37 +15,54 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAppState();
+    
+    // Subscribe to Firebase Auth state
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        // Map Firebase user properties to expected fields in the app
+        setUser({
+          ...currentUser,
+          id: currentUser.uid,
+          full_name: currentUser.displayName || currentUser.email.split('@')[0],
+          preferred_role: "Student", // Defaulting role for now
+        });
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+      setIsLoadingAuth(false);
+      setAuthChecked(true);
+    }, (error) => {
+      console.error("Auth state error:", error);
+      setAuthError(error.message);
+      setIsLoadingAuth(false);
+      setIsAuthenticated(false);
+      setAuthChecked(true);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const checkAppState = async () => {
     setIsLoadingPublicSettings(true);
-    // Mock public settings
+    // Maintain mock public settings to prevent app crashes
     setAppPublicSettings({ id: 'mock', public_settings: {} });
-    await checkUserAuth();
     setIsLoadingPublicSettings(false);
   };
 
   const checkUserAuth = async () => {
-    try {
-      setIsLoadingAuth(true);
-      const currentUser = await db.auth.me();
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-      setAuthChecked(true);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
-      setIsAuthenticated(false);
-      setAuthChecked(true);
-    }
+    // No-op: onAuthStateChanged handles this automatically, but function kept for API compat
   };
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    if (shouldRedirect) {
-      window.location.href = '/login';
+  const logout = async (shouldRedirect = true) => {
+    try {
+      await signOut(auth);
+      if (shouldRedirect) {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error("Logout failed", error);
     }
   };
 

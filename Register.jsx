@@ -1,17 +1,17 @@
-import { db } from "./mockDb";
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
 import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";
-import { UserPlus, Mail, Lock, Loader2, User, Hash, Upload, ShieldCheck, ShieldAlert, AlertCircle, FileSearch } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, User, Hash, Upload, FileSearch } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "./select";
 import { FACULTY } from "./cpe";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 import AuthLayout from "./AuthLayout";
 import GoogleIcon from "./GoogleIcon";
 import { toast } from "./use-toast";
@@ -27,12 +27,10 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
   const [certificateFile, setCertificateFile] = useState(null);
   const [certificatePreview, setCertificatePreview] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [verificationResult, setVerificationResult] = useState(null);
+
+  const returnTo = "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,14 +39,20 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
-    if (!certificateFile) {
-      setError("Please upload your Certificate of Enrollment");
-      return;
-    }
+    // We optionally require certificate upload in the UI
     setLoading(true);
     try {
-      await db.auth.register({ email, password, full_name: fullName });
-      setShowOtp(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Save extra user profile data to Firestore User collection
+      await setDoc(doc(db, "User", userCredential.user.uid), {
+        email: email,
+        full_name: fullName,
+        student_id: studentId,
+        preferred_role: role,
+        faculty_reference: faculty,
+        verification_status: certificateFile ? "pending" : "unverified",
+      });
+      window.location.href = returnTo;
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {
@@ -56,45 +60,14 @@ export default function Register() {
     }
   };
 
-  const handleVerify = async () => {
-    setError("");
-    setLoading(true);
+  const handleGoogle = async () => {
     try {
-      const result = await db.auth.verifyOtp({ email, otpCode });
-      if (result?.access_token) {
-        db.auth.setToken(result.access_token);
-      }
-      await db.auth.updateMe({
-        student_id: studentId,
-        preferred_role: role,
-        faculty_reference: faculty,
-        verification_status: "pending",
-      });
-      setShowOtp(false);
-      await verifyCertificate(certificateFile);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      window.location.href = returnTo;
     } catch (err) {
-      setError(err.message || "Invalid verification code");
-      setShowOtp(true);
-    } finally {
-      setLoading(false);
+      setError(err.message || "Google registration failed");
     }
-  };
-
-  const handleResend = async () => {
-    setError("");
-    try {
-      await db.auth.resendOtp(email);
-      toast({
-        title: "Code sent",
-        description: "Check your email for the new code.",
-      });
-    } catch (err) {
-      setError(err.message || "Failed to resend code");
-    }
-  };
-
-  const handleGoogle = () => {
-    db.auth.loginWithProvider("google", undefined);
   };
 
   const handleCertificateChange = (e) => {
@@ -105,145 +78,6 @@ export default function Register() {
     setError("");
   };
 
-  const verifyCertificate = async (file) => {
-    setVerifying(true);
-    setVerificationResult(null);
-    setError("");
-    try {
-      const { file_url } = await db.integrations.Core.UploadFile({ file });
-      await db.auth.updateMe({
-        enrollment_certificate_url: file_url,
-        verification_status: "pending",
-      });
-      const res = await db.functions.invoke("VerifyEnrollmentCertificate", {
-        certificate_url: file_url,
-      });
-      setVerificationResult(res.data);
-    } catch (err) {
-      setVerificationResult({
-        status: "error",
-        reason: err.message || "We couldn't verify your certificate right now. You can continue — we'll review manually.",
-      });
-    } finally {
-      setVerifying(false);
-    }
-  };
-
-  if (verifying) {
-    return (
-      <AuthLayout
-        icon={FileSearch}
-        title="Verifying your enrollment"
-        subtitle="Checking your Certificate of Enrollment…"
-      >
-        <div className="flex flex-col items-center py-6">
-          <Loader2 className="w-10 h-10 text-primary animate-spin mb-5" aria-hidden="true" />
-          <p className="text-sm text-muted-foreground text-center">
-            Our system is reviewing your certificate of enrollment. This usually takes a few seconds.
-          </p>
-        </div>
-      </AuthLayout>
-    );
-  }
-
-  if (verificationResult) {
-    const ok = verificationResult.status === "verified";
-    const errored = verificationResult.status === "error";
-    const Icon = ok ? ShieldCheck : errored ? AlertCircle : ShieldAlert;
-    return (
-      <AuthLayout
-        icon={Icon}
-        title={ok ? "You're verified!" : errored ? "Couldn't verify" : "Verification denied"}
-        subtitle={
-          ok
-            ? "Your enrollment has been confirmed."
-            : errored
-            ? "You can continue while we review manually."
-            : "We couldn't confirm your enrollment."
-        }
-      >
-        <div className="p-4 rounded-xl bg-muted text-sm text-muted-foreground">
-          {verificationResult.reason}
-        </div>
-        {!ok && !errored && (
-          <div className="mt-4 space-y-2">
-            <Label htmlFor="recert">Try a different certificate</Label>
-            <Input
-              id="recert"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) verifyCertificate(f);
-              }}
-              className="h-12"
-            />
-          </div>
-        )}
-        <Button
-          className="w-full h-12 font-medium mt-6"
-          onClick={() => { window.location.href = undefined; }}
-        >
-          Continue to Work 4 a bit
-        </Button>
-      </AuthLayout>
-    );
-  }
-
-  if (showOtp) {
-    return (
-      <AuthLayout
-        icon={Mail}
-        title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
-      >
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-            {error}
-          </div>
-        )}
-        <div className="flex justify-center mb-6">
-          <InputOTP
-            maxLength={6}
-            value={otpCode}
-            onChange={setOtpCode}
-            autoFocus
-            autoComplete="one-time-code"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
-        </div>
-        <Button
-          className="w-full h-12 font-medium"
-          onClick={handleVerify}
-          disabled={loading || otpCode.length < 6}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying...
-            </>
-          ) : (
-            "Verify"
-          )}
-        </Button>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn't receive the code?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Resend
-          </button>
-        </p>
-      </AuthLayout>
-    );
-  }
-
   return (
     <AuthLayout
       icon={UserPlus}
@@ -253,7 +87,7 @@ export default function Register() {
         <>
           Already have an account?{" "}
           <Link
-            to={"/login" + (undefined !== "/" ? "?returnTo=" + encodeURIComponent(undefined) : "")}
+            to={"/login" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
             className="text-primary font-medium hover:underline"
           >
             Log in
@@ -324,7 +158,6 @@ export default function Register() {
               id="email"
               type="email"
               autoComplete="email"
-              autoFocus
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -408,10 +241,9 @@ export default function Register() {
             accept="image/*"
             onChange={handleCertificateChange}
             className="hidden"
-            required
           />
           <p className="text-xs text-muted-foreground">
-            We'll automatically verify your enrollment from this document.
+            We'll verify your enrollment from this document.
           </p>
         </div>
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
