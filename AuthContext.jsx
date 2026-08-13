@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -17,16 +18,29 @@ export const AuthProvider = ({ children }) => {
     checkAppState();
     
     // Subscribe to Firebase Auth state
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Map Firebase user properties to expected fields in the app
-        setUser({
-          ...currentUser,
-          id: currentUser.uid,
-          full_name: currentUser.displayName || currentUser.email.split('@')[0],
-          preferred_role: "Student", // Defaulting role for now
-        });
-        setIsAuthenticated(true);
+        try {
+          // Fetch additional user profile details from Firestore
+          const userDoc = await getDoc(doc(db, "User", currentUser.uid));
+          let extraData = {};
+          if (userDoc.exists()) {
+            extraData = userDoc.data();
+          }
+
+          setUser({
+            ...currentUser,
+            id: currentUser.uid,
+            full_name: extraData.full_name || currentUser.displayName || currentUser.email.split('@')[0],
+            preferred_role: extraData.preferred_role || "Student",
+            verification_status: extraData.verification_status || "unverified",
+            ...extraData,
+          });
+          setIsAuthenticated(true);
+        } catch (err) {
+          console.error("Failed to fetch user doc:", err);
+          setAuthError("Failed to fetch user profile");
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);

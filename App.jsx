@@ -20,6 +20,8 @@ import HelpRequests from "./HelpRequests";
 import Profile from "./Profile";
 import StudentProfile from "./StudentProfile";
 import SearchResults from "./SearchResults";
+import PendingApproval from "./PendingApproval";
+import AdminDashboard from "./AdminDashboard";
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -51,6 +53,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/pending" element={<PendingApproval />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -60,6 +63,7 @@ const AuthenticatedApp = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/students/:email" element={<StudentProfile />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

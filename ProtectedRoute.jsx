@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from "./AuthContext";
 import UserNotRegisteredError from "./UserNotRegisteredError";
 
@@ -31,6 +31,15 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
 
   if (!isAuthenticated) {
     return unauthenticatedElement;
+  }
+
+  // Check verification status
+  const isAdmin = user?.email === 'charlesjanparaggua@gmail.com';
+  const isVerified = user?.verification_status === 'verified';
+  
+  // Allow admins and verified users through
+  if (!isAdmin && !isVerified) {
+    return <Navigate to="/pending" replace />;
   }
 
   return <Outlet />;

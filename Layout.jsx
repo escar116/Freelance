@@ -2,6 +2,7 @@ import { db } from "./mockDb";
 
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 import { Menu, X, LogOut, Search } from "lucide-react";
 import { Button } from "./button";
@@ -21,6 +22,9 @@ export default function Layout() {
   const [q, setQ] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const isAdmin = user?.email === 'charlesjanparaggua@gmail.com';
 
   const submitSearch = (e) => {
     e.preventDefault();
@@ -70,6 +74,19 @@ export default function Layout() {
                 {n.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={
+                  "px-3 py-2 text-sm rounded-full transition-colors " +
+                  (location.pathname === "/admin"
+                    ? "bg-amber-100 text-amber-700 font-medium"
+                    : "text-amber-600 hover:text-amber-700 hover:bg-amber-50")
+                }
+              >
+                Admin
+              </Link>
+            )}
             <ThemeToggle />
             <Button
               variant="ghost"
@@ -114,6 +131,15 @@ export default function Layout() {
                 {n.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="block px-3 py-2.5 rounded-xl text-sm text-amber-600 hover:bg-amber-50"
+              >
+                Admin Dashboard
+              </Link>
+            )}
             <div className="flex items-center justify-between px-3 py-2.5">
               <span className="text-sm text-muted-foreground">Theme</span>
               <ThemeToggle />

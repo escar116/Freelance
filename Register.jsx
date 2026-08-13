@@ -32,6 +32,42 @@ export default function Register() {
 
   const returnTo = "/";
 
+  // Compress image to ensure it fits within Firestore's 1MB document limit
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.6)); // compress to 60% quality jpeg
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -43,6 +79,13 @@ export default function Register() {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      let certificateUrl = "";
+      if (certificateFile) {
+        // Bypass Firebase Storage completely - compress and store as text (Base64) in Firestore
+        certificateUrl = await compressImage(certificateFile);
+      }
+
       // Save extra user profile data to Firestore User collection
       await setDoc(doc(db, "User", userCredential.user.uid), {
         email: email,
@@ -50,6 +93,7 @@ export default function Register() {
         student_id: studentId,
         preferred_role: role,
         faculty_reference: faculty,
+        certificate_url: certificateUrl,
         verification_status: certificateFile ? "pending" : "unverified",
       });
       window.location.href = returnTo;
