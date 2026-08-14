@@ -1,0 +1,37 @@
+type User @table(key: "id") {
+  id: String!
+  email: String!
+  fullName: String!
+  studentId: String
+  facultyReference: String
+  certificateUrl: String!
+  verificationStatus: String!
+  preferredRole: String
+}
+
+type Category @table {
+  name: String!
+  description: String
+}
+
+type Service @table {
+  title: String!
+  description: String!
+  price: Float!
+  category: Category!
+  provider: User!
+}
+
+type HelpRequest @table {
+  title: String!
+  description: String!
+  budget: Float!
+  requester: User!
+}
+
+type Review @table {
+  rating: Int!
+  comment: String!
+  reviewer: User!
+  targetUser: User!
+}

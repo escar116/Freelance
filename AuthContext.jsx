@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getUser } from "@work4abit/dataconnect";
 
 const AuthContext = createContext();
 
@@ -21,11 +21,11 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          // Fetch additional user profile details from Firestore
-          const userDoc = await getDoc(doc(db, "User", currentUser.uid));
+          // Fetch extra user data from PostgreSQL via Data Connect
+          const response = await getUser({ id: currentUser.uid });
           let extraData = {};
-          if (userDoc.exists()) {
-            extraData = userDoc.data();
+          if (response.data.user) {
+            extraData = response.data.user;
           }
 
           setUser({

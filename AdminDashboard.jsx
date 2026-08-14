@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { db } from "./firebase";
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { listPendingUsers, updateUserStatus } from "@work4abit/dataconnect";
 import { Button } from "./button";
 import { Check, X, User, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "./use-toast";
@@ -20,10 +19,8 @@ export default function AdminDashboard() {
 
     const fetchPending = async () => {
       try {
-        const q = query(collection(db, "User"), where("verification_status", "==", "pending"));
-        const snapshot = await getDocs(q);
-        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPendingUsers(users);
+        const response = await listPendingUsers();
+        setPendingUsers(response.data.users);
       } catch (err) {
         console.error("Error fetching pending users:", err);
         toast({ title: "Error", description: "Failed to load pending users", variant: "destructive" });
@@ -36,8 +33,7 @@ export default function AdminDashboard() {
 
   const handleUpdateStatus = async (userId, newStatus) => {
     try {
-      const userRef = doc(db, "User", userId);
-      await updateDoc(userRef, { verification_status: newStatus });
+      await updateUserStatus({ id: userId, status: newStatus });
       setPendingUsers(prev => prev.filter(u => u.id !== userId));
       toast({ 
         title: "Success", 
@@ -84,19 +80,19 @@ export default function AdminDashboard() {
                   <User className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{u.full_name}</h3>
+                  <h3 className="font-semibold text-lg">{u.fullName}</h3>
                   <div className="text-sm text-muted-foreground flex flex-col gap-0.5 mt-1">
                     <span>{u.email}</span>
-                    <span>Student ID: <span className="font-medium text-foreground">{u.student_id}</span></span>
-                    <span>Faculty Ref: {u.faculty_reference || "N/A"}</span>
+                    <span>Student ID: <span className="font-medium text-foreground">{u.studentId}</span></span>
+                    <span>Faculty Ref: {u.facultyReference || "N/A"}</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                {u.certificate_url ? (
+                {u.certificateUrl && u.certificateUrl !== "none" ? (
                   <a 
-                    href={u.certificate_url} 
+                    href={u.certificateUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center text-sm font-medium text-blue-600 hover:underline bg-blue-50 px-4 py-2 rounded-lg"

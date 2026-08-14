@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
+import { createUser } from "@work4abit/dataconnect";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -86,15 +86,14 @@ export default function Register() {
         certificateUrl = await compressImage(certificateFile);
       }
 
-      // Save extra user profile data to Firestore User collection
-      await setDoc(doc(db, "User", userCredential.user.uid), {
+      // Save extra user profile data to PostgreSQL via Data Connect
+      await createUser({
+        id: userCredential.user.uid,
         email: email,
-        full_name: fullName,
-        student_id: studentId,
-        preferred_role: role,
-        faculty_reference: faculty,
-        certificate_url: certificateUrl,
-        verification_status: certificateFile ? "pending" : "unverified",
+        fullName: fullName,
+        studentId: studentId || null,
+        facultyReference: faculty || null,
+        certificateUrl: certificateUrl || "none",
       });
       window.location.href = returnTo;
     } catch (err) {

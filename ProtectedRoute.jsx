@@ -10,7 +10,7 @@ const DefaultFallback = () => (
 );
 
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
-  const { isAuthenticated, isLoadingAuth, authChecked, authError, checkUserAuth } = useAuth();
+  const { user, isAuthenticated, isLoadingAuth, authChecked, authError, checkUserAuth } = useAuth();
 
   useEffect(() => {
     if (!authChecked && !isLoadingAuth) {
@@ -35,7 +35,7 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
 
   // Check verification status
   const isAdmin = user?.email === 'charlesjanparaggua@gmail.com';
-  const isVerified = user?.verification_status === 'verified';
+  const isVerified = user?.verificationStatus === 'verified';
   
   // Allow admins and verified users through
   if (!isAdmin && !isVerified) {

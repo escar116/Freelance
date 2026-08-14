@@ -1,0 +1,24 @@
+query ListPendingUsers @auth(level: PUBLIC) {
+  users(where: {verificationStatus: {eq: "pending"}}) {
+    id
+    email
+    fullName
+    studentId
+    facultyReference
+    certificateUrl
+    verificationStatus
+  }
+}
+
+query GetUser($id: String!) @auth(level: PUBLIC) {
+  user(id: $id) {
+    id
+    email
+    fullName
+    studentId
+    facultyReference
+    certificateUrl
+    verificationStatus
+    preferredRole
+  }
+}

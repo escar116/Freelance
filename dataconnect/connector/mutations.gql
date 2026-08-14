@@ -1,0 +1,15 @@
+mutation CreateUser($id: String!, $email: String!, $fullName: String!, $studentId: String, $facultyReference: String, $certificateUrl: String!) @auth(level: PUBLIC) {
+  user_insert(data: {
+    id: $id,
+    email: $email,
+    fullName: $fullName,
+    studentId: $studentId,
+    facultyReference: $facultyReference,
+    certificateUrl: $certificateUrl,
+    verificationStatus: "pending"
+  })
+}
+
+mutation UpdateUserStatus($id: String!, $status: String!) @auth(level: PUBLIC) {
+  user_update(id: $id, data: {verificationStatus: $status})
+}
