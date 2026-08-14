@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import { getUser } from "@work4abit/dataconnect";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -34,11 +35,26 @@ export default function Login() {
 
   const handleGoogle = async () => {
     try {
+      setLoading(true);
+      setError("");
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, provider);
+      
+      // Check if user actually exists in the PostgreSQL database
+      const response = await getUser({ id: result.user.uid });
+      if (!response.data.user) {
+        // User authenticated with Google but never finished registration!
+        await signOut(auth);
+        setError("Account not found. Please sign up first.");
+        setLoading(false);
+        return;
+      }
+
       window.location.href = returnTo;
     } catch (err) {
       setError(err.message || "Google login failed");
+      setLoading(false);
     }
   };
 

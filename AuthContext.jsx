@@ -23,20 +23,25 @@ export const AuthProvider = ({ children }) => {
         try {
           // Fetch extra user data from PostgreSQL via Data Connect
           const response = await getUser({ id: currentUser.uid });
-          let extraData = {};
-          if (response.data.user) {
-            extraData = response.data.user;
+          if (!response.data.user) {
+            // User does not exist in our Postgres DB yet!
+            // We shouldn't let them stay logged in as a ghost.
+            await signOut(auth);
+            setUser(null);
+            setIsAuthenticated(false);
+            setAuthError("Incomplete registration");
+          } else {
+            const extraData = response.data.user;
+            setUser({
+              ...currentUser,
+              id: currentUser.uid,
+              full_name: extraData.fullName || currentUser.displayName || currentUser.email.split('@')[0],
+              preferred_role: extraData.preferredRole || "Student",
+              verification_status: extraData.verificationStatus || "unverified",
+              ...extraData,
+            });
+            setIsAuthenticated(true);
           }
-
-          setUser({
-            ...currentUser,
-            id: currentUser.uid,
-            full_name: extraData.full_name || currentUser.displayName || currentUser.email.split('@')[0],
-            preferred_role: extraData.preferred_role || "Student",
-            verification_status: extraData.verification_status || "unverified",
-            ...extraData,
-          });
-          setIsAuthenticated(true);
         } catch (err) {
           console.error("Failed to fetch user doc:", err);
           setAuthError("Failed to fetch user profile");

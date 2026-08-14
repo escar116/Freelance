@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "./firebase";
-import { createUser } from "@work4abit/dataconnect";
+import { createUser, getUser } from "@work4abit/dataconnect";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -29,6 +29,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [certificateFile, setCertificateFile] = useState(null);
   const [certificatePreview, setCertificatePreview] = useState("");
+  const [googleUser, setGoogleUser] = useState(null);
 
   const returnTo = "/";
 
@@ -71,14 +72,26 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-    // We optionally require certificate upload in the UI
     setLoading(true);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      let uid;
+      let userEmail = email;
+      let userName = fullName;
+
+      if (googleUser) {
+        uid = googleUser.uid;
+        userEmail = googleUser.email;
+        userName = googleUser.displayName || fullName;
+      } else {
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        uid = userCredential.user.uid;
+      }
       
       let certificateUrl = "";
       if (certificateFile) {
@@ -88,9 +101,9 @@ export default function Register() {
 
       // Save extra user profile data to PostgreSQL via Data Connect
       await createUser({
-        id: userCredential.user.uid,
-        email: email,
-        fullName: fullName,
+        id: uid,
+        email: userEmail,
+        fullName: userName,
         studentId: studentId || null,
         facultyReference: faculty || null,
         certificateUrl: certificateUrl || "none",
@@ -105,11 +118,27 @@ export default function Register() {
 
   const handleGoogle = async () => {
     try {
+      setLoading(true);
+      setError("");
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      window.location.href = returnTo;
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, provider);
+      
+      const response = await getUser({ id: result.user.uid });
+      if (response.data.user) {
+        // User already has a complete PostgreSQL account! Just redirect them.
+        window.location.href = returnTo;
+        return;
+      }
+
+      // First time Google user! Save credentials and show step 2.
+      setGoogleUser(result.user);
+      setFullName(result.user.displayName || "");
+      setEmail(result.user.email || "");
+      setLoading(false);
     } catch (err) {
       setError(err.message || "Google registration failed");
+      setLoading(false);
     }
   };
 
@@ -124,8 +153,8 @@ export default function Register() {
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Join Work 4 a bit"
-      subtitle="Exclusive to Computer Engineering students"
+      title={googleUser ? "Complete Registration" : "Join Work 4 a bit"}
+      subtitle={googleUser ? "Almost done! Please provide the remaining details." : "Exclusive to Computer Engineering students"}
       footer={
         <>
           Already have an account?{" "}
@@ -138,23 +167,28 @@ export default function Register() {
         </>
       }
     >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
-      </Button>
+      {!googleUser && (
+        <>
+          <Button
+            variant="outline"
+            className="w-full h-12 text-sm font-medium mb-6"
+            onClick={handleGoogle}
+            disabled={loading}
+          >
+            <GoogleIcon className="w-5 h-5 mr-2" />
+            Continue with Google
+          </Button>
 
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
-        </div>
-      </div>
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-3 text-muted-foreground">or</span>
+            </div>
+          </div>
+        </>
+      )}
 
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -162,23 +196,83 @@ export default function Register() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="fullName"
-              autoComplete="name"
-              autoFocus
-              placeholder="Juan Dela Cruz"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
+      {googleUser && (
+        <div className="mb-4 p-4 rounded-lg border border-border bg-muted/40">
+          <div className="text-sm font-medium">Google Account Linked</div>
+          <div className="text-xs text-muted-foreground mt-1">{googleUser.email}</div>
         </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!googleUser && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="fullName"
+                  autoComplete="name"
+                  autoFocus
+                  placeholder="Juan Dela Cruz"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+            </div>
+          </>
+        )}
+        
         <div className="space-y-2">
           <Label htmlFor="studentId">Student ID</Label>
           <div className="relative">
@@ -193,54 +287,7 @@ export default function Register() {
             />
           </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="confirm"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
+        
         <div className="space-y-2">
           <Label>Preferred Role</Label>
           <Select value={role} onValueChange={setRole}>
@@ -293,10 +340,10 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating account...
+              {googleUser ? "Completing Setup..." : "Creating account..."}
             </>
           ) : (
-            "Create account"
+            googleUser ? "Complete Setup" : "Create account"
           )}
         </Button>
       </form>
