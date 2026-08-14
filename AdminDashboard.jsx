@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Strictly check for admin email
   const isAdmin = user?.email === "charlesjanparaggua@gmail.com";
@@ -89,19 +90,19 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 sm:mt-0">
                 {u.certificateUrl && u.certificateUrl !== "none" ? (
-                  <a 
-                    href={u.certificateUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center text-sm font-medium text-blue-600 hover:underline bg-blue-50 px-4 py-2 rounded-lg"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View COE Image
-                  </a>
+                  <div className="flex flex-col items-center sm:items-start gap-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Certificate</span>
+                    <img 
+                      src={u.certificateUrl} 
+                      alt="Certificate Thumbnail" 
+                      className="h-16 w-auto rounded border border-border cursor-pointer hover:opacity-80 hover:ring-2 ring-primary transition-all object-cover"
+                      onClick={() => setSelectedImage(u.certificateUrl)}
+                    />
+                  </div>
                 ) : (
-                  <span className="text-sm text-red-500 font-medium bg-red-50 px-4 py-2 rounded-lg">No COE provided</span>
+                  <span className="text-sm text-muted-foreground italic mr-4">No certificate</span>
                 )}
 
                 <div className="flex gap-2 w-full sm:w-auto">
@@ -125,6 +126,28 @@ export default function AdminDashboard() {
               
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Fullscreen Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl max-h-screen">
+            <button 
+              className="absolute -top-4 -right-4 bg-background text-foreground rounded-full p-2 hover:bg-muted shadow-lg"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Full Certificate" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
+            />
+          </div>
         </div>
       )}
     </div>

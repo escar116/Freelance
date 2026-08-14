@@ -108,7 +108,7 @@ export default function Register() {
         facultyReference: faculty || null,
         certificateUrl: certificateUrl || "none",
       });
-      window.location.href = returnTo;
+      window.location.href = "/pending";
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {

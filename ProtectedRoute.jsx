@@ -33,6 +33,11 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
     return unauthenticatedElement;
   }
 
+  // If they are authenticated in Firebase but haven't finished PostgreSQL registration
+  if (user && !user.hasPostgresData) {
+    return <Navigate to="/register" replace />;
+  }
+
   // Check verification status
   const isAdmin = user?.email === 'charlesjanparaggua@gmail.com';
   const isVerified = user?.verificationStatus === 'verified';

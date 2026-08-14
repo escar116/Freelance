@@ -25,11 +25,12 @@ export const AuthProvider = ({ children }) => {
           const response = await getUser({ id: currentUser.uid });
           if (!response.data.user) {
             // User does not exist in our Postgres DB yet!
-            // We shouldn't let them stay logged in as a ghost.
-            await signOut(auth);
-            setUser(null);
-            setIsAuthenticated(false);
-            setAuthError("Incomplete registration");
+            // We flag them so ProtectedRoute kicks them back to the registration form
+            setUser({
+              ...currentUser,
+              hasPostgresData: false,
+            });
+            setIsAuthenticated(true);
           } else {
             const extraData = response.data.user;
             setUser({
@@ -37,7 +38,8 @@ export const AuthProvider = ({ children }) => {
               id: currentUser.uid,
               full_name: extraData.fullName || currentUser.displayName || currentUser.email.split('@')[0],
               preferred_role: extraData.preferredRole || "Student",
-              verification_status: extraData.verificationStatus || "unverified",
+              verificationStatus: extraData.verificationStatus || "unverified",
+              hasPostgresData: true,
               ...extraData,
             });
             setIsAuthenticated(true);
