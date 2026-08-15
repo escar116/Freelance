@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "./select";
 import { toast } from "./use-toast";
-import { CATEGORIES, URGENCY } from "./cpe";
+import { CATEGORIES, URGENCY } from "./utils";
 
 export default function NewRequestDialog({ me, onClose }) {
   const [form, setForm] = useState({

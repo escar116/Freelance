@@ -5,7 +5,7 @@ import {
   listMessages,
   createMessage
 } from "@work4abit/dataconnect";
-import useMe from "./useMe";
+import { useMe } from "./utils";
 import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";

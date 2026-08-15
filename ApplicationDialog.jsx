@@ -9,7 +9,7 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Label } from "./label";
 import { toast } from "./use-toast";
-import { peso } from "./cpe";
+import { peso } from "./utils";
 
 export default function ApplicationDialog({ request, me, onClose }) {
   const [amount, setAmount] = useState(request?.budget || "");

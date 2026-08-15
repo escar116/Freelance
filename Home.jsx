@@ -3,8 +3,8 @@ import { listHelpRequests, listApplicationsByApplicant } from "@work4abit/dataco
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "./Loader";
-import useMe from "./useMe";
-import { peso } from "./cpe";
+import { useMe } from "./utils";
+import { peso } from "./utils";
 import { Briefcase, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";

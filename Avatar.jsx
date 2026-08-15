@@ -1,6 +1,6 @@
 import React from "react";
 import { Image } from "./image";
-import { initials } from "./cpe";
+import { initials } from "./utils";
 
 export default function Avatar({ src, name = "", className = "w-10 h-10" }) {
   if (src) {

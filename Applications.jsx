@@ -7,13 +7,13 @@ import {
   createConversation,
   createMessage
 } from "@work4abit/dataconnect";
-import useMe from "./useMe";
+import { useMe } from "./utils";
 import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import Avatar from "./Avatar";
 import { Button } from "./button";
-import { peso } from "./cpe";
+import { peso } from "./utils";
 import { ClipboardList, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "./use-toast";
 import { useNavigate } from "react-router-dom";

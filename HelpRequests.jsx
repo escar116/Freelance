@@ -13,8 +13,8 @@ import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import ApplicationDialog from "./ApplicationDialog";
 import NewRequestDialog from "./NewRequestDialog";
-import useMe from "./useMe";
-import { applyFilters } from "./filtering";
+import { useMe } from "./utils";
+import { applyFilters } from "./utils";
 
 const MAX = 20000;
 

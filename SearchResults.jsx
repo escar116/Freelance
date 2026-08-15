@@ -10,9 +10,9 @@ import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import ApplicationDialog from "./ApplicationDialog";
-import useMe from "./useMe";
-import { matchesQuery } from "./filtering";
-import { CATEGORIES } from "./cpe";
+import { useMe } from "./utils";
+import { matchesQuery } from "./utils";
+import { CATEGORIES } from "./utils";
 
 // Import Data Connect queries
 import { listHelpRequests } from "@work4abit/dataconnect";

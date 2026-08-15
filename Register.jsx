@@ -11,7 +11,7 @@ import { UserPlus, Mail, Lock, Loader2, User, Hash, Upload, FileSearch } from "l
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "./select";
-import { FACULTY } from "./cpe";
+import { FACULTY } from "./utils";
 import AuthLayout from "./AuthLayout";
 import GoogleIcon from "./GoogleIcon";
 import { toast } from "./use-toast";
