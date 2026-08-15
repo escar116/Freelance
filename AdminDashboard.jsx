@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { db } from "./firebase";
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { listPendingUsers, updateUserStatus } from "@work4abit/dataconnect";
 import { Button } from "./button";
 import { Check, X, User, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "./use-toast";
@@ -21,10 +20,8 @@ export default function AdminDashboard() {
 
     const fetchPending = async () => {
       try {
-        const q = query(collection(db, "users"), where("verificationStatus", "==", "pending"));
-        const snap = await getDocs(q);
-        const users = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPendingUsers(users);
+        const response = await listPendingUsers();
+        setPendingUsers(response.data.users);
       } catch (err) {
         console.error("Error fetching pending users:", err);
         toast({ title: "Error", description: "Failed to load pending users", variant: "destructive" });
@@ -37,7 +34,7 @@ export default function AdminDashboard() {
 
   const handleUpdateStatus = async (userId, newStatus) => {
     try {
-      await updateDoc(doc(db, "users", userId), { verificationStatus: newStatus });
+      await updateUserStatus({ id: userId, status: newStatus });
       setPendingUsers(prev => prev.filter(u => u.id !== userId));
       toast({ 
         title: "Success", 

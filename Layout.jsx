@@ -1,5 +1,4 @@
-import { auth } from "./firebase";
-import { signOut } from "firebase/auth";
+import { db } from "./mockDb";
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
@@ -138,7 +137,7 @@ export default function Layout() {
           </div>
           
           <button
-            onClick={() => signOut(auth).then(() => navigate("/login"))}
+            onClick={() => db.auth.logout("/login")}
             className={`flex items-center h-10 px-3 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors ${
               isCollapsed ? 'justify-center' : ''
             }`}

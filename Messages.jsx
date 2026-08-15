@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { db } from "./firebase";
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, or } from "firebase/firestore";
-import { useMe } from "./AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  listConversations,
+  listMessages,
+  createMessage
+} from "@work4abit/dataconnect";
+import useMe from "./useMe";
 import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
@@ -15,59 +19,32 @@ export default function Messages() {
   const { data: me, isLoading: meLoading } = useMe();
   const [activeConvId, setActiveConvId] = useState(null);
   const [newMessage, setNewMessage] = useState("");
-  const [conversations, setConversations] = useState([]);
-  const [cLoading, setCLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
-  const [mLoading, setMLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Fetch conversations in real-time
-  useEffect(() => {
-    if (!me?.id) return;
-    
-    setCLoading(true);
-    const q = query(
-      collection(db, "conversations"),
-      or(where("posterId", "==", me.id), where("applicantId", "==", me.id)),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const convs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setConversations(convs);
-      setCLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [me?.id]);
-
+  const { data: convData, isLoading: cLoading } = useQuery({
+    queryKey: ["conversations", me?.id],
+    queryFn: () => listConversations({ userId: me.id }),
+    enabled: !!me?.id,
+  });
+  
+  const conversations = convData?.data?.conversations || [];
+  
   useEffect(() => {
     if (conversations.length > 0 && !activeConvId) {
       setActiveConvId(conversations[0].id);
     }
   }, [conversations, activeConvId]);
 
-  // Fetch messages in real-time for the active conversation
-  useEffect(() => {
-    if (!activeConvId) return;
-    
-    setMLoading(true);
-    const q = query(
-      collection(db, "messages"),
-      where("conversationId", "==", activeConvId),
-      orderBy("createdAt", "asc")
-    );
+  const { data: msgData, isLoading: mLoading, refetch: refetchMessages } = useQuery({
+    queryKey: ["messages", activeConvId],
+    queryFn: () => listMessages({ conversationId: activeConvId }),
+    enabled: !!activeConvId,
+    refetchInterval: 3000, // Poll every 3 seconds for new messages
+  });
 
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const msgs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMessages(msgs);
-      setMLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [activeConvId]);
-
+  const messages = msgData?.data?.messages || [];
   const activeConv = conversations.find(c => c.id === activeConvId);
-  const otherUser = activeConv?.posterId === me?.id ? activeConv?.applicant : activeConv?.poster;
+  const otherUser = activeConv?.poster?.id === me?.id ? activeConv?.applicant : activeConv?.poster;
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -77,12 +54,12 @@ export default function Messages() {
     setNewMessage("");
 
     try {
-      await addDoc(collection(db, "messages"), {
+      await createMessage({
         conversationId: activeConvId,
         senderId: me.id,
         text: text,
-        createdAt: serverTimestamp(),
       });
+      refetchMessages();
     } catch (err) {
       toast({ title: "Failed to send", description: err.message, variant: "destructive" });
     }
@@ -107,7 +84,7 @@ export default function Messages() {
         {/* Sidebar */}
         <div className="w-1/3 card-soft overflow-y-auto flex flex-col divide-y divide-border/50">
           {conversations.map(conv => {
-            const isMePoster = conv.posterId === me?.id;
+            const isMePoster = conv.poster.id === me?.id;
             const peer = isMePoster ? conv.applicant : conv.poster;
             const isActive = conv.id === activeConvId;
 
@@ -117,10 +94,10 @@ export default function Messages() {
                 onClick={() => setActiveConvId(conv.id)}
                 className={`flex items-center gap-3 p-4 text-left transition-colors ${isActive ? 'bg-primary/5' : 'hover:bg-muted/50'}`}
               >
-                <Avatar src={null} name={peer.fullName || peer.full_name} className="w-10 h-10 shrink-0" />
+                <Avatar src={null} name={peer.fullName} className="w-10 h-10 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <h4 className={`font-medium truncate ${isActive ? 'text-primary' : ''}`}>{peer.fullName || peer.full_name}</h4>
-                  <p className="text-xs text-muted-foreground truncate">{conv.helpRequestTitle}</p>
+                  <h4 className={`font-medium truncate ${isActive ? 'text-primary' : ''}`}>{peer.fullName}</h4>
+                  <p className="text-xs text-muted-foreground truncate">{conv.helpRequest.title}</p>
                 </div>
               </button>
             );
@@ -133,10 +110,10 @@ export default function Messages() {
             <>
               {/* Chat Header */}
               <div className="p-4 border-b border-border/70 flex items-center gap-3 bg-card/50">
-                <Avatar src={null} name={otherUser?.fullName || otherUser?.full_name} className="w-10 h-10" />
+                <Avatar src={null} name={otherUser?.fullName} className="w-10 h-10" />
                 <div>
-                  <h4 className="font-semibold text-primary">{otherUser?.fullName || otherUser?.full_name}</h4>
-                  <p className="text-xs text-muted-foreground">{activeConv?.helpRequestTitle}</p>
+                  <h4 className="font-semibold text-primary">{otherUser?.fullName}</h4>
+                  <p className="text-xs text-muted-foreground">{activeConv?.helpRequest?.title}</p>
                 </div>
               </div>
 
@@ -148,15 +125,14 @@ export default function Messages() {
                   <div className="text-center text-muted-foreground text-sm mt-10">No messages yet. Say hi!</div>
                 ) : (
                   messages.map(msg => {
-                    const isMe = msg.senderId === me.id;
-                    const dateObj = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date();
+                    const isMe = msg.sender.id === me.id;
                     return (
                       <div key={msg.id} className={`flex flex-col max-w-[75%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
                         <div className={`p-3 rounded-2xl whitespace-pre-wrap text-sm ${isMe ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-muted rounded-bl-sm text-foreground'}`}>
                           {msg.text}
                         </div>
                         <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                          {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     );

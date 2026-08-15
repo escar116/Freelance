@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 import ProfileView from "./ProfileView";
 import EditProfileDialog from "./EditProfileDialog";
 import Loader from "./Loader";
-import { useMe } from "./AuthContext";
+import useMe from "./useMe";
 
 export default function Profile() {
   const { data: me, isLoading } = useMe();

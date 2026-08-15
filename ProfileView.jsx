@@ -1,11 +1,11 @@
+import { db } from "./mockDb";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { db } from "./firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
 import { Image } from "./image";
 import Avatar from "./Avatar";
 import StarRating from "./StarRating";
 import { BlueprintGrid, HexOutlines } from "./CircuitDecor";
+import { listApplicationsByApplicant } from "@work4abit/dataconnect";
 
 const AVAILABILITY = {
   Available: "bg-secondary/25 text-primary",
@@ -16,27 +16,16 @@ const AVAILABILITY = {
 export default function ProfileView({ user, action }) {
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", user?.email],
-    queryFn: async () => {
-      // Stub for future reviews feature
-      return [];
-    },
+    queryFn: () => db.entities.Review.filter({ target_email: user.email }),
     enabled: !!user?.email,
   });
 
-  const { data: applications = [] } = useQuery({
+  const { data: appData } = useQuery({
     queryKey: ["applications", "applicant", user?.id],
-    queryFn: async () => {
-      const q = query(
-        collection(db, "applications"),
-        where("applicantId", "==", user.id)
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+    queryFn: () => listApplicationsByApplicant({ userId: user.id }),
     enabled: !!user?.id,
   });
-  
-  const applicationsCount = applications.length;
+  const applicationsCount = appData?.data?.applications?.length || 0;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">

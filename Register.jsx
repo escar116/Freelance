@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, db } from "./firebase";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { auth } from "./firebase";
+import { createUser, getUser } from "@work4abit/dataconnect";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -11,10 +11,11 @@ import { UserPlus, Mail, Lock, Loader2, User, Hash, Upload, FileSearch } from "l
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "./select";
-import { FACULTY } from "./utils";
+import { FACULTY } from "./cpe";
 import AuthLayout from "./AuthLayout";
 import GoogleIcon from "./GoogleIcon";
 import { toast } from "./use-toast";
+
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -99,8 +100,8 @@ export default function Register() {
         certificateUrl = await compressImage(certificateFile);
       }
 
-      // Save extra user profile data to Firestore
-      await setDoc(doc(db, "users", uid), {
+      // Save extra user profile data to PostgreSQL via Data Connect
+      await createUser({
         id: uid,
         email: userEmail,
         fullName: userName,
@@ -108,9 +109,6 @@ export default function Register() {
         facultyReference: faculty || null,
         certificateUrl: certificateUrl || "none",
         gender: gender || null,
-        verificationStatus: "pending",
-        preferredRole: role,
-        createdAt: serverTimestamp(),
       });
       window.location.href = "/pending";
     } catch (err) {
@@ -128,9 +126,9 @@ export default function Register() {
       provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       
-      const userDoc = await getDoc(doc(db, "users", result.user.uid));
-      if (userDoc.exists()) {
-        // User already has a complete account! Just redirect them.
+      const response = await getUser({ id: result.user.uid });
+      if (response.data.user) {
+        // User already has a complete PostgreSQL account! Just redirect them.
         window.location.href = returnTo;
         return;
       }

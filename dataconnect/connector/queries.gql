@@ -1,0 +1,116 @@
+query ListPendingUsers @auth(level: PUBLIC) {
+  users(where: {verificationStatus: {eq: "pending"}}) {
+    id
+    email
+    fullName
+    studentId
+    facultyReference
+    certificateUrl
+    verificationStatus
+  }
+}
+
+query GetUser($id: String!) @auth(level: PUBLIC) {
+  user(id: $id) {
+    id
+    email
+    fullName
+    studentId
+    facultyReference
+    certificateUrl
+    verificationStatus
+    preferredRole
+    gender
+  }
+}
+
+query ListHelpRequests @auth(level: PUBLIC) {
+  helpRequests {
+    id
+    title
+    description
+    budget
+    category
+    urgency
+    deadline
+    requester {
+      id
+      fullName
+      email
+      certificateUrl
+      verificationStatus
+    }
+  }
+}
+
+query ListApplicationsByApplicant($userId: String!) @auth(level: PUBLIC) {
+  applications(where: {applicantId: {eq: $userId}}) {
+    id
+    priceOffer
+    message
+    status
+    createdAt
+    helpRequest {
+      id
+      title
+      budget
+      requester {
+        id
+        fullName
+      }
+    }
+  }
+}
+
+query ListApplicationsForMyRequests($userId: String!) @auth(level: PUBLIC) {
+  applications(where: {helpRequest: {requesterId: {eq: $userId}}}) {
+    id
+    priceOffer
+    message
+    status
+    createdAt
+    applicant {
+      id
+      fullName
+      email
+    }
+    helpRequest {
+      id
+      title
+      requesterId
+    }
+  }
+}
+
+query ListConversations($userId: String!) @auth(level: PUBLIC) {
+  conversations(where: {_or: [{posterId: {eq: $userId}}, {applicantId: {eq: $userId}}]}) {
+    id
+    createdAt
+    poster {
+      id
+      fullName
+    }
+    applicant {
+      id
+      fullName
+    }
+    application {
+      id
+      helpRequest {
+        title
+      }
+    }
+  }
+}
+
+query ListMessages($conversationId: UUID!) @auth(level: PUBLIC) {
+  messages(where: {conversationId: {eq: $conversationId}}, orderBy: [{createdAt: ASC}]) {
+    id
+    content
+    createdAt
+    sender {
+      id
+      fullName
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getUser } from "@work4abit/dataconnect";
 
 const AuthContext = createContext();
 
@@ -21,28 +21,25 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
-          // Fetch extra user data from Firestore
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          
-          if (!userDocSnap.exists()) {
-            // User does not exist in our Firestore DB yet!
+          // Fetch extra user data from PostgreSQL via Data Connect
+          const response = await getUser({ id: currentUser.uid });
+          if (!response.data.user) {
+            // User does not exist in our Postgres DB yet!
             // We flag them so ProtectedRoute kicks them back to the registration form
             setUser({
               ...currentUser,
-              id: currentUser.uid,
-              hasFirestoreData: false,
+              hasPostgresData: false,
             });
             setIsAuthenticated(true);
           } else {
-            const extraData = userDocSnap.data();
+            const extraData = response.data.user;
             setUser({
               ...currentUser,
               id: currentUser.uid,
               full_name: extraData.fullName || currentUser.displayName || currentUser.email.split('@')[0],
               preferred_role: extraData.preferredRole || "Student",
               verificationStatus: extraData.verificationStatus || "unverified",
-              hasFirestoreData: true,
+              hasPostgresData: true,
               ...extraData,
             });
             setIsAuthenticated(true);
@@ -120,13 +117,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// Merged useMe hook
-export function useMe() {
-  const { user, isLoadingAuth } = useAuth();
-  
-  return {
-    data: user,
-    isLoading: isLoadingAuth,
-  };
-}

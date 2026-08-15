@@ -3,7 +3,7 @@ import { Slider } from "./slider";
 import { Switch } from "./switch";
 import { Label } from "./label";
 import { Button } from "./button";
-import { CATEGORIES, peso } from "./utils";
+import { CATEGORIES, peso } from "./cpe";
 
 const SORTS = [
   { value: "newest", label: "Newest" },

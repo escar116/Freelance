@@ -3,7 +3,7 @@ import { CalendarDays, Flame } from "lucide-react";
 import { Button } from "./button";
 import Avatar from "./Avatar";
 import { CornerAccent } from "./CircuitDecor";
-import { peso } from "./utils";
+import { peso } from "./cpe";
 
 const URGENCY_STYLES = {
   Low: "bg-muted text-muted-foreground",

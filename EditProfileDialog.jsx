@@ -1,6 +1,7 @@
+import { db } from "./mockDb";
+
 import React, { useState } from "react";
-import { db } from "./firebase";
-import { doc, updateDoc } from "firebase/firestore";
+
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "./dialog";
@@ -13,48 +14,6 @@ import {
 } from "./select";
 import { toast } from "./use-toast";
 
-// Helper to compress image
-const compressImage = (file) => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        // Max dimensions
-        const MAX_WIDTH = 400;
-        const MAX_HEIGHT = 400;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress to JPEG with 0.7 quality
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        resolve(dataUrl);
-      };
-    };
-  });
-};
-
 export default function EditProfileDialog({ user, onClose }) {
   const [bio, setBio] = useState(user?.bio || "");
   const [skills, setSkills] = useState((user?.skills || []).join(", "));
@@ -65,34 +24,15 @@ export default function EditProfileDialog({ user, onClose }) {
   const uploadPhoto = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    // We must ensure the file isn't too large since we're using base64 strings in Firestore
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Image must be under 5MB before compression", variant: "destructive" });
-      return;
-    }
-    
-    toast({ title: "Compressing image..." });
-    const compressedDataUrl = await compressImage(file);
-    
-    // Safety check: Firestore document size limit is 1MB. 
-    // DataURL size in bytes is roughly (length * 3) / 4.
-    const sizeInBytes = Math.round((compressedDataUrl.length * 3) / 4);
-    if (sizeInBytes > 800000) {
-      toast({ title: "Image too large", description: "Image is too large even after compression. Please use a smaller image.", variant: "destructive" });
-      return;
-    }
-
-    setPhotoUrl(compressedDataUrl);
-    toast({ title: "Image compressed and ready" });
+    const { file_url } = await db.integrations.Core.UploadFile({ file });
+    setPhotoUrl(file_url);
   };
 
   const submit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const userRef = doc(db, "users", user.id);
-      await updateDoc(userRef, {
+      await db.auth.updateMe({
         bio,
         availability,
         photo_url: photoUrl,

@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { db } from "./firebase";
-import { collection, query, orderBy, getDocs, limit } from "firebase/firestore";
 
 import { Input } from "./input";
 import { Search } from "lucide-react";
@@ -12,8 +10,13 @@ import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import ApplicationDialog from "./ApplicationDialog";
-import { useMe } from "./AuthContext";
-import { CATEGORIES } from "./utils";
+import useMe from "./useMe";
+import { matchesQuery } from "./filtering";
+import { CATEGORIES } from "./cpe";
+
+// Import Data Connect queries
+import { listHelpRequests } from "@work4abit/dataconnect";
+import { db } from "./mockDb";
 
 export default function SearchResults() {
   const [params, setParams] = useSearchParams();
@@ -24,24 +27,19 @@ export default function SearchResults() {
   const { data: requests = [], isLoading: l1 } = useQuery({
     queryKey: ["requests"],
     queryFn: async () => {
-      const q = query(collection(db, "helpRequests"), orderBy("createdAt", "desc"), limit(100));
-      const snap = await getDocs(q);
-      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const res = await listHelpRequests();
+      return res.data.helpRequests;
     },
   });
 
   const { data: students = [], isLoading: l2 } = useQuery({
     queryKey: ["students"],
-    queryFn: async () => {
-      const q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(200));
-      const snap = await getDocs(q);
-      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    },
+    queryFn: () => db.entities.User.list("-created_date", 200),
   });
 
   const term = q.toLowerCase();
   
-  // Custom matcher for Firestore format
+  // Custom matcher for Data Connect HelpRequest format
   const matchesDataConnectQuery = (item, query) => {
     if (!query) return true;
     const t = query.toLowerCase();
@@ -55,7 +53,7 @@ export default function SearchResults() {
   const r = requests.filter((i) => matchesDataConnectQuery(i, q));
   const people = students.filter(
     (u) =>
-      (u.fullName || u.full_name || u.email || "").toLowerCase().includes(term) ||
+      (u.full_name || "").toLowerCase().includes(term) ||
       (u.skills || []).join(" ").toLowerCase().includes(term)
   );
   const cats = CATEGORIES.filter((c) => c.toLowerCase().includes(term));
@@ -109,9 +107,9 @@ export default function SearchResults() {
                     to={`/students/${encodeURIComponent(u.email)}`}
                     className="card-soft card-soft-hover p-5 flex items-center gap-3"
                   >
-                    <Avatar src={u.photo_url || u.certificateUrl} name={u.fullName || u.full_name} className="w-11 h-11" />
+                    <Avatar src={u.photo_url} name={u.full_name} className="w-11 h-11" />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-primary truncate">{u.fullName || u.full_name || u.email}</p>
+                      <p className="text-sm font-medium text-primary truncate">{u.full_name || u.email}</p>
                     </div>
                   </Link>
                 ))}

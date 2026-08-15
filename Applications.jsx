@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { db } from "./firebase";
-import { collection, query, where, getDocs, doc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
-import { useMe } from "./AuthContext";
+import {
+  listApplicationsForMyRequests,
+  listApplicationsByApplicant,
+  updateApplicationStatus,
+  createConversation,
+  createMessage
+} from "@work4abit/dataconnect";
+import useMe from "./useMe";
 import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import Avatar from "./Avatar";
 import { Button } from "./button";
-import { peso } from "./utils";
+import { peso } from "./cpe";
 import { ClipboardList, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "./use-toast";
 import { useNavigate } from "react-router-dom";
@@ -19,54 +24,42 @@ export default function Applications() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: postedApps = [], isLoading: pLoading, refetch: refetchPosted } = useQuery({
+  const { data: myPostedData, isLoading: pLoading, refetch: refetchPosted } = useQuery({
     queryKey: ["applications", "poster", me?.id],
-    queryFn: async () => {
-      const q = query(collection(db, "applications"), where("posterId", "==", me.id));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+    queryFn: () => listApplicationsForMyRequests({ userId: me.id }),
     enabled: !!me?.id && tab === "posted",
   });
 
-  const { data: appliedApps = [], isLoading: aLoading, refetch: refetchApplied } = useQuery({
+  const { data: myAppliedData, isLoading: aLoading, refetch: refetchApplied } = useQuery({
     queryKey: ["applications", "applicant", me?.id],
-    queryFn: async () => {
-      const q = query(collection(db, "applications"), where("applicantId", "==", me.id));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+    queryFn: () => listApplicationsByApplicant({ userId: me.id }),
     enabled: !!me?.id && tab === "applied",
   });
+
+  const postedApps = myPostedData?.data?.applications || [];
+  const appliedApps = myAppliedData?.data?.applications || [];
 
   const handleApprove = async (app) => {
     try {
       // 1. Update application status
-      await updateDoc(doc(db, "applications", app.id), {
+      await updateApplicationStatus({
+        id: app.id,
         status: "APPROVED"
       });
 
       // 2. Create conversation
-      const convRef = await addDoc(collection(db, "conversations"), {
+      const convRes = await createConversation({
         posterId: me.id,
-        applicantId: app.applicantId,
-        helpRequestId: app.helpRequestId,
-        helpRequestTitle: app.helpRequest.title,
-        applicant: app.applicant,
-        poster: {
-          fullName: me.fullName || me.full_name || me.email,
-        },
-        createdAt: serverTimestamp(),
-        lastMessageAt: serverTimestamp(),
+        applicantId: app.applicant.id,
+        helpRequestId: app.helpRequest.id
       });
-      const convId = convRef.id;
+      const convId = convRes.data.conversation_insert.id;
 
       // 3. Create initial message using the applicant's offer details
-      await addDoc(collection(db, "messages"), {
+      await createMessage({
         conversationId: convId,
-        senderId: app.applicantId,
-        text: `Application accepted. Price offer: ${peso(app.priceOffer)}\n\nMessage: ${app.message}`,
-        createdAt: serverTimestamp(),
+        senderId: app.applicant.id,
+        text: `Application accepted. Price offer: ${peso(app.priceOffer)}\n\nMessage: ${app.message}`
       });
 
       toast({ title: "Applicant Approved", description: "A conversation has been started in Messages." });
@@ -79,7 +72,8 @@ export default function Applications() {
 
   const handleReject = async (app) => {
     try {
-      await updateDoc(doc(db, "applications", app.id), {
+      await updateApplicationStatus({
+        id: app.id,
         status: "REJECTED"
       });
       toast({ title: "Applicant Rejected" });
@@ -94,6 +88,7 @@ export default function Applications() {
   }
 
   // Filter out REJECTED/APPROVED from posted if we only want to show PENDING ones.
+  // Actually, the user said "expire, finished or someone else got approve it should disappear"
   const visiblePostedApps = postedApps.filter(app => app.status === "PENDING");
   
   // For applied apps, we can show PENDING and APPROVED ones.
