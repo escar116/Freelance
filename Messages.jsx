@@ -57,7 +57,7 @@ export default function Messages() {
       await createMessage({
         conversationId: activeConvId,
         senderId: me.id,
-        text: text,
+        content: text,
       });
       refetchMessages();
     } catch (err) {
@@ -97,7 +97,7 @@ export default function Messages() {
                 <Avatar src={null} name={peer.fullName} className="w-10 h-10 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <h4 className={`font-medium truncate ${isActive ? 'text-primary' : ''}`}>{peer.fullName}</h4>
-                  <p className="text-xs text-muted-foreground truncate">{conv.helpRequest.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{conv.application?.helpRequest?.title}</p>
                 </div>
               </button>
             );
@@ -113,7 +113,7 @@ export default function Messages() {
                 <Avatar src={null} name={otherUser?.fullName} className="w-10 h-10" />
                 <div>
                   <h4 className="font-semibold text-primary">{otherUser?.fullName}</h4>
-                  <p className="text-xs text-muted-foreground">{activeConv?.helpRequest?.title}</p>
+                  <p className="text-xs text-muted-foreground">{activeConv?.application?.helpRequest?.title}</p>
                 </div>
               </div>
 
@@ -129,7 +129,7 @@ export default function Messages() {
                     return (
                       <div key={msg.id} className={`flex flex-col max-w-[75%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
                         <div className={`p-3 rounded-2xl whitespace-pre-wrap text-sm ${isMe ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-muted rounded-bl-sm text-foreground'}`}>
-                          {msg.text}
+                          {msg.content}
                         </div>
                         <span className="text-[10px] text-muted-foreground mt-1 px-1">
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
