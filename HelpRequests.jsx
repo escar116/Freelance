@@ -49,8 +49,11 @@ export default function HelpRequests() {
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
   const refresh = async () => {
+    await new Promise(r => setTimeout(r, 500));
     await queryClient.invalidateQueries({ queryKey: ["requests"] });
     await queryClient.invalidateQueries({ queryKey: ["applications"] });
+    // Fallback if needed
+    setTimeout(() => window.location.reload(), 100);
   };
 
   return (

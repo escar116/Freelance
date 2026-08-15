@@ -35,9 +35,9 @@ export default function Messages() {
   
   const allConversations = convData?.data?.conversations || [];
   const conversations = allConversations.filter(c => {
-    const isRejected = c.application?.status === "REJECTED";
+    const isTerminated = c.application?.status === "TERMINATED";
     const isCompleted = c.application?.helpRequest?.status === "COMPLETED";
-    return !isRejected && !isCompleted;
+    return !isTerminated && !isCompleted;
   });
   
   useEffect(() => {
@@ -77,6 +77,7 @@ export default function Messages() {
         content: text,
       });
       await refetchMessages();
+      await queryClient.invalidateQueries({ queryKey: ["messages", activeConvId] });
     } catch (err) {
       toast({ title: "Failed to send", description: err.message, variant: "destructive" });
     }
@@ -92,6 +93,8 @@ export default function Messages() {
       toast({ title: "Job Terminated" });
       await queryClient.invalidateQueries({ queryKey: ["conversations"] });
       setActiveConvId(null);
+      // Fallback manual reload in case cache is stubborn
+      window.location.reload();
     } catch (err) {
       toast({ title: "Error terminating job", description: err.message, variant: "destructive" });
     }
@@ -105,7 +108,6 @@ export default function Messages() {
       });
       setReviewOpen(true);
       await queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      setActiveConvId(null);
     } catch (err) {
       toast({ title: "Error completing job", description: err.message, variant: "destructive" });
     }
@@ -121,6 +123,8 @@ export default function Messages() {
       });
       toast({ title: "Review Submitted", description: "Thank you for your feedback!" });
       setReviewOpen(false);
+      setActiveConvId(null);
+      window.location.reload();
     } catch (err) {
       toast({ title: "Error submitting review", description: err.message, variant: "destructive" });
     }
