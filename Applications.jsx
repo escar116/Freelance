@@ -59,7 +59,7 @@ export default function Applications() {
       await createMessage({
         conversationId: convId,
         senderId: app.applicant.id,
-        text: `Application accepted. Price offer: ${peso(app.priceOffer)}\n\nMessage: ${app.message}`
+        content: `Application accepted. Price offer: ${peso(app.priceOffer)}\n\nMessage: ${app.message}`
       });
 
       toast({ title: "Applicant Approved", description: "A conversation has been started in Messages." });
