@@ -51,7 +51,7 @@ export default function Applications() {
       const convRes = await createConversation({
         posterId: me.id,
         applicantId: app.applicant.id,
-        helpRequestId: app.helpRequest.id
+        applicationId: app.id
       });
       const convId = convRes.data.conversation_insert.id;
 
