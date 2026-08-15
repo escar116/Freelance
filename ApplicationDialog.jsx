@@ -1,5 +1,4 @@
-import { db } from "./mockDb";
-
+import { createApplication } from "@work4abit/dataconnect";
 import React, { useState } from "react";
 
 import {
@@ -12,7 +11,7 @@ import { Label } from "./label";
 import { toast } from "./use-toast";
 import { peso } from "./cpe";
 
-export default function SendOfferDialog({ request, me, onClose }) {
+export default function ApplicationDialog({ request, me, onClose }) {
   const [amount, setAmount] = useState(request?.budget || "");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -21,21 +20,16 @@ export default function SendOfferDialog({ request, me, onClose }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await db.entities.Offer.create({
-        request_id: request.id,
-        request_title: request.title,
-        amount: Number(amount),
-        message,
-        sender_name: me?.full_name || me?.email || "Student",
-        sender_email: me?.email,
+      await createApplication({
+        helpRequestId: request.id,
+        applicantId: me?.id,
+        priceOffer: Number(amount),
+        message: message,
       });
-      await db.entities.HelpRequest.update(request.id, {
-        offers_count: (request.offers_count || 0) + 1,
-      });
-      toast({ title: "Offer sent", description: `Your offer of ${peso(amount)} was sent.` });
+      toast({ title: "Application sent", description: `Your offer of ${peso(amount)} was sent.` });
       onClose(true);
     } catch (err) {
-      toast({ title: "Could not send offer", description: err.message, variant: "destructive" });
+      toast({ title: "Could not send application", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -45,12 +39,12 @@ export default function SendOfferDialog({ request, me, onClose }) {
     <Dialog open={!!request} onOpenChange={() => onClose(false)}>
       <DialogContent className="sm:max-w-md rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="text-primary">Send an offer</DialogTitle>
+          <DialogTitle className="text-primary">Apply to Job</DialogTitle>
           <DialogDescription>{request?.title}</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="amount">Your price (₱)</Label>
+            <Label htmlFor="amount">Your price offer (₱)</Label>
             <Input
               id="amount"
               type="number"
@@ -62,18 +56,19 @@ export default function SendOfferDialog({ request, me, onClose }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="msg">Message</Label>
+            <Label htmlFor="msg">Why you are a good fit</Label>
             <Textarea
               id="msg"
               rows={4}
               placeholder="How you can help, your relevant experience..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              required
             />
           </div>
           <DialogFooter>
             <Button type="submit" className="w-full rounded-full h-11" disabled={saving}>
-              {saving ? "Sending..." : "Send Offer"}
+              {saving ? "Applying..." : "Submit Application"}
             </Button>
           </DialogFooter>
         </form>

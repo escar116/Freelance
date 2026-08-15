@@ -11,7 +11,7 @@ import FilterPanel from "./FilterPanel";
 import SectionHeader from "./SectionHeader";
 import EmptyState from "./EmptyState";
 import Loader from "./Loader";
-import SendOfferDialog from "./SendOfferDialog";
+import ApplicationDialog from "./ApplicationDialog";
 import NewRequestDialog from "./NewRequestDialog";
 import useMe from "./useMe";
 import { applyFilters } from "./filtering";
@@ -87,7 +87,7 @@ export default function HelpRequests() {
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {results.map((r) => (
-                <HelpRequestCard key={r.id} request={r} onSendOffer={setOfferTarget} />
+                <HelpRequestCard key={r.id} request={r} onSendOffer={setOfferTarget} me={me} />
               ))}
             </div>
           )}
@@ -95,7 +95,7 @@ export default function HelpRequests() {
       </div>
 
       {offerTarget && (
-        <SendOfferDialog
+        <ApplicationDialog
           request={offerTarget}
           me={me}
           onClose={(sent) => {

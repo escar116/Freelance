@@ -14,10 +14,9 @@ import { SideTraces } from "./CircuitDecor";
 
 const NAV = [
   { label: "Dashboard", to: "/", icon: Home },
-  { label: "Find Services", to: "/services", icon: Search },
   { label: "Service Requests", to: "/requests", icon: FileText },
-  { label: "Applications", to: "#applications", icon: ClipboardList },
-  { label: "Messages", to: "#messages", icon: MessageSquare },
+  { label: "Applications", to: "/applications", icon: ClipboardList },
+  { label: "Messages", to: "/messages", icon: MessageSquare },
   { label: "Transactions", to: "#transactions", icon: Banknote },
   { label: "Ratings", to: "#ratings", icon: Star },
   { label: "Profile", to: "/profile", icon: UserIcon },

@@ -1,4 +1,4 @@
-mutation CreateUser($id: String!, $email: String!, $fullName: String!, $studentId: String, $facultyReference: String, $certificateUrl: String!) @auth(level: PUBLIC) {
+mutation CreateUser($id: String!, $email: String!, $fullName: String!, $studentId: String, $facultyReference: String, $certificateUrl: String!, $gender: String) @auth(level: PUBLIC) {
   user_insert(data: {
     id: $id,
     email: $email,
@@ -6,7 +6,8 @@ mutation CreateUser($id: String!, $email: String!, $fullName: String!, $studentI
     studentId: $studentId,
     facultyReference: $facultyReference,
     certificateUrl: $certificateUrl,
-    verificationStatus: "pending"
+    verificationStatus: "pending",
+    gender: $gender
   })
 }
 
@@ -31,5 +32,48 @@ mutation CreateHelpRequest(
     category: $category
     urgency: $urgency
     deadline: $deadline
+  })
+}
+
+mutation CreateApplication(
+  $helpRequestId: UUID!
+  $applicantId: String!
+  $priceOffer: Float!
+  $message: String!
+) @auth(level: PUBLIC) {
+  application_insert(data: {
+    helpRequestId: $helpRequestId
+    applicantId: $applicantId
+    priceOffer: $priceOffer
+    message: $message
+    status: "pending"
+  })
+}
+
+mutation UpdateApplicationStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
+  application_update(id: $id, data: {status: $status})
+}
+
+mutation CreateConversation(
+  $applicationId: UUID!
+  $posterId: String!
+  $applicantId: String!
+) @auth(level: PUBLIC) {
+  conversation_insert(data: {
+    applicationId: $applicationId
+    posterId: $posterId
+    applicantId: $applicantId
+  })
+}
+
+mutation CreateMessage(
+  $conversationId: UUID!
+  $senderId: String!
+  $content: String!
+) @auth(level: PUBLIC) {
+  message_insert(data: {
+    conversationId: $conversationId
+    senderId: $senderId
+    content: $content
   })
 }

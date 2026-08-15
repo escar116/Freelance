@@ -11,7 +11,9 @@ const URGENCY_STYLES = {
   Urgent: "bg-accent text-primary",
 };
 
-export default function HelpRequestCard({ request, onSendOffer }) {
+export default function HelpRequestCard({ request, onSendOffer, me }) {
+  const isMine = request.requester?.id === me?.id || request.requesterId === me?.id;
+  
   return (
     <article className="card-soft card-soft-hover p-5 flex flex-col gap-3">
       <CornerAccent className="top-0 right-0 text-accent" />
@@ -49,8 +51,14 @@ export default function HelpRequestCard({ request, onSendOffer }) {
           <p className="text-[11px] text-muted-foreground">Budget</p>
           <p className="text-lg font-semibold text-primary">{peso(request.budget)}</p>
         </div>
-        <Button size="sm" variant="secondary" className="rounded-full" onClick={() => onSendOffer(request)}>
-          Send Offer
+        <Button 
+          size="sm" 
+          variant={isMine ? "ghost" : "secondary"} 
+          className="rounded-full" 
+          disabled={isMine}
+          onClick={() => onSendOffer(request)}
+        >
+          {isMine ? "Your Post" : "Apply"}
         </Button>
       </div>
     </article>

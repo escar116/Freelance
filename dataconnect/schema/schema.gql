@@ -7,6 +7,7 @@ type User @table(key: "id") {
   certificateUrl: String!
   verificationStatus: String!
   preferredRole: String
+  gender: String
 }
 
 type Category @table {
@@ -37,4 +38,27 @@ type Review @table {
   comment: String!
   reviewer: User!
   targetUser: User!
+}
+
+type Application @table {
+  helpRequest: HelpRequest!
+  applicant: User!
+  priceOffer: Float!
+  message: String!
+  status: String! # pending, approved, rejected
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Conversation @table {
+  application: Application!
+  poster: User!
+  applicant: User!
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Message @table {
+  conversation: Conversation!
+  sender: User!
+  content: String!
+  createdAt: Date! @default(expr: "request.time")
 }

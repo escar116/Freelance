@@ -14,14 +14,14 @@ import ForgotPassword from "./ForgotPassword";
 import ResetPassword from "./ResetPassword";
 import Layout from "./Layout";
 import Home from "./Home";
-import BrowseServices from "./BrowseServices";
-import ServiceDetail from "./ServiceDetail";
 import HelpRequests from "./HelpRequests";
 import Profile from "./Profile";
 import StudentProfile from "./StudentProfile";
 import SearchResults from "./SearchResults";
 import PendingApproval from "./PendingApproval";
 import AdminDashboard from "./AdminDashboard";
+import Applications from "./Applications";
+import Messages from "./Messages";
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -57,12 +57,12 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/services" element={<BrowseServices />} />
-          <Route path="/services/:id" element={<ServiceDetail />} />
           <Route path="/requests" element={<HelpRequests />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/students/:email" element={<StudentProfile />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/applications" element={<Applications />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Route>
       </Route>

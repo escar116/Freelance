@@ -22,6 +22,7 @@ export default function Register() {
   const [studentId, setStudentId] = useState("");
   const [role, setRole] = useState("Offer My Skills");
   const [faculty, setFaculty] = useState(FACULTY[0]);
+  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -107,6 +108,7 @@ export default function Register() {
         studentId: studentId || null,
         facultyReference: faculty || null,
         certificateUrl: certificateUrl || "none",
+        gender: gender || null,
       });
       window.location.href = "/pending";
     } catch (err) {
@@ -295,6 +297,18 @@ export default function Register() {
             <SelectContent>
               <SelectItem value="Offer My Skills">Offer My Skills</SelectItem>
               <SelectItem value="Need Technical Assistance">Need Technical Assistance</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Gender</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger className="h-12"><SelectValue placeholder="Select Gender" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Male">Male</SelectItem>
+              <SelectItem value="Female">Female</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+              <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
             </SelectContent>
           </Select>
         </div>

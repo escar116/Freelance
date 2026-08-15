@@ -1,5 +1,5 @@
 import { db } from "./mockDb";
-import { listHelpRequests } from "@work4abit/dataconnect";
+import { listHelpRequests, listApplicationsByApplicant } from "@work4abit/dataconnect";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "./Loader";
@@ -11,26 +11,28 @@ import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";
 
 export default function Home() {
   const { data: me, isLoading: meLoading } = useMe();
-
-  const { data: services = [], isLoading: sLoading } = useQuery({
-    queryKey: ["services", "home"],
-    queryFn: () => db.entities.Service.list("-popularity", 5),
-  });
   
   const { data: reqData, isLoading: rLoading } = useQuery({
     queryKey: ["requests", "home"],
     queryFn: () => listHelpRequests(),
   });
+
+  const { data: appData, isLoading: aLoading } = useQuery({
+    queryKey: ["applications", "applicant", me?.id],
+    queryFn: () => listApplicationsByApplicant({ userId: me.id }),
+    enabled: !!me?.id,
+  });
   
   const requests = reqData?.data?.helpRequests || [];
+  const applications = appData?.data?.applications || [];
+  const appliedCount = applications.length;
 
-  if (meLoading || sLoading || rLoading) return <Loader />;
+  if (meLoading || rLoading || aLoading) return <Loader />;
 
-  // Mix services and requests for the "RECOMMENDED JOBS" list
+  // Mix requests for the "RECOMMENDED JOBS" list
   const mixedList = [
-    ...services.map(s => ({ ...s, type: 'Service', link: `/services/${s.id}` })),
-    ...requests.slice(0, 5).map(r => ({ ...r, type: 'Request', price: r.budget, link: `/requests` }))
-  ].sort(() => 0.5 - Math.random()).slice(0, 6); // Mix them up for the dashboard feel
+    ...requests.slice(0, 6).map(r => ({ ...r, type: 'Request', price: r.budget, link: `/requests` }))
+  ];
 
   return (
     <div className="space-y-8 fade-up pb-8 relative">
@@ -51,10 +53,10 @@ export default function Home() {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Applied", value: "5" },
-          { label: "Completed", value: "12" },
-          { label: "Earnings", value: "₱5,250" },
-          { label: "Rating", value: "4.8★" }
+          { label: "Applied", value: appliedCount },
+          { label: "Completed", value: "0" },
+          { label: "Earnings", value: "₱0" },
+          { label: "Rating", value: "0.0★" }
         ].map((stat, i) => (
           <div key={i} className="bg-card border border-border p-6 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{stat.label}</span>
