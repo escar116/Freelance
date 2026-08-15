@@ -29,12 +29,12 @@ export default function NewRequestDialog({ me, onClose }) {
       await db.entities.HelpRequest.create({
         ...form,
         budget: Number(form.budget),
-        deadline: form.deadline || undefined,
+        deadline: form.deadline || null,
         poster_name: me?.full_name || me?.email || "Student",
-        poster_email: me?.email,
-        poster_photo: me?.photo_url,
+        poster_email: me?.email || null,
+        poster_photo: me?.photo_url || null,
         poster_verified: me?.verification_status === "verified",
-        poster_verifier: me?.verified_by,
+        poster_verifier: me?.verified_by || null,
       });
       toast({ title: "Request posted", description: "Peers can now send you offers." });
       onClose(true);
