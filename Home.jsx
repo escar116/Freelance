@@ -7,6 +7,7 @@ import useMe from "./useMe";
 import { peso } from "./cpe";
 import { Briefcase, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";
 
 export default function Home() {
   const { data: me, isLoading: meLoading } = useMe();
@@ -32,9 +33,15 @@ export default function Home() {
   ].sort(() => 0.5 - Math.random()).slice(0, 6); // Mix them up for the dashboard feel
 
   return (
-    <div className="space-y-8 fade-up pb-8">
+    <div className="space-y-8 fade-up pb-8 relative">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+        <BlueprintGrid />
+        <PcbTraces className="-top-6 -right-16 w-[520px] text-secondary hidden lg:block opacity-30" />
+        <HexOutlines className="top-10 left-6 w-32 text-accent hidden md:block opacity-40" />
+      </div>
+
       {/* Header */}
-      <div>
+      <div className="relative z-10 pt-4">
         <h1 className="text-3xl font-semibold text-primary">
           Welcome back, {(me?.full_name || me?.email || "student").split(" ")[0]}! 👋
         </h1>

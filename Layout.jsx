@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "./button";
 import ThemeToggle from "./ThemeToggle";
+import { SideTraces } from "./CircuitDecor";
 
 const NAV = [
   { label: "Dashboard", to: "/", icon: Home },
@@ -34,7 +35,11 @@ export default function Layout() {
   const sidebarWidth = isCollapsed ? "w-20" : "w-64";
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background relative overflow-hidden">
+      <div className="fixed inset-y-0 right-0 w-12 pointer-events-none z-0 hidden xl:block text-secondary opacity-[0.08]">
+        <SideTraces flip />
+      </div>
+
       {/* Mobile Top Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-40 flex items-center justify-between px-4">
         <Link to="/" className="flex items-center shrink-0">
