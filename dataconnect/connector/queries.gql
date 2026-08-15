@@ -63,7 +63,7 @@ query ListApplicationsByApplicant($userId: String!) @auth(level: PUBLIC) {
 }
 
 query ListApplicationsForMyRequests($userId: String!) @auth(level: PUBLIC) {
-  applications {
+  applications(where: {helpRequest: {requesterId: {eq: $userId}}}) {
     id
     priceOffer
     message

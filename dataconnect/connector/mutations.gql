@@ -46,7 +46,7 @@ mutation CreateApplication(
     applicantId: $applicantId
     priceOffer: $priceOffer
     message: $message
-    status: "pending"
+    status: "PENDING"
   })
 }
 
