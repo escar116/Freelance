@@ -1,171 +1,96 @@
 import { db } from "./mockDb";
 import { listHelpRequests } from "@work4abit/dataconnect";
-
 import React from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-
-import { Button } from "./button";
-import { ArrowRight, Plus, Search, User as UserIcon } from "lucide-react";
-import ServiceCard from "./ServiceCard";
-import HelpRequestCard from "./HelpRequestCard";
-import SectionHeader from "./SectionHeader";
 import Loader from "./Loader";
 import useMe from "./useMe";
-import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";
-import { CATEGORIES, peso } from "./cpe";
-
-const QUICK = [
-  { to: "/requests", label: "Post a help request", icon: Plus },
-  { to: "/services", label: "Browse services", icon: Search },
-  { to: "/profile", label: "Update my profile", icon: UserIcon },
-];
+import { peso } from "./cpe";
+import { Briefcase, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const { data: me, isLoading: meLoading } = useMe();
 
-  const { data: services = [], isLoading } = useQuery({
+  const { data: services = [], isLoading: sLoading } = useQuery({
     queryKey: ["services", "home"],
-    queryFn: () => db.entities.Service.list("-popularity", 6),
+    queryFn: () => db.entities.Service.list("-popularity", 5),
   });
-  const { data: reqData } = useQuery({
+  
+  const { data: reqData, isLoading: rLoading } = useQuery({
     queryKey: ["requests", "home"],
     queryFn: () => listHelpRequests(),
   });
+  
   const requests = reqData?.data?.helpRequests || [];
-  const { data: offers = [] } = useQuery({
-    queryKey: ["offers", me?.email],
-    queryFn: () => db.entities.Offer.filter({ sender_email: me.email }, "-created_date", 5),
-    enabled: !!me?.email,
-  });
 
-  if (meLoading) return <Loader />;
+  if (meLoading || sLoading || rLoading) return <Loader />;
 
-  const myRequests = requests.filter((r) => (r.poster_email || r.requester?.email) === me?.email).slice(0, 4);
+  // Mix services and requests for the "RECOMMENDED JOBS" list
+  const mixedList = [
+    ...services.map(s => ({ ...s, type: 'Service', link: `/services/${s.id}` })),
+    ...requests.slice(0, 5).map(r => ({ ...r, type: 'Request', price: r.budget, link: `/requests` }))
+  ].sort(() => 0.5 - Math.random()).slice(0, 6); // Mix them up for the dashboard feel
 
   return (
-    <div>
-      <section className="relative overflow-hidden bg-card">
-        <BlueprintGrid />
-        <PcbTraces className="-top-6 -right-16 w-[520px] text-secondary hidden sm:block" />
-        <HexOutlines className="bottom-10 left-6 w-32 text-accent hidden md:block" />
-        <div className="relative max-w-7xl mx-auto px-6 pt-12 pb-14 sm:pt-16 sm:pb-16 fade-up">
-          <p className="text-xs uppercase tracking-[0.18em] text-secondary font-semibold">Dashboard</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-semibold text-primary">
-            Welcome back, {(me?.full_name || me?.email || "student").split(" ")[0]}
-          </h1>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <span className="inline-flex items-center text-sm px-4 py-2 rounded-full bg-muted text-muted-foreground">
-              Role: {me?.preferred_role || "Offer My Skills"}
-            </span>
+    <div className="space-y-8 fade-up pb-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-semibold text-primary">
+          Welcome back, {(me?.full_name || me?.email || "student").split(" ")[0]}! 👋
+        </h1>
+        <p className="text-muted-foreground mt-1">Here's an overview of your activity.</p>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Applied", value: "5" },
+          { label: "Completed", value: "12" },
+          { label: "Earnings", value: "₱5,250" },
+          { label: "Rating", value: "4.8★" }
+        ].map((stat, i) => (
+          <div key={i} className="bg-card border border-border p-6 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{stat.label}</span>
+            <span className="text-3xl font-bold text-primary">{stat.value}</span>
           </div>
+        ))}
+      </div>
+
+      {/* Recommended Listings */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Recommended Listings</h2>
         </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {QUICK.map((q) => (
-            <Link key={q.to} to={q.to} className="card-soft card-soft-hover p-5 flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center">
-                <q.icon className="w-4 h-4 text-primary" aria-hidden="true" />
-              </span>
-              <span className="text-sm font-medium text-primary">{q.label}</span>
-              <ArrowRight className="w-4 h-4 ml-auto text-muted-foreground" aria-hidden="true" />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 pb-10">
-        <SectionHeader
-          eyebrow="Categories"
-          title="Explore Computer Engineering skills"
-          subtitle="Every listing belongs to a discipline you already study."
-        />
-        <div className="flex flex-wrap gap-2.5">
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c}
-              to={`/services?category=${encodeURIComponent(c)}`}
-              className="px-4 py-2.5 rounded-full bg-card border border-border text-sm text-primary hover:border-secondary hover:bg-secondary/10 transition-colors"
-            >
-              {c}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <SectionHeader
-          eyebrow="Popular now"
-          title="Featured services"
-          action={
-            <Button asChild variant="ghost" className="text-primary">
-              <Link to="/services">
-                View all <ArrowRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
-              </Link>
-            </Button>
-          }
-        />
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((s) => (
-              <ServiceCard key={s.id} service={s} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <SectionHeader eyebrow="Your account" title="Recent activity" />
-        <div className="card-soft divide-y divide-border/70">
-          {offers.length === 0 && myRequests.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">
-              No activity yet — send an offer or post a request to get started.
-            </p>
-          )}
-          {offers.map((o) => (
-            <div key={o.id} className="p-5 flex items-center gap-3 text-sm">
-              <span className="w-2 h-2 rounded-full bg-secondary" aria-hidden="true" />
-              <span className="text-primary">
-                You sent a {peso(o.amount)} offer on “{o.request_title}”
-              </span>
-              <span className="ml-auto text-xs text-muted-foreground capitalize">{o.status}</span>
-            </div>
-          ))}
-          {myRequests.map((r) => (
-            <div key={r.id} className="p-5 flex items-center gap-3 text-sm">
-              <span className="w-2 h-2 rounded-full bg-accent" aria-hidden="true" />
-              <span className="text-primary">You posted “{r.title}”</span>
-              <span className="ml-auto text-xs text-muted-foreground">{r.offers_count || 0} offers</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-muted py-16">
-        <PcbTraces className="bottom-0 left-0 w-[420px] text-secondary hidden md:block" />
-        <div className="relative max-w-7xl mx-auto px-6">
-          <SectionHeader
-            eyebrow="Peer support"
-            title="Latest help requests"
-            action={
-              <Button asChild variant="ghost" className="text-primary">
-                <Link to="/requests">
-                  View all <ArrowRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          {mixedList.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No listings found.</div>
+          ) : (
+            <div className="divide-y divide-border/70">
+              {mixedList.map((item, i) => (
+                <Link to={item.link} key={i} className="flex items-center justify-between p-5 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
+                      <Briefcase className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary text-sm sm:text-base leading-tight">{item.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">{item.category?.name || item.category || 'General'}</span>
+                        <span className="w-1 h-1 rounded-full bg-border"></span>
+                        <span className="text-xs font-medium text-secondary">{item.type}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-5 text-right shrink-0">
+                    <span className="font-semibold text-primary text-sm sm:text-base">{peso(item.price)}</span>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground hidden sm:block" />
+                  </div>
                 </Link>
-              </Button>
-            }
-          />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {requests.slice(0, 3).map((r) => (
-              <HelpRequestCard key={r.id} request={r} onSendOffer={() => { window.location.href = "/requests"; }} />
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
