@@ -48,9 +48,9 @@ export default function HelpRequests() {
   const appliedJobIds = new Set((appData?.data?.applications || []).map(a => a.helpRequest.id));
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
-  const refresh = () => {
-    refetchRequests();
-    refetchApplied();
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["requests"] });
+    await queryClient.invalidateQueries({ queryKey: ["applications"] });
   };
 
   return (

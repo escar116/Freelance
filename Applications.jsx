@@ -70,8 +70,8 @@ export default function Applications() {
       });
 
       toast({ title: "Applicant Approved", description: "A conversation has been started in Messages." });
-      refetchPosted();
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      await refetchPosted();
+      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
       navigate("/messages");
     } catch (err) {
       toast({ title: "Error approving applicant", description: err.message, variant: "destructive" });

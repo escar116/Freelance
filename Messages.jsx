@@ -27,13 +27,18 @@ export default function Messages() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: convData, isLoading: cLoading, refetch: refetchConversations } = useQuery({
+  const { data: convData, isLoading: cLoading } = useQuery({
     queryKey: ["conversations", me?.id],
     queryFn: () => listConversations({ userId: me.id }),
     enabled: !!me?.id,
   });
   
-  const conversations = convData?.data?.conversations || [];
+  const allConversations = convData?.data?.conversations || [];
+  const conversations = allConversations.filter(c => {
+    const isRejected = c.application?.status === "REJECTED";
+    const isCompleted = c.application?.helpRequest?.status === "COMPLETED";
+    return !isRejected && !isCompleted;
+  });
   
   useEffect(() => {
     if (conversations.length > 0 && !activeConvId) {
@@ -71,21 +76,22 @@ export default function Messages() {
         senderId: me.id,
         content: text,
       });
-      refetchMessages();
+      await refetchMessages();
     } catch (err) {
       toast({ title: "Failed to send", description: err.message, variant: "destructive" });
     }
   };
 
   const handleTerminate = async () => {
-    if (!window.confirm("Are you sure you want to terminate this job? The job will be reopened and this application will be cancelled.")) return;
+    if (!window.confirm("Are you sure you want to terminate this job?")) return;
     try {
       await terminateJob({
         applicationId: activeConv.application.id,
         helpRequestId: activeConv.application.helpRequest.id
       });
       toast({ title: "Job Terminated" });
-      refetchConversations();
+      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      setActiveConvId(null);
     } catch (err) {
       toast({ title: "Error terminating job", description: err.message, variant: "destructive" });
     }
@@ -98,7 +104,8 @@ export default function Messages() {
         helpRequestId: activeConv.application.helpRequest.id
       });
       setReviewOpen(true);
-      refetchConversations();
+      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      setActiveConvId(null);
     } catch (err) {
       toast({ title: "Error completing job", description: err.message, variant: "destructive" });
     }

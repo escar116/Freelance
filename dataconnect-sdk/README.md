@@ -829,9 +829,11 @@ export interface ListConversationsData {
     } & User_Key;
     application: {
       id: UUIDString;
+      status: string;
       helpRequest: {
         id: UUIDString;
         title: string;
+        status?: string | null;
       } & HelpRequest_Key;
     } & Application_Key;
   } & Conversation_Key)[];
