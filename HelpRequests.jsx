@@ -33,12 +33,12 @@ export default function HelpRequests() {
     sort: "newest",
   });
 
-  const { data: queryData, isLoading } = useQuery({
+  const { data: queryData, isLoading, refetch: refetchRequests } = useQuery({
     queryKey: ["requests"],
     queryFn: () => listHelpRequests(),
   });
   
-  const { data: appData } = useQuery({
+  const { data: appData, refetch: refetchApplied } = useQuery({
     queryKey: ["applications", "applicant", me?.id],
     queryFn: () => listApplicationsByApplicant({ userId: me.id }),
     enabled: !!me?.id,
@@ -48,7 +48,10 @@ export default function HelpRequests() {
   const appliedJobIds = new Set((appData?.data?.applications || []).map(a => a.helpRequest.id));
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["requests"] });
+  const refresh = () => {
+    refetchRequests();
+    refetchApplied();
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
