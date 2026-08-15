@@ -1,4 +1,4 @@
-import { db } from "./mockDb";
+import { createHelpRequest } from "@work4abit/dataconnect";
 
 import React, { useState } from "react";
 
@@ -26,15 +26,16 @@ export default function NewRequestDialog({ me, onClose }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await db.entities.HelpRequest.create({
-        ...form,
+      if (!me?.id) throw new Error("You must be logged in to post a request.");
+      
+      await createHelpRequest({
+        title: form.title,
+        description: form.description,
         budget: Number(form.budget),
+        requesterId: me.id,
+        category: form.category || null,
+        urgency: form.urgency || null,
         deadline: form.deadline || null,
-        poster_name: me?.full_name || me?.email || "Student",
-        poster_email: me?.email || null,
-        poster_photo: me?.photo_url || null,
-        poster_verified: me?.verification_status === "verified",
-        poster_verifier: me?.verified_by || null,
       });
       toast({ title: "Request posted", description: "Peers can now send you offers." });
       onClose(true);

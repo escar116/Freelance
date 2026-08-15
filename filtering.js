@@ -8,6 +8,7 @@ export function matchesQuery(item, q) {
     item.category,
     item.seller_name,
     item.poster_name,
+    item.requester?.fullName,
     (item.skills || []).join(" ")
   );
   return haystack.includes(q.toLowerCase());
@@ -21,7 +22,13 @@ export function applyFilters(items, filters, kind = "service") {
     if (!matchesQuery(i, filters.q)) return false;
     if (filters.category && i.category !== filters.category) return false;
     if (filters.maxPrice != null && Number(i[priceKey]) > filters.maxPrice) return false;
-    if (filters.verifiedOnly && !i[verifiedKey]) return false;
+    if (filters.verifiedOnly) {
+      if (kind === "request") {
+        if (!i.poster_verified && i.requester?.verificationStatus !== "verified") return false;
+      } else {
+        if (!i[verifiedKey]) return false;
+      }
+    }
     if (filters.minRating && Number(i.rating || 0) < filters.minRating) return false;
     return true;
   });

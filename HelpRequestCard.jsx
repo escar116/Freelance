@@ -16,9 +16,9 @@ export default function HelpRequestCard({ request, onSendOffer }) {
     <article className="card-soft card-soft-hover p-5 flex flex-col gap-3">
       <CornerAccent className="top-0 right-0 text-accent" />
       <div className="flex items-center gap-3">
-        <Avatar src={request.poster_photo} name={request.poster_name} className="w-9 h-9" />
+        <Avatar src={null} name={request.requester?.fullName || "Student"} className="w-9 h-9" />
         <div className="min-w-0">
-          <p className="text-sm font-medium text-primary truncate">{request.poster_name}</p>
+          <p className="text-sm font-medium text-primary truncate">{request.requester?.fullName || "Student"}</p>
         </div>
         <span
           className={

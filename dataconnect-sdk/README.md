@@ -10,9 +10,11 @@ This README will guide you through the process of using the generated JavaScript
 - [**Queries**](#queries)
   - [*ListPendingUsers*](#listpendingusers)
   - [*GetUser*](#getuser)
+  - [*ListHelpRequests*](#listhelprequests)
 - [**Mutations**](#mutations)
   - [*CreateUser*](#createuser)
   - [*UpdateUserStatus*](#updateuserstatus)
+  - [*CreateHelpRequest*](#createhelprequest)
 
 # Accessing the connector
 A connector is a collection of Queries and Mutations. One SDK is generated for each connector - this SDK is generated for the connector `default`. You can find more information about connectors in the [Data Connect documentation](https://firebase.google.com/docs/data-connect#how-does).
@@ -276,6 +278,112 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## ListHelpRequests
+You can execute the `ListHelpRequests` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+listHelpRequests(options?: ExecuteQueryOptions): QueryPromise<ListHelpRequestsData, undefined>;
+
+interface ListHelpRequestsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListHelpRequestsData, undefined>;
+}
+export const listHelpRequestsRef: ListHelpRequestsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listHelpRequests(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListHelpRequestsData, undefined>;
+
+interface ListHelpRequestsRef {
+  ...
+  (dc: DataConnect): QueryRef<ListHelpRequestsData, undefined>;
+}
+export const listHelpRequestsRef: ListHelpRequestsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listHelpRequestsRef:
+```typescript
+const name = listHelpRequestsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListHelpRequests` query has no variables.
+### Return Type
+Recall that executing the `ListHelpRequests` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListHelpRequestsData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListHelpRequestsData {
+  helpRequests: ({
+    id: UUIDString;
+    title: string;
+    description: string;
+    budget: number;
+    category?: string | null;
+    urgency?: string | null;
+    deadline?: string | null;
+    requester: {
+      id: string;
+      fullName: string;
+      email: string;
+      certificateUrl: string;
+      verificationStatus: string;
+    } & User_Key;
+  } & HelpRequest_Key)[];
+}
+```
+### Using `ListHelpRequests`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listHelpRequests } from '@work4abit/dataconnect';
+
+
+// Call the `listHelpRequests()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listHelpRequests();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listHelpRequests(dataConnect);
+
+console.log(data.helpRequests);
+
+// Or, you can use the `Promise` API.
+listHelpRequests().then((response) => {
+  const data = response.data;
+  console.log(data.helpRequests);
+});
+```
+
+### Using `ListHelpRequests`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listHelpRequestsRef } from '@work4abit/dataconnect';
+
+
+// Call the `listHelpRequestsRef()` function to get a reference to the query.
+const ref = listHelpRequestsRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listHelpRequestsRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.helpRequests);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.helpRequests);
+});
+```
+
 # Mutations
 
 There are two ways to execute a Data Connect Mutation using the generated Web SDK:
@@ -524,6 +632,133 @@ console.log(data.user_update);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.user_update);
+});
+```
+
+## CreateHelpRequest
+You can execute the `CreateHelpRequest` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+createHelpRequest(vars: CreateHelpRequestVariables): MutationPromise<CreateHelpRequestData, CreateHelpRequestVariables>;
+
+interface CreateHelpRequestRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateHelpRequestVariables): MutationRef<CreateHelpRequestData, CreateHelpRequestVariables>;
+}
+export const createHelpRequestRef: CreateHelpRequestRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+createHelpRequest(dc: DataConnect, vars: CreateHelpRequestVariables): MutationPromise<CreateHelpRequestData, CreateHelpRequestVariables>;
+
+interface CreateHelpRequestRef {
+  ...
+  (dc: DataConnect, vars: CreateHelpRequestVariables): MutationRef<CreateHelpRequestData, CreateHelpRequestVariables>;
+}
+export const createHelpRequestRef: CreateHelpRequestRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createHelpRequestRef:
+```typescript
+const name = createHelpRequestRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `CreateHelpRequest` mutation requires an argument of type `CreateHelpRequestVariables`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface CreateHelpRequestVariables {
+  title: string;
+  description: string;
+  budget: number;
+  requesterId: string;
+  category?: string | null;
+  urgency?: string | null;
+  deadline?: string | null;
+}
+```
+### Return Type
+Recall that executing the `CreateHelpRequest` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `CreateHelpRequestData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface CreateHelpRequestData {
+  helpRequest_insert: HelpRequest_Key;
+}
+```
+### Using `CreateHelpRequest`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, createHelpRequest, CreateHelpRequestVariables } from '@work4abit/dataconnect';
+
+// The `CreateHelpRequest` mutation requires an argument of type `CreateHelpRequestVariables`:
+const createHelpRequestVars: CreateHelpRequestVariables = {
+  title: ..., 
+  description: ..., 
+  budget: ..., 
+  requesterId: ..., 
+  category: ..., // optional
+  urgency: ..., // optional
+  deadline: ..., // optional
+};
+
+// Call the `createHelpRequest()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await createHelpRequest(createHelpRequestVars);
+// Variables can be defined inline as well.
+const { data } = await createHelpRequest({ title: ..., description: ..., budget: ..., requesterId: ..., category: ..., urgency: ..., deadline: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await createHelpRequest(dataConnect, createHelpRequestVars);
+
+console.log(data.helpRequest_insert);
+
+// Or, you can use the `Promise` API.
+createHelpRequest(createHelpRequestVars).then((response) => {
+  const data = response.data;
+  console.log(data.helpRequest_insert);
+});
+```
+
+### Using `CreateHelpRequest`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, createHelpRequestRef, CreateHelpRequestVariables } from '@work4abit/dataconnect';
+
+// The `CreateHelpRequest` mutation requires an argument of type `CreateHelpRequestVariables`:
+const createHelpRequestVars: CreateHelpRequestVariables = {
+  title: ..., 
+  description: ..., 
+  budget: ..., 
+  requesterId: ..., 
+  category: ..., // optional
+  urgency: ..., // optional
+  deadline: ..., // optional
+};
+
+// Call the `createHelpRequestRef()` function to get a reference to the mutation.
+const ref = createHelpRequestRef(createHelpRequestVars);
+// Variables can be defined inline as well.
+const ref = createHelpRequestRef({ title: ..., description: ..., budget: ..., requesterId: ..., category: ..., urgency: ..., deadline: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = createHelpRequestRef(dataConnect, createHelpRequestVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.helpRequest_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.helpRequest_insert);
 });
 ```
 

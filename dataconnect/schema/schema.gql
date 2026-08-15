@@ -27,6 +27,9 @@ type HelpRequest @table {
   description: String!
   budget: Float!
   requester: User!
+  category: String
+  urgency: String
+  deadline: String
 }
 
 type Review @table {

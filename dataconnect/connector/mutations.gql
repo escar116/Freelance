@@ -13,3 +13,23 @@ mutation CreateUser($id: String!, $email: String!, $fullName: String!, $studentI
 mutation UpdateUserStatus($id: String!, $status: String!) @auth(level: PUBLIC) {
   user_update(id: $id, data: {verificationStatus: $status})
 }
+
+mutation CreateHelpRequest(
+  $title: String!
+  $description: String!
+  $budget: Float!
+  $requesterId: String!
+  $category: String
+  $urgency: String
+  $deadline: String
+) @auth(level: PUBLIC) {
+  helpRequest_insert(data: {
+    title: $title
+    description: $description
+    budget: $budget
+    requesterId: $requesterId
+    category: $category
+    urgency: $urgency
+    deadline: $deadline
+  })
+}

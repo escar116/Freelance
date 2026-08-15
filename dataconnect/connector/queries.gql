@@ -22,3 +22,22 @@ query GetUser($id: String!) @auth(level: PUBLIC) {
     preferredRole
   }
 }
+
+query ListHelpRequests @auth(level: PUBLIC) {
+  helpRequests {
+    id
+    title
+    description
+    budget
+    category
+    urgency
+    deadline
+    requester {
+      id
+      fullName
+      email
+      certificateUrl
+      verificationStatus
+    }
+  }
+}

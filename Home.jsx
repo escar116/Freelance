@@ -1,4 +1,5 @@
 import { db } from "./mockDb";
+import { listHelpRequests } from "@work4abit/dataconnect";
 
 import React from "react";
 import { Link } from "react-router-dom";
@@ -27,10 +28,11 @@ export default function Home() {
     queryKey: ["services", "home"],
     queryFn: () => db.entities.Service.list("-popularity", 6),
   });
-  const { data: requests = [] } = useQuery({
+  const { data: reqData } = useQuery({
     queryKey: ["requests", "home"],
-    queryFn: () => db.entities.HelpRequest.list("-created_date", 6),
+    queryFn: () => listHelpRequests(),
   });
+  const requests = reqData?.data?.helpRequests || [];
   const { data: offers = [] } = useQuery({
     queryKey: ["offers", me?.email],
     queryFn: () => db.entities.Offer.filter({ sender_email: me.email }, "-created_date", 5),
@@ -39,7 +41,7 @@ export default function Home() {
 
   if (meLoading) return <Loader />;
 
-  const myRequests = requests.filter((r) => r.poster_email === me?.email).slice(0, 4);
+  const myRequests = requests.filter((r) => (r.poster_email || r.requester?.email) === me?.email).slice(0, 4);
 
   return (
     <div>

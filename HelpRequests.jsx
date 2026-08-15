@@ -1,4 +1,4 @@
-import { db } from "./mockDb";
+import { listHelpRequests } from "@work4abit/dataconnect";
 
 import React, { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,10 +33,12 @@ export default function HelpRequests() {
     sort: "newest",
   });
 
-  const { data: requests = [], isLoading } = useQuery({
+  const { data: queryData, isLoading } = useQuery({
     queryKey: ["requests"],
-    queryFn: () => db.entities.HelpRequest.list("-created_date", 200),
+    queryFn: () => listHelpRequests(),
   });
+  
+  const requests = queryData?.data?.helpRequests || [];
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["requests"] });

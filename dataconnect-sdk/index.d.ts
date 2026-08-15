@@ -15,6 +15,20 @@ export interface Category_Key {
   __typename?: 'Category_Key';
 }
 
+export interface CreateHelpRequestData {
+  helpRequest_insert: HelpRequest_Key;
+}
+
+export interface CreateHelpRequestVariables {
+  title: string;
+  description: string;
+  budget: number;
+  requesterId: string;
+  category?: string | null;
+  urgency?: string | null;
+  deadline?: string | null;
+}
+
 export interface CreateUserData {
   user_insert: User_Key;
 }
@@ -48,6 +62,25 @@ export interface GetUserVariables {
 export interface HelpRequest_Key {
   id: UUIDString;
   __typename?: 'HelpRequest_Key';
+}
+
+export interface ListHelpRequestsData {
+  helpRequests: ({
+    id: UUIDString;
+    title: string;
+    description: string;
+    budget: number;
+    category?: string | null;
+    urgency?: string | null;
+    deadline?: string | null;
+    requester: {
+      id: string;
+      fullName: string;
+      email: string;
+      certificateUrl: string;
+      verificationStatus: string;
+    } & User_Key;
+  } & HelpRequest_Key)[];
 }
 
 export interface ListPendingUsersData {
@@ -110,6 +143,18 @@ export const updateUserStatusRef: UpdateUserStatusRef;
 export function updateUserStatus(vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
 export function updateUserStatus(dc: DataConnect, vars: UpdateUserStatusVariables): MutationPromise<UpdateUserStatusData, UpdateUserStatusVariables>;
 
+interface CreateHelpRequestRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateHelpRequestVariables): MutationRef<CreateHelpRequestData, CreateHelpRequestVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateHelpRequestVariables): MutationRef<CreateHelpRequestData, CreateHelpRequestVariables>;
+  operationName: string;
+}
+export const createHelpRequestRef: CreateHelpRequestRef;
+
+export function createHelpRequest(vars: CreateHelpRequestVariables): MutationPromise<CreateHelpRequestData, CreateHelpRequestVariables>;
+export function createHelpRequest(dc: DataConnect, vars: CreateHelpRequestVariables): MutationPromise<CreateHelpRequestData, CreateHelpRequestVariables>;
+
 interface ListPendingUsersRef {
   /* Allow users to create refs without passing in DataConnect */
   (): QueryRef<ListPendingUsersData, undefined>;
@@ -133,4 +178,16 @@ export const getUserRef: GetUserRef;
 
 export function getUser(vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
 export function getUser(dc: DataConnect, vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
+
+interface ListHelpRequestsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListHelpRequestsData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListHelpRequestsData, undefined>;
+  operationName: string;
+}
+export const listHelpRequestsRef: ListHelpRequestsRef;
+
+export function listHelpRequests(options?: ExecuteQueryOptions): QueryPromise<ListHelpRequestsData, undefined>;
+export function listHelpRequests(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListHelpRequestsData, undefined>;
 
