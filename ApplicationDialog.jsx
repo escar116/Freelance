@@ -1,5 +1,6 @@
-import { createApplication } from "@work4abit/dataconnect";
 import React, { useState } from "react";
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -9,7 +10,7 @@ import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { Label } from "./label";
 import { toast } from "./use-toast";
-import { peso } from "./cpe";
+import { peso } from "./utils";
 
 export default function ApplicationDialog({ request, me, onClose }) {
   const [amount, setAmount] = useState(request?.budget || "");
@@ -20,11 +21,19 @@ export default function ApplicationDialog({ request, me, onClose }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await createApplication({
+      await addDoc(collection(db, "applications"), {
         helpRequestId: request.id,
+        helpRequest: request,
+        posterId: request.requesterId,
         applicantId: me?.id,
+        applicant: {
+          fullName: me?.full_name || me?.fullName || me?.email,
+          studentId: me?.student_id || me?.studentId,
+        },
         priceOffer: Number(amount),
         message: message,
+        status: "PENDING",
+        createdAt: serverTimestamp(),
       });
       toast({ title: "Application sent", description: `Your offer of ${peso(amount)} was sent.` });
       onClose(true);

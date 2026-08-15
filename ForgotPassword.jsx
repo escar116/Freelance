@@ -1,4 +1,5 @@
-import { db } from "./mockDb";
+import { auth } from "./firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
@@ -18,7 +19,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     try {
-      await db.auth.resetPasswordRequest(email);
+      await sendPasswordResetEmail(auth, email);
     } catch {
       // Always show success regardless
     } finally {

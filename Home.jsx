@@ -1,10 +1,10 @@
-import { db } from "./mockDb";
-import { listHelpRequests, listApplicationsByApplicant } from "@work4abit/dataconnect";
+import { db } from "./firebase";
+import { collection, query, where, getDocs, limit, orderBy } from "firebase/firestore";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "./Loader";
-import useMe from "./useMe";
-import { peso } from "./cpe";
+import { useMe } from "./AuthContext";
+import { peso } from "./utils";
 import { Briefcase, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";
@@ -12,19 +12,25 @@ import { PcbTraces, BlueprintGrid, HexOutlines } from "./CircuitDecor";
 export default function Home() {
   const { data: me, isLoading: meLoading } = useMe();
   
-  const { data: reqData, isLoading: rLoading } = useQuery({
+  const { data: requests = [], isLoading: rLoading } = useQuery({
     queryKey: ["requests", "home"],
-    queryFn: () => listHelpRequests(),
+    queryFn: async () => {
+      const q = query(collection(db, "helpRequests"), orderBy("createdAt", "desc"), limit(10));
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
   });
 
-  const { data: appData, isLoading: aLoading } = useQuery({
+  const { data: applications = [], isLoading: aLoading } = useQuery({
     queryKey: ["applications", "applicant", me?.id],
-    queryFn: () => listApplicationsByApplicant({ userId: me.id }),
+    queryFn: async () => {
+      const q = query(collection(db, "applications"), where("applicantId", "==", me.id));
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
     enabled: !!me?.id,
   });
   
-  const requests = reqData?.data?.helpRequests || [];
-  const applications = appData?.data?.applications || [];
   const appliedCount = applications.length;
 
   if (meLoading || rLoading || aLoading) return <Loader />;

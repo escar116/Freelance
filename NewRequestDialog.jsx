@@ -1,7 +1,6 @@
-import { createHelpRequest } from "@work4abit/dataconnect";
-
 import React, { useState } from "react";
-
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "./dialog";
@@ -13,7 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "./select";
 import { toast } from "./use-toast";
-import { CATEGORIES, URGENCY } from "./cpe";
+import { CATEGORIES, URGENCY } from "./utils";
 
 export default function NewRequestDialog({ me, onClose }) {
   const [form, setForm] = useState({
@@ -28,7 +27,7 @@ export default function NewRequestDialog({ me, onClose }) {
     try {
       if (!me?.id) throw new Error("You must be logged in to post a request.");
       
-      await createHelpRequest({
+      await addDoc(collection(db, "helpRequests"), {
         title: form.title,
         description: form.description,
         budget: Number(form.budget),
@@ -36,6 +35,8 @@ export default function NewRequestDialog({ me, onClose }) {
         category: form.category || null,
         urgency: form.urgency || null,
         deadline: form.deadline || null,
+        status: "OPEN",
+        createdAt: serverTimestamp()
       });
       toast({ title: "Request posted", description: "Peers can now send you offers." });
       onClose(true);

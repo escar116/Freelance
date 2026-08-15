@@ -1,11 +1,10 @@
-import { listHelpRequests } from "@work4abit/dataconnect";
-
-import React, { useMemo, useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { Input } from "./input";
-import { Search, SlidersHorizontal, Plus } from "lucide-react";
+import { db } from "./firebase";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { Button } from "./button";
+import { Input } from "./input";
+import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import HelpRequestCard from "./HelpRequestCard";
 import FilterPanel from "./FilterPanel";
 import SectionHeader from "./SectionHeader";
@@ -13,8 +12,8 @@ import EmptyState from "./EmptyState";
 import Loader from "./Loader";
 import ApplicationDialog from "./ApplicationDialog";
 import NewRequestDialog from "./NewRequestDialog";
-import useMe from "./useMe";
-import { applyFilters } from "./filtering";
+import { useMe } from "./AuthContext";
+import { applyFilters } from "./utils";
 
 const MAX = 20000;
 
@@ -33,12 +32,14 @@ export default function HelpRequests() {
     sort: "newest",
   });
 
-  const { data: queryData, isLoading } = useQuery({
+  const { data: requests = [], isLoading } = useQuery({
     queryKey: ["requests"],
-    queryFn: () => listHelpRequests(),
+    queryFn: async () => {
+      const q = query(collection(db, "helpRequests"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
   });
-  
-  const requests = queryData?.data?.helpRequests || [];
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["requests"] });

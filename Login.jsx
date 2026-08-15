@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { auth } from "./firebase";
-import { getUser } from "@work4abit/dataconnect";
+import { auth, db } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 import { Button } from "./button";
 import { Input } from "./input";
@@ -41,9 +41,9 @@ export default function Login() {
       provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       
-      // Check if user actually exists in the PostgreSQL database
-      const response = await getUser({ id: result.user.uid });
-      if (!response.data.user) {
+      // Check if user actually exists in the Firestore database
+      const userDoc = await getDoc(doc(db, "users", result.user.uid));
+      if (!userDoc.exists()) {
         // User authenticated with Google but never finished registration!
         await signOut(auth);
         setError("Account not found. Please sign up first.");

@@ -1,5 +1,0 @@
-connectorId: "default"
-generate:
-  javascriptSdk:
-    outputDir: "../../dataconnect-sdk"
-    package: "@work4abit/dataconnect"

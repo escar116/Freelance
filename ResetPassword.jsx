@@ -1,4 +1,5 @@
-import { db } from "./mockDb";
+import { auth } from "./firebase";
+import { confirmPasswordReset } from "firebase/auth";
 
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -27,7 +28,7 @@ export default function ResetPassword() {
     }
     setLoading(true);
     try {
-      await db.auth.resetPassword({ resetToken, newPassword });
+      await confirmPasswordReset(auth, resetToken, newPassword);
       window.location.href = "/login";
     } catch (err) {
       setError(err.message || "Failed to reset password");

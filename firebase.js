@@ -3,8 +3,6 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
-import { getDataConnect, connectDataConnectEmulator } from "firebase/data-connect";
-import { connectorConfig } from "@work4abit/dataconnect";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAu53ZLxN_6p_BKZUWSE6R8aMbn_iKP91s",
@@ -21,7 +19,6 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const dataConnect = getDataConnect(app, connectorConfig);
 
 let analytics = null;
 if (typeof window !== "undefined") {
