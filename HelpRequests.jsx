@@ -1,4 +1,4 @@
-import { listHelpRequests } from "@work4abit/dataconnect";
+import { listHelpRequests, listApplicationsByApplicant } from "@work4abit/dataconnect";
 
 import React, { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,7 +38,14 @@ export default function HelpRequests() {
     queryFn: () => listHelpRequests(),
   });
   
+  const { data: appData } = useQuery({
+    queryKey: ["applications", "applicant", me?.id],
+    queryFn: () => listApplicationsByApplicant({ userId: me.id }),
+    enabled: !!me?.id,
+  });
+
   const requests = queryData?.data?.helpRequests || [];
+  const appliedJobIds = new Set((appData?.data?.applications || []).map(a => a.helpRequest.id));
 
   const results = useMemo(() => applyFilters(requests, filters, "request"), [requests, filters]);
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["requests"] });
@@ -87,7 +94,7 @@ export default function HelpRequests() {
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {results.map((r) => (
-                <HelpRequestCard key={r.id} request={r} onSendOffer={setOfferTarget} me={me} />
+                <HelpRequestCard key={r.id} request={r} onSendOffer={setOfferTarget} me={me} hasApplied={appliedJobIds.has(r.id)} />
               ))}
             </div>
           )}

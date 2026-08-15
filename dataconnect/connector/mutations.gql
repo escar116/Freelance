@@ -32,6 +32,7 @@ mutation CreateHelpRequest(
     category: $category
     urgency: $urgency
     deadline: $deadline
+    status: "OPEN"
   })
 }
 
@@ -75,5 +76,39 @@ mutation CreateMessage(
     conversationId: $conversationId
     senderId: $senderId
     content: $content
+  })
+}
+
+mutation UpdateHelpRequestStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
+  helpRequest_update(id: $id, data: {status: $status})
+}
+
+mutation TerminateJob(
+  $applicationId: UUID!
+  $helpRequestId: UUID!
+) @auth(level: PUBLIC) {
+  application_update(id: $applicationId, data: {status: "TERMINATED"})
+  helpRequest_update(id: $helpRequestId, data: {status: "OPEN"})
+}
+
+mutation CompleteJob(
+  $applicationId: UUID!
+  $helpRequestId: UUID!
+) @auth(level: PUBLIC) {
+  application_update(id: $applicationId, data: {status: "COMPLETED"})
+  helpRequest_update(id: $helpRequestId, data: {status: "COMPLETED"})
+}
+
+mutation CreateReview(
+  $rating: Int!
+  $comment: String!
+  $reviewerId: String!
+  $targetUserId: String!
+) @auth(level: PUBLIC) {
+  review_insert(data: {
+    rating: $rating
+    comment: $comment
+    reviewerId: $reviewerId
+    targetUserId: $targetUserId
   })
 }

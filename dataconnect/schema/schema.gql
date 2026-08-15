@@ -31,6 +31,7 @@ type HelpRequest @table {
   category: String
   urgency: String
   deadline: String
+  status: String @default(expr: "'OPEN'")
 }
 
 type Review @table {

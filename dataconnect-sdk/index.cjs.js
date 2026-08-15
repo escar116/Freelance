@@ -105,6 +105,62 @@ exports.createMessage = function createMessage(dcOrVars, vars) {
 }
 ;
 
+const updateHelpRequestStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateHelpRequestStatus', inputVars);
+}
+updateHelpRequestStatusRef.operationName = 'UpdateHelpRequestStatus';
+exports.updateHelpRequestStatusRef = updateHelpRequestStatusRef;
+
+exports.updateHelpRequestStatus = function updateHelpRequestStatus(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateHelpRequestStatusRef(dcInstance, inputVars));
+}
+;
+
+const terminateJobRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'TerminateJob', inputVars);
+}
+terminateJobRef.operationName = 'TerminateJob';
+exports.terminateJobRef = terminateJobRef;
+
+exports.terminateJob = function terminateJob(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(terminateJobRef(dcInstance, inputVars));
+}
+;
+
+const completeJobRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CompleteJob', inputVars);
+}
+completeJobRef.operationName = 'CompleteJob';
+exports.completeJobRef = completeJobRef;
+
+exports.completeJob = function completeJob(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(completeJobRef(dcInstance, inputVars));
+}
+;
+
+const createReviewRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateReview', inputVars);
+}
+createReviewRef.operationName = 'CreateReview';
+exports.createReviewRef = createReviewRef;
+
+exports.createReview = function createReview(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createReviewRef(dcInstance, inputVars));
+}
+;
+
 const listPendingUsersRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
@@ -177,6 +233,21 @@ exports.listApplicationsForMyRequests = function listApplicationsForMyRequests(d
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(listApplicationsForMyRequestsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
+
+const listMyHelpRequestsWithApplicationsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'ListMyHelpRequestsWithApplications', inputVars);
+}
+listMyHelpRequestsWithApplicationsRef.operationName = 'ListMyHelpRequestsWithApplications';
+exports.listMyHelpRequestsWithApplicationsRef = listMyHelpRequestsWithApplicationsRef;
+
+exports.listMyHelpRequestsWithApplications = function listMyHelpRequestsWithApplications(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(listMyHelpRequestsWithApplicationsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 

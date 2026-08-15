@@ -63,6 +63,13 @@ export function applyFilters(items, filters, kind = "service") {
   let out = items.filter((i) => {
     if (!matchesQuery(i, filters.q)) return false;
     if (filters.category && i.category !== filters.category) return false;
+    
+    // Filter out jobs where deadline has passed
+    if (kind === "request" && i.deadline) {
+      const today = new Date().toISOString().split('T')[0];
+      if (i.deadline < today) return false;
+    }
+
     if (filters.maxPrice != null && Number(i[priceKey]) > filters.maxPrice) return false;
     if (filters.verifiedOnly) {
       if (kind === "request") {

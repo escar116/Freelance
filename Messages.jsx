@@ -3,7 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listConversations,
   listMessages,
-  createMessage
+  createMessage,
+  terminateJob,
+  completeJob,
+  createReview
 } from "@work4abit/dataconnect";
 import { useMe } from "./utils";
 import SectionHeader from "./SectionHeader";
@@ -12,16 +15,18 @@ import Loader from "./Loader";
 import Avatar from "./Avatar";
 import { Button } from "./button";
 import { Input } from "./input";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "./use-toast";
+import ReviewDialog from "./ReviewDialog";
 
 export default function Messages() {
   const { data: me, isLoading: meLoading } = useMe();
   const [activeConvId, setActiveConvId] = useState(null);
   const [newMessage, setNewMessage] = useState("");
+  const [reviewOpen, setReviewOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: convData, isLoading: cLoading } = useQuery({
+  const { data: convData, isLoading: cLoading, refetch: refetchConversations } = useQuery({
     queryKey: ["conversations", me?.id],
     queryFn: () => listConversations({ userId: me.id }),
     enabled: !!me?.id,
@@ -39,12 +44,13 @@ export default function Messages() {
     queryKey: ["messages", activeConvId],
     queryFn: () => listMessages({ conversationId: activeConvId }),
     enabled: !!activeConvId,
-    refetchInterval: 3000, // Poll every 3 seconds for new messages
+    refetchInterval: 3000,
   });
 
   const messages = msgData?.data?.messages || [];
   const activeConv = conversations.find(c => c.id === activeConvId);
-  const otherUser = activeConv?.poster?.id === me?.id ? activeConv?.applicant : activeConv?.poster;
+  const isPoster = activeConv?.poster?.id === me?.id;
+  const otherUser = isPoster ? activeConv?.applicant : activeConv?.poster;
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -62,6 +68,48 @@ export default function Messages() {
       refetchMessages();
     } catch (err) {
       toast({ title: "Failed to send", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleTerminate = async () => {
+    if (!window.confirm("Are you sure you want to terminate this job? The job will be reopened and this application will be cancelled.")) return;
+    try {
+      await terminateJob({
+        applicationId: activeConv.application.id,
+        helpRequestId: activeConv.application.helpRequest.id
+      });
+      toast({ title: "Job Terminated" });
+      refetchConversations();
+    } catch (err) {
+      toast({ title: "Error terminating job", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      await completeJob({
+        applicationId: activeConv.application.id,
+        helpRequestId: activeConv.application.helpRequest.id
+      });
+      setReviewOpen(true);
+      refetchConversations();
+    } catch (err) {
+      toast({ title: "Error completing job", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleReviewSubmit = async (rating, comment) => {
+    try {
+      await createReview({
+        rating,
+        comment,
+        reviewerId: me.id,
+        targetUserId: otherUser.id
+      });
+      toast({ title: "Review Submitted", description: "Thank you for your feedback!" });
+      setReviewOpen(false);
+    } catch (err) {
+      toast({ title: "Error submitting review", description: err.message, variant: "destructive" });
     }
   };
 
@@ -109,11 +157,25 @@ export default function Messages() {
           {activeConvId ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-border/70 flex items-center gap-3 bg-card/50">
-                <Avatar src={null} name={otherUser?.fullName} className="w-10 h-10" />
-                <div>
-                  <h4 className="font-semibold text-primary">{otherUser?.fullName}</h4>
-                  <p className="text-xs text-muted-foreground">{activeConv?.application?.helpRequest?.title}</p>
+              <div className="p-4 border-b border-border/70 flex items-center justify-between gap-3 bg-card/50">
+                <div className="flex items-center gap-3">
+                  <Avatar src={null} name={otherUser?.fullName} className="w-10 h-10" />
+                  <div>
+                    <h4 className="font-semibold text-primary">{otherUser?.fullName}</h4>
+                    <p className="text-xs text-muted-foreground">{activeConv?.application?.helpRequest?.title}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="border-destructive/30 text-destructive hover:bg-destructive/10" onClick={handleTerminate}>
+                    <XCircle className="w-4 h-4 mr-1.5" />
+                    Terminate
+                  </Button>
+                  {isPoster && (
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleComplete}>
+                      <CheckCircle className="w-4 h-4 mr-1.5" />
+                      Job Complete
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -160,6 +222,15 @@ export default function Messages() {
           )}
         </div>
       </div>
+      
+      {reviewOpen && (
+        <ReviewDialog
+          isOpen={reviewOpen}
+          onClose={() => setReviewOpen(false)}
+          onSubmit={handleReviewSubmit}
+          peerName={otherUser?.fullName}
+        />
+      )}
     </div>
   );
 }

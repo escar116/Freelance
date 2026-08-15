@@ -25,7 +25,7 @@ query GetUser($id: String!) @auth(level: PUBLIC) {
 }
 
 query ListHelpRequests @auth(level: PUBLIC) {
-  helpRequests {
+  helpRequests(where: {_or: [{status: {eq: "OPEN"}}, {status: {eq: null}}]}) {
     id
     title
     description
@@ -33,6 +33,7 @@ query ListHelpRequests @auth(level: PUBLIC) {
     category
     urgency
     deadline
+    status
     requester {
       id
       fullName
@@ -82,6 +83,26 @@ query ListApplicationsForMyRequests($userId: String!) @auth(level: PUBLIC) {
   }
 }
 
+query ListMyHelpRequestsWithApplications($userId: String!) @auth(level: PUBLIC) {
+  helpRequests(where: {requesterId: {eq: $userId}}) {
+    id
+    title
+    budget
+    status
+    applications_on_helpRequest {
+      id
+      priceOffer
+      message
+      status
+      applicant {
+        id
+        fullName
+        studentId
+      }
+    }
+  }
+}
+
 query ListConversations($userId: String!) @auth(level: PUBLIC) {
   conversations(where: {_or: [{posterId: {eq: $userId}}, {applicantId: {eq: $userId}}]}) {
     id
@@ -97,6 +118,7 @@ query ListConversations($userId: String!) @auth(level: PUBLIC) {
     application {
       id
       helpRequest {
+        id
         title
       }
     }

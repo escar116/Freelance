@@ -11,7 +11,7 @@ const URGENCY_STYLES = {
   Urgent: "bg-accent text-primary",
 };
 
-export default function HelpRequestCard({ request, onSendOffer, me }) {
+export default function HelpRequestCard({ request, onSendOffer, me, hasApplied }) {
   const isMine = request.requester?.id === me?.id || request.requesterId === me?.id;
   
   return (
@@ -53,12 +53,12 @@ export default function HelpRequestCard({ request, onSendOffer, me }) {
         </div>
         <Button 
           size="sm" 
-          variant={isMine ? "ghost" : "secondary"} 
+          variant={isMine ? "ghost" : hasApplied ? "secondary" : "secondary"} 
           className="rounded-full" 
-          disabled={isMine}
+          disabled={isMine || hasApplied}
           onClick={() => onSendOffer(request)}
         >
-          {isMine ? "Your Post" : "Apply"}
+          {isMine ? "Your Post" : hasApplied ? "Applied" : "Apply"}
         </Button>
       </div>
     </article>

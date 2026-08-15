@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createUser, updateUserStatus, createHelpRequest, createApplication, updateApplicationStatus, createConversation, createMessage, listPendingUsers, getUser, listHelpRequests } from '@work4abit/dataconnect';
+import { createUser, updateUserStatus, createHelpRequest, createApplication, updateApplicationStatus, createConversation, createMessage, updateHelpRequestStatus, terminateJob, completeJob } from '@work4abit/dataconnect';
 
 
 // Operation CreateUser:  For variables, look at type CreateUserVars in ../index.d.ts
@@ -38,14 +38,14 @@ const { data } = await CreateConversation(dataConnect, createConversationVars);
 // Operation CreateMessage:  For variables, look at type CreateMessageVars in ../index.d.ts
 const { data } = await CreateMessage(dataConnect, createMessageVars);
 
-// Operation ListPendingUsers: 
-const { data } = await ListPendingUsers(dataConnect);
+// Operation UpdateHelpRequestStatus:  For variables, look at type UpdateHelpRequestStatusVars in ../index.d.ts
+const { data } = await UpdateHelpRequestStatus(dataConnect, updateHelpRequestStatusVars);
 
-// Operation GetUser:  For variables, look at type GetUserVars in ../index.d.ts
-const { data } = await GetUser(dataConnect, getUserVars);
+// Operation TerminateJob:  For variables, look at type TerminateJobVars in ../index.d.ts
+const { data } = await TerminateJob(dataConnect, terminateJobVars);
 
-// Operation ListHelpRequests: 
-const { data } = await ListHelpRequests(dataConnect);
+// Operation CompleteJob:  For variables, look at type CompleteJobVars in ../index.d.ts
+const { data } = await CompleteJob(dataConnect, completeJobVars);
 
 
 ```

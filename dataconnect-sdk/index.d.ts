@@ -20,6 +20,16 @@ export interface Category_Key {
   __typename?: 'Category_Key';
 }
 
+export interface CompleteJobData {
+  application_update?: Application_Key | null;
+  helpRequest_update?: HelpRequest_Key | null;
+}
+
+export interface CompleteJobVariables {
+  applicationId: UUIDString;
+  helpRequestId: UUIDString;
+}
+
 export interface Conversation_Key {
   id: UUIDString;
   __typename?: 'Conversation_Key';
@@ -68,6 +78,17 @@ export interface CreateMessageVariables {
   conversationId: UUIDString;
   senderId: string;
   content: string;
+}
+
+export interface CreateReviewData {
+  review_insert: Review_Key;
+}
+
+export interface CreateReviewVariables {
+  rating: number;
+  comment: string;
+  reviewerId: string;
+  targetUserId: string;
 }
 
 export interface CreateUserData {
@@ -169,8 +190,9 @@ export interface ListConversationsData {
     application: {
       id: UUIDString;
       helpRequest: {
+        id: UUIDString;
         title: string;
-      };
+      } & HelpRequest_Key;
     } & Application_Key;
   } & Conversation_Key)[];
 }
@@ -188,6 +210,7 @@ export interface ListHelpRequestsData {
     category?: string | null;
     urgency?: string | null;
     deadline?: string | null;
+    status?: string | null;
     requester: {
       id: string;
       fullName: string;
@@ -212,6 +235,30 @@ export interface ListMessagesData {
 
 export interface ListMessagesVariables {
   conversationId: UUIDString;
+}
+
+export interface ListMyHelpRequestsWithApplicationsData {
+  helpRequests: ({
+    id: UUIDString;
+    title: string;
+    budget: number;
+    status?: string | null;
+    applications_on_helpRequest: ({
+      id: UUIDString;
+      priceOffer: number;
+      message: string;
+      status: string;
+      applicant: {
+        id: string;
+        fullName: string;
+        studentId?: string | null;
+      } & User_Key;
+    } & Application_Key)[];
+  } & HelpRequest_Key)[];
+}
+
+export interface ListMyHelpRequestsWithApplicationsVariables {
+  userId: string;
 }
 
 export interface ListPendingUsersData {
@@ -241,11 +288,30 @@ export interface Service_Key {
   __typename?: 'Service_Key';
 }
 
+export interface TerminateJobData {
+  application_update?: Application_Key | null;
+  helpRequest_update?: HelpRequest_Key | null;
+}
+
+export interface TerminateJobVariables {
+  applicationId: UUIDString;
+  helpRequestId: UUIDString;
+}
+
 export interface UpdateApplicationStatusData {
   application_update?: Application_Key | null;
 }
 
 export interface UpdateApplicationStatusVariables {
+  id: UUIDString;
+  status: string;
+}
+
+export interface UpdateHelpRequestStatusData {
+  helpRequest_update?: HelpRequest_Key | null;
+}
+
+export interface UpdateHelpRequestStatusVariables {
   id: UUIDString;
   status: string;
 }
@@ -348,6 +414,54 @@ export const createMessageRef: CreateMessageRef;
 export function createMessage(vars: CreateMessageVariables): MutationPromise<CreateMessageData, CreateMessageVariables>;
 export function createMessage(dc: DataConnect, vars: CreateMessageVariables): MutationPromise<CreateMessageData, CreateMessageVariables>;
 
+interface UpdateHelpRequestStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateHelpRequestStatusVariables): MutationRef<UpdateHelpRequestStatusData, UpdateHelpRequestStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateHelpRequestStatusVariables): MutationRef<UpdateHelpRequestStatusData, UpdateHelpRequestStatusVariables>;
+  operationName: string;
+}
+export const updateHelpRequestStatusRef: UpdateHelpRequestStatusRef;
+
+export function updateHelpRequestStatus(vars: UpdateHelpRequestStatusVariables): MutationPromise<UpdateHelpRequestStatusData, UpdateHelpRequestStatusVariables>;
+export function updateHelpRequestStatus(dc: DataConnect, vars: UpdateHelpRequestStatusVariables): MutationPromise<UpdateHelpRequestStatusData, UpdateHelpRequestStatusVariables>;
+
+interface TerminateJobRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: TerminateJobVariables): MutationRef<TerminateJobData, TerminateJobVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: TerminateJobVariables): MutationRef<TerminateJobData, TerminateJobVariables>;
+  operationName: string;
+}
+export const terminateJobRef: TerminateJobRef;
+
+export function terminateJob(vars: TerminateJobVariables): MutationPromise<TerminateJobData, TerminateJobVariables>;
+export function terminateJob(dc: DataConnect, vars: TerminateJobVariables): MutationPromise<TerminateJobData, TerminateJobVariables>;
+
+interface CompleteJobRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CompleteJobVariables): MutationRef<CompleteJobData, CompleteJobVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CompleteJobVariables): MutationRef<CompleteJobData, CompleteJobVariables>;
+  operationName: string;
+}
+export const completeJobRef: CompleteJobRef;
+
+export function completeJob(vars: CompleteJobVariables): MutationPromise<CompleteJobData, CompleteJobVariables>;
+export function completeJob(dc: DataConnect, vars: CompleteJobVariables): MutationPromise<CompleteJobData, CompleteJobVariables>;
+
+interface CreateReviewRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateReviewVariables): MutationRef<CreateReviewData, CreateReviewVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateReviewVariables): MutationRef<CreateReviewData, CreateReviewVariables>;
+  operationName: string;
+}
+export const createReviewRef: CreateReviewRef;
+
+export function createReview(vars: CreateReviewVariables): MutationPromise<CreateReviewData, CreateReviewVariables>;
+export function createReview(dc: DataConnect, vars: CreateReviewVariables): MutationPromise<CreateReviewData, CreateReviewVariables>;
+
 interface ListPendingUsersRef {
   /* Allow users to create refs without passing in DataConnect */
   (): QueryRef<ListPendingUsersData, undefined>;
@@ -407,6 +521,18 @@ export const listApplicationsForMyRequestsRef: ListApplicationsForMyRequestsRef;
 
 export function listApplicationsForMyRequests(vars: ListApplicationsForMyRequestsVariables, options?: ExecuteQueryOptions): QueryPromise<ListApplicationsForMyRequestsData, ListApplicationsForMyRequestsVariables>;
 export function listApplicationsForMyRequests(dc: DataConnect, vars: ListApplicationsForMyRequestsVariables, options?: ExecuteQueryOptions): QueryPromise<ListApplicationsForMyRequestsData, ListApplicationsForMyRequestsVariables>;
+
+interface ListMyHelpRequestsWithApplicationsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ListMyHelpRequestsWithApplicationsVariables): QueryRef<ListMyHelpRequestsWithApplicationsData, ListMyHelpRequestsWithApplicationsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ListMyHelpRequestsWithApplicationsVariables): QueryRef<ListMyHelpRequestsWithApplicationsData, ListMyHelpRequestsWithApplicationsVariables>;
+  operationName: string;
+}
+export const listMyHelpRequestsWithApplicationsRef: ListMyHelpRequestsWithApplicationsRef;
+
+export function listMyHelpRequestsWithApplications(vars: ListMyHelpRequestsWithApplicationsVariables, options?: ExecuteQueryOptions): QueryPromise<ListMyHelpRequestsWithApplicationsData, ListMyHelpRequestsWithApplicationsVariables>;
+export function listMyHelpRequestsWithApplications(dc: DataConnect, vars: ListMyHelpRequestsWithApplicationsVariables, options?: ExecuteQueryOptions): QueryPromise<ListMyHelpRequestsWithApplicationsData, ListMyHelpRequestsWithApplicationsVariables>;
 
 interface ListConversationsRef {
   /* Allow users to create refs without passing in DataConnect */
