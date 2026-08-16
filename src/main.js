@@ -5,12 +5,13 @@ import {
   createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, 
   signOut, sendPasswordResetEmail 
 } from 'firebase/auth';
-import { getDataConnect } from 'firebase/data-connect';
+import { getDataConnect, subscribe } from 'firebase/data-connect';
 import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
   listApplicationsByApplicant, listMyHelpRequestsWithApplications,
   createApplication, updateApplicationStatus, updateHelpRequestStatus,
   createConversation, createMessage, listConversations, listMessages,
+  listMessagesRef, listConversationsRef,
   listPendingUsers, updateUserStatus, terminateJob, completeJob, createReview
 } from '@work4abit/dataconnect';
 
@@ -33,6 +34,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
+const SERVER_ONLY = { fetchPolicy: 'SERVER_ONLY' };
 
 // ── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -41,6 +43,8 @@ let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
 let autoRefreshTimer = null;
 let chatPollTimer = null;
 let activeConvId = null;
+let messageSubscription = null;
+let conversationsSubscription = null;
 let renderedMsgIds = new Set();
 let pendingTempMessages = [];
 let lastConversationsDigest = '';
@@ -93,18 +97,18 @@ function startBackgroundSync() {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
   if (chatPollTimer) clearInterval(chatPollTimer);
 
-  // High-frequency Real-time Chat Sync (Every 1.2s for active chat)
+  // High-frequency Real-time Chat Sync with SERVER_ONLY cache bypass
   chatPollTimer = setInterval(() => {
     if (userData && activeSection === 'messages' && activeConvId) {
       pollMessages(false);
     }
   }, 1200);
 
-  // Background view synchronization (Every 3.5s)
+  // Background view synchronization
   autoRefreshTimer = setInterval(() => {
     if (!userData) return;
     if (activeSection === 'messages') {
-      loadMessages(true); // Sync new conversations in sidebar
+      loadMessages(true);
     } else if (activeSection === 'dashboard') {
       loadDashboard(true);
     } else if (activeSection === 'applications') {
@@ -159,6 +163,8 @@ function navigateTo(section) {
 function showAuth(section = 'login') {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
   if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+  if (messageSubscription) { messageSubscription(); messageSubscription = null; }
+  if (conversationsSubscription) { conversationsSubscription(); conversationsSubscription = null; }
   hide($('#app-views'));
   hide($('#loading-screen'));
   show($('#auth-views'));
@@ -200,7 +206,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     try {
-      const res = await getUser(dc, { id: user.uid });
+      const res = await getUser(dc, { id: user.uid }, SERVER_ONLY);
       if (res.data.user) {
         userData = { id: user.uid, ...res.data.user };
         if (userData.verificationStatus === 'pending') {
@@ -253,7 +259,7 @@ function setupLogin() {
     hide(errorEl);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const res = await getUser(dc, { id: result.user.uid });
+      const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (!res.data.user) {
         await signOut(auth);
         errorEl.textContent = 'Account not found. Please register first.';
@@ -296,7 +302,7 @@ function setupRegister() {
     hide(errorEl);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const res = await getUser(dc, { id: result.user.uid });
+      const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (res.data.user) {
         return;
       }
@@ -414,9 +420,9 @@ async function loadDashboard(isSilent = false) {
 
   try {
     const [reqRes, appRes, convRes] = await Promise.all([
-      listHelpRequests(dc),
-      userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }) : { data: { applications: [] } },
-      userData?.id ? listConversations(dc, { userId: userData.id }) : { data: { conversations: [] } }
+      listHelpRequests(dc, SERVER_ONLY),
+      userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY) : { data: { applications: [] } },
+      userData?.id ? listConversations(dc, { userId: userData.id }, SERVER_ONLY) : { data: { conversations: [] } }
     ]);
     const requests = reqRes.data.helpRequests || [];
     const applications = appRes.data.applications || [];
@@ -535,8 +541,8 @@ async function loadServices(isSilent = false) {
   if (!isSilent) grid.innerHTML = '<div class="loader"></div>';
   try {
     const [reqRes, appRes] = await Promise.all([
-      listHelpRequests(dc),
-      userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }) : { data: { applications: [] } }
+      listHelpRequests(dc, SERVER_ONLY),
+      userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY) : { data: { applications: [] } }
     ]);
     allRequests = reqRes.data.helpRequests || [];
     const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest?.id));
@@ -727,7 +733,7 @@ async function loadPostedJobs(isSilent = false) {
   const container = $('#posted-jobs-list');
   if (!isSilent) container.innerHTML = '<div class="loader"></div>';
   try {
-    const res = await listMyHelpRequestsWithApplications(dc, { userId: userData.id });
+    const res = await listMyHelpRequestsWithApplications(dc, { userId: userData.id }, SERVER_ONLY);
     const jobs = (res.data.helpRequests || []).filter(j => j.status === 'OPEN' || !j.status);
     container.innerHTML = '';
     if (jobs.length === 0) {
@@ -782,7 +788,7 @@ async function loadMyApplications(isSilent = false) {
   const container = $('#my-applications-list');
   if (!isSilent) container.innerHTML = '<div class="loader"></div>';
   try {
-    const res = await listApplicationsByApplicant(dc, { userId: userData.id });
+    const res = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
     const apps = (res.data.applications || []).filter(a => a.status !== 'REJECTED');
     container.innerHTML = '';
     if (apps.length === 0) {
@@ -869,7 +875,7 @@ async function loadMessages(isSilent = false) {
   const convList = $('#conversations-list');
   if (!isSilent && convList.children.length === 0) convList.innerHTML = '<div class="loader"></div>';
   try {
-    const res = await listConversations(dc, { userId: userData.id });
+    const res = await listConversations(dc, { userId: userData.id }, SERVER_ONLY);
     conversations = (res.data.conversations || []).filter(c =>
       c.application?.status !== 'TERMINATED' && c.application?.helpRequest?.status !== 'COMPLETED'
     );
@@ -877,7 +883,6 @@ async function loadMessages(isSilent = false) {
     if (conversations.length > 0 && !activeConvId) {
       selectConversation(conversations[0].id);
     } else if (activeConvId) {
-      // Keep conversation view alive
       const exists = conversations.some(c => c.id === activeConvId);
       if (!exists && conversations.length > 0) {
         selectConversation(conversations[0].id);
@@ -968,17 +973,71 @@ async function selectConversation(convId) {
     }
   });
 
+  // Setup direct Data Connect live subscription
+  if (messageSubscription) {
+    messageSubscription();
+    messageSubscription = null;
+  }
+  try {
+    const qRef = listMessagesRef(dc, { conversationId: convId });
+    messageSubscription = subscribe(qRef, (res) => {
+      renderIncomingMessages(res.data?.messages || []);
+    });
+  } catch (err) {
+    console.warn('Subscription fallback to SERVER_ONLY polling:', err);
+  }
+
   await pollMessages(true);
 }
 
-// High-speed realtime message synchronization
+function renderIncomingMessages(messages) {
+  const msgArea = $('#chat-messages');
+  if (!msgArea) return;
+
+  if (messages.length > 0 || pendingTempMessages.length > 0) {
+    const emptyState = msgArea.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+  }
+
+  let hasNew = false;
+  messages.forEach(msg => {
+    if (!renderedMsgIds.has(msg.id)) {
+      renderedMsgIds.add(msg.id);
+      hasNew = true;
+
+      const tempIdx = pendingTempMessages.findIndex(t => t.content === msg.content);
+      if (tempIdx !== -1) {
+        const tempEl = pendingTempMessages[tempIdx].el;
+        if (tempEl && tempEl.parentNode) {
+          tempEl.dataset.msgId = msg.id;
+          tempEl.removeAttribute('data-temp');
+          pendingTempMessages.splice(tempIdx, 1);
+          return;
+        }
+      }
+
+      const isMe = msg.sender?.id === userData?.id;
+      const div = document.createElement('div');
+      div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
+      div.dataset.msgId = msg.id;
+      div.innerHTML = `<div class="message-bubble">${msg.content}</div>`;
+      msgArea.appendChild(div);
+    }
+  });
+
+  if (hasNew) {
+    msgArea.scrollTop = msgArea.scrollHeight;
+  }
+}
+
+// High-speed realtime message polling bypassing client cache
 async function pollMessages(isFullReset = false) {
   if (!activeConvId) return;
   const msgArea = $('#chat-messages');
   if (!msgArea) return;
 
   try {
-    const res = await listMessages(dc, { conversationId: activeConvId });
+    const res = await listMessages(dc, { conversationId: activeConvId }, SERVER_ONLY);
     const messages = res.data.messages || [];
 
     if (isFullReset) {
@@ -986,44 +1045,7 @@ async function pollMessages(isFullReset = false) {
       msgArea.innerHTML = '';
     }
 
-    if (messages.length > 0 || pendingTempMessages.length > 0) {
-      const emptyState = msgArea.querySelector('.empty-state');
-      if (emptyState) emptyState.remove();
-    } else if (msgArea.children.length === 0) {
-      msgArea.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No messages yet. Send a message to start!</div>';
-      return;
-    }
-
-    let hasNew = false;
-    messages.forEach(msg => {
-      if (!renderedMsgIds.has(msg.id)) {
-        renderedMsgIds.add(msg.id);
-        hasNew = true;
-
-        // Check if there was a matching pending temp message from sender
-        const tempIdx = pendingTempMessages.findIndex(t => t.content === msg.content);
-        if (tempIdx !== -1) {
-          const tempEl = pendingTempMessages[tempIdx].el;
-          if (tempEl && tempEl.parentNode) {
-            tempEl.dataset.msgId = msg.id;
-            tempEl.removeAttribute('data-temp');
-            pendingTempMessages.splice(tempIdx, 1);
-            return;
-          }
-        }
-
-        const isMe = msg.sender?.id === userData?.id;
-        const div = document.createElement('div');
-        div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
-        div.dataset.msgId = msg.id;
-        div.innerHTML = `<div class="message-bubble">${msg.content}</div>`;
-        msgArea.appendChild(div);
-      }
-    });
-
-    if (hasNew || isFullReset) {
-      msgArea.scrollTop = msgArea.scrollHeight;
-    }
+    renderIncomingMessages(messages);
   } catch (err) {
     console.error('Chat sync error:', err);
   }
@@ -1042,7 +1064,7 @@ function setupChat() {
     const emptyState = msgArea.querySelector('.empty-state');
     if (emptyState) emptyState.remove();
 
-    // Render outgoing bubble instantly
+    // Instant local outgoing bubble
     const tempDiv = document.createElement('div');
     tempDiv.className = 'message outgoing';
     tempDiv.dataset.temp = 'true';
@@ -1056,7 +1078,6 @@ function setupChat() {
     sendBtn.disabled = true;
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      // Trigger instant poll to update server message state
       await pollMessages(false);
     } catch (err) {
       showToast('Error sending message: ' + err.message, 'error');
@@ -1089,7 +1110,7 @@ async function loadTransactions() {
   const tbody = $('#transactions-tbody');
   tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="loader"></div></td></tr>';
   try {
-    const res = await listApplicationsByApplicant(dc, { userId: userData.id });
+    const res = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
     const apps = res.data.applications || [];
     allTransactions = apps;
 
@@ -1202,7 +1223,7 @@ async function loadProfile() {
   $('#profile-student-id').textContent = userData.studentId || '—';
 
   try {
-    const res = await listApplicationsByApplicant(dc, { userId: userData.id });
+    const res = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
     const apps = res.data.applications || [];
     $('#stat-active-services').textContent = apps.length;
   } catch {
@@ -1231,7 +1252,7 @@ async function loadAdmin() {
   const container = $('#admin-list');
   container.innerHTML = '<div class="loader"></div>';
   try {
-    const res = await listPendingUsers(dc);
+    const res = await listPendingUsers(dc, SERVER_ONLY);
     const users = res.data.users || [];
     container.innerHTML = '';
     if (users.length === 0) {
@@ -1303,6 +1324,8 @@ function setupLogout() {
     e.preventDefault();
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+    if (messageSubscription) { messageSubscription(); messageSubscription = null; }
+    if (conversationsSubscription) { conversationsSubscription(); conversationsSubscription = null; }
     sessionStorage.removeItem('active_section');
     await signOut(auth);
   });
