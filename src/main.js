@@ -99,9 +99,11 @@ function navigateTo(section) {
   });
 
   if (section === 'dashboard') loadDashboard();
-  else if (section === 'requests') loadRequests();
+  else if (section === 'services') loadServices();
   else if (section === 'applications') loadApplications();
   else if (section === 'messages') loadMessages();
+  else if (section === 'transactions') loadTransactions();
+  else if (section === 'ratings') loadRatings();
   else if (section === 'profile') loadProfile();
   else if (section === 'admin') loadAdmin();
 }
@@ -127,10 +129,17 @@ function showApp() {
     else hide(adminNav);
   }
 
-  // User Avatar on Dashboard Top Right
-  const userInitials = initials(userData?.fullName || currentUser?.displayName || 'Juan Dela Cruz');
-  const avatarEl = $('#dashboard-user-avatar');
-  if (avatarEl) avatarEl.textContent = userInitials;
+  // User Profile Info in Sidebar Footer & Top Avatar
+  const userName = userData?.fullName || currentUser?.displayName || 'charles jan paraggua';
+  const userInitials = initials(userName);
+  
+  const sidebarName = $('#sidebar-user-name');
+  if (sidebarName) sidebarName.textContent = userName;
+  const sidebarAvatar = $('#sidebar-user-avatar');
+  if (sidebarAvatar) sidebarAvatar.textContent = userInitials;
+
+  const topAvatar = $('#dashboard-user-avatar');
+  if (topAvatar) topAvatar.textContent = userInitials;
 
   navigateTo('dashboard');
 }
@@ -384,7 +393,7 @@ async function loadDashboard() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
           </button>
         `;
-        item.addEventListener('click', () => navigateTo('requests'));
+        item.addEventListener('click', () => navigateTo('services'));
         listEl.appendChild(item);
       });
     }
@@ -394,17 +403,17 @@ async function loadDashboard() {
 }
 
 function setupDashboardLinks() {
-  $('#dash-view-all-jobs')?.addEventListener('click', () => navigateTo('requests'));
+  $('#dash-view-all-jobs')?.addEventListener('click', () => navigateTo('services'));
   $('#dash-view-all-apps')?.addEventListener('click', () => navigateTo('applications'));
   $('#dash-view-all-messages')?.addEventListener('click', () => navigateTo('messages'));
   $('#dashboard-avatar-btn')?.addEventListener('click', () => navigateTo('profile'));
 }
 
-// ── Service Requests ("Find Jobs") ───────────────────────────────────────────
+// ── Find Services ────────────────────────────────────────────────────────────
 let allRequests = [];
 let requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest' };
 
-async function loadRequests() {
+async function loadServices() {
   const grid = $('#requests-grid');
   grid.innerHTML = '<div class="loader"></div>';
   try {
@@ -414,13 +423,13 @@ async function loadRequests() {
     ]);
     allRequests = reqRes.data.helpRequests || [];
     const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest?.id));
-    renderRequests(allRequests, appliedIds);
+    renderServices(allRequests, appliedIds);
   } catch (err) {
-    grid.innerHTML = '<div class="empty-state">Error loading opportunities.</div>';
+    grid.innerHTML = '<div class="empty-state">Error loading services.</div>';
   }
 }
 
-function renderRequests(requests, appliedIds = new Set()) {
+function renderServices(requests, appliedIds = new Set()) {
   const grid = $('#requests-grid');
   let filtered = requests.filter(r => {
     if (requestFilters.q) {
@@ -435,11 +444,11 @@ function renderRequests(requests, appliedIds = new Set()) {
   if (requestFilters.sort === 'price_asc') filtered.sort((a, b) => a.budget - b.budget);
   else if (requestFilters.sort === 'price_desc') filtered.sort((a, b) => b.budget - a.budget);
 
-  $('#requests-count').textContent = `${filtered.length} opportunity(ies) found`;
+  $('#requests-count').textContent = `${filtered.length} service(s) found`;
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
-    grid.innerHTML = '<div class="empty-state">No matching opportunities found.</div>';
+    grid.innerHTML = '<div class="empty-state">No matching services found.</div>';
     return;
   }
 
@@ -481,26 +490,26 @@ function renderRequests(requests, appliedIds = new Set()) {
   });
 }
 
-function setupRequestFilters() {
+function setupServiceFilters() {
   $('#filter-search')?.addEventListener('input', (e) => { 
     requestFilters.q = e.target.value; 
-    renderRequests(allRequests); 
+    renderServices(allRequests); 
   });
 
   $('#filter-category')?.addEventListener('change', (e) => {
     requestFilters.category = e.target.value;
-    renderRequests(allRequests);
+    renderServices(allRequests);
   });
 
   $('#filter-sort')?.addEventListener('change', (e) => {
     requestFilters.sort = e.target.value;
-    renderRequests(allRequests);
+    renderServices(allRequests);
   });
 
   $('#filter-budget')?.addEventListener('input', (e) => {
     requestFilters.maxPrice = Number(e.target.value);
     $('#filter-budget-value').textContent = peso(requestFilters.maxPrice);
-    renderRequests(allRequests);
+    renderServices(allRequests);
   });
 
   $('#btn-reset-filters')?.addEventListener('click', () => {
@@ -510,7 +519,7 @@ function setupRequestFilters() {
     $('#filter-sort').value = 'newest';
     $('#filter-budget').value = 20000;
     $('#filter-budget-value').textContent = '₱20,000';
-    renderRequests(allRequests);
+    renderServices(allRequests);
   });
 }
 
@@ -537,7 +546,7 @@ function setupNewRequestDialog() {
       showToast('Job published successfully!');
       $('#dialog-new-request').close();
       e.target.reset();
-      loadRequests();
+      loadServices();
     } catch (err) {
       showToast('Could not post job: ' + err.message, 'error');
     } finally {
@@ -572,7 +581,7 @@ function setupApplyDialog() {
       });
       showToast(`Application sent! Proposed rate: ${peso($('#apply-amount').value)}`);
       $('#dialog-apply').close();
-      loadRequests();
+      loadServices();
     } catch (err) {
       showToast('Could not apply: ' + err.message, 'error');
     } finally {
@@ -709,10 +718,10 @@ async function handleReject(application) {
 }
 
 function setupApplicationTabs() {
-  $$('.tab-btn').forEach(btn => {
+  $$('.tab-btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       appTab = btn.dataset.tab;
-      $$('.tab-btn').forEach(b => b.classList.remove('active'));
+      $$('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       if (appTab === 'posted') {
         show($('#posted-jobs-list'));
@@ -896,6 +905,24 @@ function setupChat() {
   });
 }
 
+// ── Transactions ─────────────────────────────────────────────────────────────
+function loadTransactions() {
+  // Static demonstration matching Screen 10
+}
+
+// ── Ratings & Feedback ───────────────────────────────────────────────────────
+function loadRatings() {
+  // Static demonstration matching Screen 11
+}
+
+function setupInlineRatingForm() {
+  $('#inline-rating-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Feedback submitted! Thank you.');
+    $('#inline-feedback-text').value = '';
+  });
+}
+
 // ── Review Dialog ────────────────────────────────────────────────────────────
 function setupReviewDialog() {
   let selectedRating = 5;
@@ -1052,11 +1079,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRegister();
   setupForgotPassword();
   setupDashboardLinks();
-  setupRequestFilters();
+  setupServiceFilters();
   setupNewRequestDialog();
   setupApplyDialog();
   setupApplicationTabs();
   setupChat();
+  setupInlineRatingForm();
   setupReviewDialog();
   setupEditProfile();
   setupMobileSidebar();
@@ -1070,4 +1098,6 @@ document.addEventListener('DOMContentLoaded', () => {
       hide($('#sidebar-overlay'));
     });
   });
+
+  $('.user-footer-profile')?.addEventListener('click', () => navigateTo('profile'));
 });

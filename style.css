@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ==========================================================================
-   1. COLOR PALETTE & DESIGN SYSTEM (Exact Student Dashboard Replica)
+   0. DESIGN SYSTEM & CSS VARIABLES
    ========================================================================== */
 :root {
     /* Solid Deep Navy Sidebar */
@@ -9,18 +9,18 @@
     --sidebar-hover: rgba(255, 255, 255, 0.07);
     --sidebar-active: #4f46e5;
     
-    /* Brand Colors */
+    /* Primary Colors */
     --primary-purple: #4f46e5;
     --primary-purple-hover: #4338ca;
     --accent-purple-light: #ede9fe;
     
-    /* Surfaces */
+    /* Surface & Background */
     --bg-main: #f8fafc;
     --bg-card: #ffffff;
     --border-card: #e5e7eb;
     --border-light: #f3f4f6;
     
-    /* Typography */
+    /* Typography Colors */
     --text-heading: #111827;
     --text-body: #374151;
     --text-muted: #6b7280;
@@ -28,25 +28,30 @@
     --text-on-dark: #ffffff;
     --text-on-dark-muted: #94a3b8;
     
-    /* Accent & Status Colors */
+    /* Status & Highlight Colors */
     --color-green: #16a34a;
+    --color-green-bg: #ecfdf5;
     --color-amber: #f59e0b;
+    --color-amber-bg: #fffbeb;
     --color-red: #ef4444;
+    --color-red-bg: #fee2e2;
     --color-cyan: #0ea5e9;
     
     /* Shadows */
     --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.06);
+    --shadow-dialog: 0 20px 50px rgba(0, 0, 0, 0.15);
     
-    /* Dimensions & Radii */
+    /* Layout Dimensions */
     --sidebar-width: 240px;
+    --content-max-width: 1200px;
     --radius-card: 14px;
     --radius-pill: 9999px;
     --transition: all 0.2s ease-in-out;
 }
 
 /* ==========================================================================
-   2. RESET & BASE
+   0.1 BASE & RESET
    ========================================================================== */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -88,46 +93,211 @@ button {
 }
 
 /* ==========================================================================
-   3. LOADING OVERLAY
+   1. AMBIENT BACKGROUND (CIRCUIT TRACELINES, HEXAGONS & BLUEPRINT GRID)
    ========================================================================== */
-.loading-overlay {
+.ambient-background {
     position: fixed;
     inset: 0;
-    background: var(--bg-main);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    z-index: 9999;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
 }
 
-.spinner, .loader {
-    width: 36px;
-    height: 36px;
-    border: 3px solid rgba(79, 70, 229, 0.15);
-    border-radius: 50%;
-    border-top-color: var(--primary-purple);
-    animation: spin 0.8s linear infinite;
-    margin: 1.5rem auto;
+.blueprint-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.decor-pcb, .decor-hex, .decor-side-traces {
+    position: absolute;
+    color: var(--primary-purple);
+    pointer-events: none;
 }
 
-.loading-brand {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--sidebar-bg);
+.decor-pcb-top {
+    top: 0;
+    right: 4%;
+    width: 360px;
+    opacity: 0.18;
+}
+
+.decor-hex-1 {
+    top: 140px;
+    left: 270px;
+    width: 90px;
+    opacity: 0.15;
+}
+
+.decor-side-traces {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 44px;
+    opacity: 0.12;
 }
 
 /* ==========================================================================
-   4. DEEP NAVY SIDEBAR NAVIGATION (Exact Screenshot 4 Layout)
+   2. AUTH VIEWS (LOGIN, REGISTER, FORGOT, PENDING)
+   ========================================================================== */
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+.auth-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow-card);
+}
+
+.auth-card.register {
+    max-width: 560px;
+}
+
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-heading);
+}
+
+.auth-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.15rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-heading);
+    margin-bottom: 0.35rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: var(--text-heading);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-subtle);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.divider:not(:empty)::before { margin-right: 1rem; }
+.divider:not(:empty)::after { margin-left: 1rem; }
+
+.error-message {
+    color: var(--color-red);
+    background: var(--color-red-bg);
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.google-status-box {
+    background: var(--color-green-bg);
+    border: 1px solid #bbf7d0;
+    color: var(--color-green);
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.file-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.file-dropzone:hover {
+    border-color: var(--primary-purple);
+    background: #fdfdfd;
+}
+
+.file-preview {
+    max-height: 180px;
+    margin-top: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-card);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.verification-status-pill {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-pill);
+    color: #d97706;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   3. SIDEBAR NAVIGATION & BOTTOM USER PROFILE (Matches User Reference Image)
    ========================================================================== */
 .layout {
     display: flex;
     min-height: 100vh;
+    position: relative;
+    z-index: 10;
 }
 
 .sidebar-nav {
@@ -138,7 +308,7 @@ button {
     width: var(--sidebar-width);
     background-color: var(--sidebar-bg);
     color: var(--text-on-dark);
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 1rem 1.15rem;
     display: flex;
     flex-direction: column;
     z-index: 100;
@@ -212,27 +382,96 @@ button {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
-.sidebar-footer {
+/* Replicated User Profile Footer with Highlighted Leave/Logout Icon */
+.sidebar-user-footer {
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding-top: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 0.65rem 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 0.5rem;
 }
 
-.mobile-close-btn, .mobile-only, .mobile-top-bar {
-    display: none;
+.user-footer-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-grow: 1;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.avatar-photo {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--sidebar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.user-footer-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-footer-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-on-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-footer-role {
+    font-size: 0.72rem;
+    color: #818cf8;
+    font-weight: 600;
+}
+
+/* Highlight Leave/Logout Icon Button */
+.sidebar-leave-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.sidebar-leave-btn:hover {
+    color: #ffffff;
+    background: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    transform: translateX(1px);
 }
 
 /* ==========================================================================
-   5. MAIN CONTENT AREA & STUDENT DASHBOARD (Screenshot 4 Exact Replica)
+   4. MAIN CONTENT AREA & CENTERING LAYOUT
    ========================================================================== */
 .main-content {
     flex-grow: 1;
     margin-left: var(--sidebar-width);
-    padding: 2.25rem 2.75rem 5rem;
-    max-width: 1320px;
+    padding: 2.25rem 2rem 5rem;
     transition: var(--transition);
+    position: relative;
+    z-index: 10;
+}
+
+.content-container {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    width: 100%;
 }
 
 .content-section {
@@ -244,7 +483,14 @@ button {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Dashboard Top Header */
+/* Mobile top bar (hidden on desktop) */
+.mobile-close-btn, .mobile-only, .mobile-top-bar {
+    display: none;
+}
+
+/* ==========================================================================
+   5. DASHBOARD VIEW (SCREEN 4 REPLICA)
+   ========================================================================== */
 .dashboard-top-header {
     display: flex;
     align-items: center;
@@ -274,7 +520,7 @@ button {
     transform: scale(1.05);
 }
 
-/* Top 4 Stat Cards (Exact Replica) */
+/* 4 Top Stat Cards Grid */
 .dashboard-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -313,7 +559,7 @@ button {
 .text-green { color: var(--color-green); }
 .text-amber { color: var(--color-amber); }
 
-/* Main 2-Column Dashboard Grid */
+/* 2-Column Main Dashboard Grid */
 .dashboard-main-grid {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
@@ -353,7 +599,7 @@ button {
     text-decoration: underline;
 }
 
-/* Recommended Jobs Feed (Left Column) */
+/* Recommended Jobs Feed */
 .jobs-list-feed {
     display: flex;
     flex-direction: column;
@@ -386,9 +632,9 @@ button {
     flex-shrink: 0;
 }
 
-.job-icon-green { background: #ecfdf5; color: #16a34a; }
-.job-icon-purple { background: #ede9fe; color: #7c3aed; }
-.job-icon-cyan { background: #e0f2fe; color: #0284c7; }
+.job-icon-green { background: var(--color-green-bg); color: var(--color-green); }
+.job-icon-purple { background: var(--accent-purple-light); color: var(--primary-purple); }
+.job-icon-cyan { background: #e0f2fe; color: var(--color-cyan); }
 
 .job-item-info {
     flex-grow: 1;
@@ -417,7 +663,7 @@ button {
     color: var(--primary-purple);
 }
 
-/* Right Column Stack (Recent Applications + Messages) */
+/* Right Stack (Recent Applications + Messages) */
 .dash-right-stack {
     display: flex;
     flex-direction: column;
@@ -458,7 +704,6 @@ button {
     margin-top: 0.1rem;
 }
 
-/* Recent Messages List */
 .recent-messages-list {
     display: flex;
     flex-direction: column;
@@ -494,7 +739,7 @@ button {
 }
 
 /* ==========================================================================
-   6. FIND OPPORTUNITIES / SERVICE REQUESTS VIEW
+   6. FIND SERVICES VIEW (SCREEN 7 REPLICA)
    ========================================================================== */
 .page-header-flex {
     display: flex;
@@ -723,7 +968,7 @@ button {
 }
 
 /* ==========================================================================
-   8. MESSAGING & CHAT SYSTEM
+   8. MESSAGING & CHAT SYSTEM (SCREEN 9 REPLICA)
    ========================================================================== */
 .messages-layout {
     display: grid;
@@ -806,8 +1051,8 @@ button {
 }
 
 .btn-terminate {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--color-red-bg);
+    color: var(--color-red);
     border: 1px solid #fecaca;
     padding: 0.45rem 1rem;
     border-radius: var(--radius-pill);
@@ -884,7 +1129,137 @@ button {
 }
 
 /* ==========================================================================
-   9. PROFILE & PORTFOLIO VIEW
+   9. TRANSACTIONS VIEW (SCREEN 10 REPLICA)
+   ========================================================================== */
+.transaction-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+.trans-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    box-shadow: var(--shadow-card);
+}
+
+.transactions-table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.9rem;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ==========================================================================
+   10. RATINGS & FEEDBACK VIEW (SCREEN 11 REPLICA)
+   ========================================================================== */
+.ratings-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.star-rating-large {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 2.25rem;
+    color: var(--color-amber);
+}
+
+.rating-score-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.rating-huge-num {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1;
+}
+
+.rating-bars-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.progress-bar-track {
+    flex-grow: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--color-amber);
+    border-radius: var(--radius-pill);
+}
+
+.feedback-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.feedback-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.feedback-content {
+    flex-grow: 1;
+}
+
+.feedback-comment {
+    font-size: 0.9rem;
+    color: var(--text-heading);
+    margin: 0.25rem 0;
+}
+
+/* ==========================================================================
+   11. PROFILE & PORTFOLIO VIEW (SCREEN 5 REPLICA)
    ========================================================================== */
 .profile-hero {
     background: var(--bg-card);
@@ -930,12 +1305,12 @@ button {
 .profile-availability-pill {
     display: inline-block;
     padding: 0.2rem 0.65rem;
-    background: #ecfdf5;
+    background: var(--color-green-bg);
     border: 1px solid #bbf7d0;
     border-radius: var(--radius-pill);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #16a34a;
+    color: var(--color-green);
     margin-top: 0.5rem;
 }
 
@@ -1002,7 +1377,7 @@ button {
 }
 
 /* ==========================================================================
-   10. ADMIN DASHBOARD
+   12. ADMIN DASHBOARD VIEW
    ========================================================================== */
 .admin-list {
     display: flex;
@@ -1039,7 +1414,7 @@ button {
 }
 
 /* ==========================================================================
-   11. BUTTONS, BADGES, AVATARS & INPUTS
+   13. BUTTONS, BADGES, AVATARS & INPUTS
    ========================================================================== */
 .btn {
     display: inline-flex;
@@ -1095,7 +1470,7 @@ button {
 .badge-normal { background: #e0f2fe; color: #0284c7; }
 .badge-low { background: #f3f4f6; color: #6b7280; }
 .badge-pending { background: #fffbeb; color: #d97706; }
-.badge-approved { background: #ecfdf5; color: #16a34a; }
+.badge-approved { background: var(--color-green-bg); color: var(--color-green); }
 
 /* Avatars */
 .avatar {
@@ -1116,150 +1491,6 @@ button {
 .avatar-md { width: 44px; height: 44px; font-size: 1rem; }
 .avatar-lg { width: 72px; height: 72px; font-size: 1.5rem; }
 
-/* Forms & Inputs */
-.auth-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-}
-
-.auth-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-card);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: var(--shadow-card);
-}
-
-.auth-card.register {
-    max-width: 560px;
-}
-
-.auth-title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--text-heading);
-}
-
-.auth-subtitle {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-}
-
-.form-group {
-    margin-bottom: 1.15rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.form-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-heading);
-    margin-bottom: 0.35rem;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    color: var(--text-heading);
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.form-control:focus {
-    border-color: var(--primary-purple);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 1.5rem 0;
-    color: var(--text-subtle);
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-.divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border-card);
-}
-
-.divider:not(:empty)::before { margin-right: 1rem; }
-.divider:not(:empty)::after { margin-left: 1rem; }
-
-.error-message {
-    color: var(--color-red);
-    background: #fee2e2;
-    padding: 0.65rem 1rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-}
-
-.google-status-box {
-    background: #ecfdf5;
-    border: 1px solid #bbf7d0;
-    color: #16a34a;
-    padding: 0.65rem 1rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.file-dropzone {
-    border: 2px dashed #cbd5e1;
-    border-radius: 10px;
-    padding: 1.5rem;
-    text-align: center;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.file-dropzone:hover {
-    border-color: var(--primary-purple);
-    background: #fdfdfd;
-}
-
-.file-preview {
-    max-height: 180px;
-    margin-top: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-card);
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.verification-status-pill {
-    display: inline-block;
-    padding: 0.35rem 1rem;
-    background: #fef3c7;
-    border: 1px solid #fde68a;
-    border-radius: var(--radius-pill);
-    color: #d97706;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
 /* Dialogs */
 dialog.modal {
     position: fixed;
@@ -1273,7 +1504,7 @@ dialog.modal {
     padding: 0;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-dialog);
     z-index: 1000;
 }
 
@@ -1342,6 +1573,7 @@ dialog::backdrop {
 .hidden { display: none !important; }
 .flex-1 { flex: 1; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }
+.mt-1 { margin-top: 0.25rem; }
 .mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 0.75rem; }
 .mt-4 { margin-top: 1rem; }
@@ -1361,11 +1593,15 @@ dialog::backdrop {
     overflow: hidden;
 }
 
-/* Responsive */
+/* ==========================================================================
+   14. RESPONSIVE BREAKPOINTS
+   ========================================================================== */
 @media (max-width: 1024px) {
     .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); }
     .dashboard-main-grid { grid-template-columns: 1fr; }
     .requests-layout { grid-template-columns: 1fr; }
+    .ratings-layout-grid { grid-template-columns: 1fr; }
+    .transaction-stats-grid { grid-template-columns: 1fr; }
     .filter-panel { position: static; }
 }
 
