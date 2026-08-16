@@ -38,9 +38,10 @@ const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
 let currentUser = null;
 let userData = null;
 let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
-let messagesInterval = null;
+let autoRefreshTimer = null;
 let activeConvId = null;
-let lastRenderedMessagesKey = '';
+let lastMessagesDigest = '';
+let lastConversationsDigest = '';
 
 // ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
@@ -85,7 +86,24 @@ function compressImage(file) {
   });
 }
 
-// ── Navigation (Preserves Active View on Page Refresh) ────────────────────────
+// ── Background Auto-Refresh Engine (Keeps All Screens In Sync) ────────────────
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(() => {
+    if (!userData) return;
+    if (activeSection === 'messages') {
+      pollMessages();
+    } else if (activeSection === 'dashboard') {
+      loadDashboard(true);
+    } else if (activeSection === 'applications') {
+      loadApplications(true);
+    } else if (activeSection === 'services') {
+      loadServices(true);
+    }
+  }, 4000);
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
 function navigateTo(section) {
   activeSection = section;
   sessionStorage.setItem('active_section', section);
@@ -100,12 +118,6 @@ function navigateTo(section) {
     b.classList.toggle('active', b.dataset.target === section);
   });
 
-  // Stop background chat polling if leaving messages view
-  if (section !== 'messages' && messagesInterval) {
-    clearInterval(messagesInterval);
-    messagesInterval = null;
-  }
-
   if (section === 'dashboard') loadDashboard();
   else if (section === 'services') loadServices();
   else if (section === 'applications') loadApplications();
@@ -117,7 +129,7 @@ function navigateTo(section) {
 }
 
 function showAuth(section = 'login') {
-  if (messagesInterval) { clearInterval(messagesInterval); messagesInterval = null; }
+  if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
   hide($('#app-views'));
   hide($('#loading-screen'));
   show($('#auth-views'));
@@ -131,14 +143,14 @@ function showApp() {
   hide($('#loading-screen'));
   show($('#app-views'));
 
-  // Admin nav button visibility
+  // Admin button visibility
   const adminNav = $('#nav-admin');
   if (adminNav) {
     if (userData?.email === ADMIN_EMAIL) show(adminNav);
     else hide(adminNav);
   }
 
-  // Set User Profile name & avatar in Sidebar footer (No "Pro" text)
+  // User Profile in Sidebar Footer & Header
   const userName = userData?.fullName || currentUser?.displayName || 'Student User';
   const userInitials = initials(userName);
   
@@ -150,8 +162,8 @@ function showApp() {
   const topAvatar = $('#dashboard-user-avatar');
   if (topAvatar) topAvatar.textContent = userInitials;
 
-  // Restore preserved view or default to dashboard
   navigateTo(activeSection || 'dashboard');
+  startAutoRefresh();
 }
 
 // ── Auth Listener ────────────────────────────────────────────────────────────
@@ -363,8 +375,8 @@ function setupForgotPassword() {
   $('#pending-logout-btn')?.addEventListener('click', (e) => { e.preventDefault(); signOut(auth); });
 }
 
-// ── Dashboard (Dynamic Real Data) ────────────────────────────────────────────
-async function loadDashboard() {
+// ── Dashboard (Dynamic Live Data) ────────────────────────────────────────────
+async function loadDashboard(isSilent = false) {
   const welcomeEl = $('#dashboard-welcome');
   if (welcomeEl) {
     const firstName = (userData?.fullName || 'Student').split(' ')[0];
@@ -381,7 +393,7 @@ async function loadDashboard() {
     const applications = appRes.data.applications || [];
     const conversations = convRes.data.conversations || [];
 
-    // Real dynamic stat calculations
+    // Real calculated statistics
     const activeApps = applications.filter(a => a.status === 'PENDING' || a.status === 'APPROVED').length;
     const completedJobs = applications.filter(a => a.status === 'COMPLETED').length;
     const totalEarnings = applications
@@ -393,12 +405,13 @@ async function loadDashboard() {
     $('#stat-earnings').textContent = peso(totalEarnings);
     $('#stat-rating').innerHTML = '5.0 <span class="text-amber">★</span>';
 
-    // Populate Recommended Services feed dynamically
+    // Populate Recommended Services
     const listEl = $('#dashboard-listings');
-    listEl.innerHTML = '';
+    if (!isSilent) listEl.innerHTML = '';
     if (requests.length === 0) {
       listEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1.5rem;">No services available right now. Be the first to post!</div>';
     } else {
+      listEl.innerHTML = '';
       const colors = ['job-icon-green', 'job-icon-purple', 'job-icon-cyan'];
       requests.slice(0, 3).forEach((r, idx) => {
         const item = document.createElement('div');
@@ -420,12 +433,13 @@ async function loadDashboard() {
       });
     }
 
-    // Populate Recent Applications feed dynamically
+    // Populate Recent Applications
     const recentAppsEl = $('#dashboard-recent-apps');
-    recentAppsEl.innerHTML = '';
+    if (!isSilent) recentAppsEl.innerHTML = '';
     if (applications.length === 0) {
       recentAppsEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1rem;">No applications submitted yet.</div>';
     } else {
+      recentAppsEl.innerHTML = '';
       applications.slice(0, 3).forEach(app => {
         const row = document.createElement('div');
         row.className = 'app-row-item';
@@ -442,12 +456,13 @@ async function loadDashboard() {
       });
     }
 
-    // Populate Recent Messages feed dynamically
+    // Populate Recent Messages
     const recentMsgEl = $('#dashboard-recent-messages');
-    recentMsgEl.innerHTML = '';
+    if (!isSilent) recentMsgEl.innerHTML = '';
     if (conversations.length === 0) {
       recentMsgEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1rem;">No active chats yet.</div>';
     } else {
+      recentMsgEl.innerHTML = '';
       conversations.slice(0, 2).forEach(conv => {
         const isPoster = conv.poster?.id === userData?.id;
         const otherUser = isPoster ? conv.applicant : conv.poster;
@@ -487,9 +502,9 @@ function setupDashboardLinks() {
 let allRequests = [];
 let requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest' };
 
-async function loadServices() {
+async function loadServices(isSilent = false) {
   const grid = $('#requests-grid');
-  grid.innerHTML = '<div class="loader"></div>';
+  if (!isSilent) grid.innerHTML = '<div class="loader"></div>';
   try {
     const [reqRes, appRes] = await Promise.all([
       listHelpRequests(dc),
@@ -499,7 +514,7 @@ async function loadServices() {
     const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest?.id));
     renderServices(allRequests, appliedIds);
   } catch (err) {
-    grid.innerHTML = '<div class="empty-state">Error loading services.</div>';
+    if (!isSilent) grid.innerHTML = '<div class="empty-state">Error loading services.</div>';
   }
 }
 
@@ -626,6 +641,7 @@ function setupNewRequestDialog() {
       $('#dialog-new-request').close();
       e.target.reset();
       loadServices();
+      loadDashboard(true);
     } catch (err) {
       showToast('Could not post job: ' + err.message, 'error');
     } finally {
@@ -661,6 +677,7 @@ function setupApplyDialog() {
       showToast(`Application sent! Proposed rate: ${peso($('#apply-amount').value)}`);
       $('#dialog-apply').close();
       loadServices();
+      loadDashboard(true);
     } catch (err) {
       showToast('Could not apply: ' + err.message, 'error');
     } finally {
@@ -673,14 +690,14 @@ function setupApplyDialog() {
 // ── Applications Hub ─────────────────────────────────────────────────────────
 let appTab = 'posted';
 
-async function loadApplications() {
-  if (appTab === 'posted') await loadPostedJobs();
-  else await loadMyApplications();
+async function loadApplications(isSilent = false) {
+  if (appTab === 'posted') await loadPostedJobs(isSilent);
+  else await loadMyApplications(isSilent);
 }
 
-async function loadPostedJobs() {
+async function loadPostedJobs(isSilent = false) {
   const container = $('#posted-jobs-list');
-  container.innerHTML = '<div class="loader"></div>';
+  if (!isSilent) container.innerHTML = '<div class="loader"></div>';
   try {
     const res = await listMyHelpRequestsWithApplications(dc, { userId: userData.id });
     const jobs = (res.data.helpRequests || []).filter(j => j.status === 'OPEN' || !j.status);
@@ -729,13 +746,13 @@ async function loadPostedJobs() {
       container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No pending candidates.</div>';
     }
   } catch (err) {
-    container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    if (!isSilent) container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
   }
 }
 
-async function loadMyApplications() {
+async function loadMyApplications(isSilent = false) {
   const container = $('#my-applications-list');
-  container.innerHTML = '<div class="loader"></div>';
+  if (!isSilent) container.innerHTML = '<div class="loader"></div>';
   try {
     const res = await listApplicationsByApplicant(dc, { userId: userData.id });
     const apps = (res.data.applications || []).filter(a => a.status !== 'REJECTED');
@@ -758,7 +775,7 @@ async function loadMyApplications() {
       container.appendChild(card);
     });
   } catch (err) {
-    container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    if (!isSilent) container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
   }
 }
 
@@ -778,6 +795,7 @@ async function handleApprove(application, job) {
         senderId: application.applicant.id,
         content: `📋 Application Offer Accepted\n\nProposed Rate: ${peso(application.priceOffer)}\nMessage: ${application.message}`
       });
+      activeConvId = convId;
     }
     showToast('Application approved! Chat created.');
     navigateTo('messages');
@@ -815,14 +833,13 @@ function setupApplicationTabs() {
   });
 }
 
-// ── Messages ─────────────────────────────────────────────────────────────────
+// ── Messages & Realtime Chat Engine ──────────────────────────────────────────
 let conversations = [];
 let reviewTarget = null;
 
-async function loadMessages() {
-  if (messagesInterval) { clearInterval(messagesInterval); messagesInterval = null; }
+async function loadMessages(isSilent = false) {
   const convList = $('#conversations-list');
-  convList.innerHTML = '<div class="loader"></div>';
+  if (!isSilent) convList.innerHTML = '<div class="loader"></div>';
   try {
     const res = await listConversations(dc, { userId: userData.id });
     conversations = (res.data.conversations || []).filter(c =>
@@ -837,12 +854,16 @@ async function loadMessages() {
       $('#chat-panel').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No conversations yet.</div>';
     }
   } catch (err) {
-    convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
+    if (!isSilent) convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
   }
 }
 
 function renderConversationList() {
   const convList = $('#conversations-list');
+  const digest = conversations.map(c => c.id).join(',');
+  if (digest === lastConversationsDigest && convList.children.length > 0) return;
+  lastConversationsDigest = digest;
+
   convList.innerHTML = '';
   conversations.forEach(conv => {
     const isPoster = conv.poster?.id === userData?.id;
@@ -863,9 +884,8 @@ function renderConversationList() {
 
 async function selectConversation(convId) {
   activeConvId = convId;
-  lastRenderedMessagesKey = '';
+  lastMessagesDigest = '';
   renderConversationList();
-  if (messagesInterval) { clearInterval(messagesInterval); messagesInterval = null; }
 
   const conv = conversations.find(c => c.id === convId);
   if (!conv) return;
@@ -913,25 +933,25 @@ async function selectConversation(convId) {
     }
   });
 
-  await loadChatMessages(convId, true);
-  messagesInterval = setInterval(() => loadChatMessages(convId, false), 3000);
+  await pollMessages(true);
 }
 
-async function loadChatMessages(convId, isInitial = false) {
+// Background poller for chat messages without flickering
+async function pollMessages(forceInitial = false) {
+  if (!activeConvId) return;
   const msgArea = $('#chat-messages');
   if (!msgArea) return;
 
   try {
-    const res = await listMessages(dc, { conversationId: convId });
+    const res = await listMessages(dc, { conversationId: activeConvId });
     const messages = res.data.messages || [];
-    const newKey = messages.map(m => m.id).join(',');
+    const newDigest = messages.map(m => `${m.id}-${m.createdAt}`).join('|');
 
-    // If messages haven't changed, don't wipe DOM (prevents visual refresh jump)
-    if (newKey === lastRenderedMessagesKey && !isInitial) {
+    if (newDigest === lastMessagesDigest && !forceInitial) {
       return;
     }
 
-    lastRenderedMessagesKey = newKey;
+    lastMessagesDigest = newDigest;
     msgArea.innerHTML = '';
     
     if (messages.length === 0) {
@@ -951,7 +971,7 @@ async function loadChatMessages(convId, isInitial = false) {
 
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch (err) {
-    console.error('Messages load error:', err);
+    console.error('Chat poll error:', err);
   }
 }
 
@@ -963,12 +983,25 @@ function setupChat() {
     const content = input.value.trim();
     if (!content || !activeConvId) return;
     input.value = '';
+
+    // Optimistic message append for 0ms instant UI update
+    const msgArea = $('#chat-messages');
+    const emptyState = msgArea.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+
+    const tempDiv = document.createElement('div');
+    tempDiv.className = 'message outgoing';
+    tempDiv.innerHTML = `<div class="message-bubble">${content}</div>`;
+    msgArea.appendChild(tempDiv);
+    msgArea.scrollTop = msgArea.scrollHeight;
+
     sendBtn.disabled = true;
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      await loadChatMessages(activeConvId, true);
+      await pollMessages(true);
     } catch (err) {
       showToast('Error sending message', 'error');
+      tempDiv.remove();
     } finally {
       sendBtn.disabled = false;
       input.focus();
@@ -1207,7 +1240,7 @@ function setupMobileSidebar() {
 function setupLogout() {
   $('#btn-logout')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    if (messagesInterval) { clearInterval(messagesInterval); messagesInterval = null; }
+    if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     sessionStorage.removeItem('active_section');
     await signOut(auth);
   });
