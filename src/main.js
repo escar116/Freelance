@@ -937,12 +937,14 @@ function setupReviewDialog() {
 // ── Profile (Matches Screenshot 1 Layout) ────────────────────────────────────
 async function loadProfile() {
   if (!userData) return;
-  $('#profile-avatar').textContent = initials(userData.fullName);
-  $('#profile-name').textContent = userData.fullName || 'User';
+  $('#profile-avatar').textContent = initials(userData.fullName || 'CJ');
+  $('#profile-name').textContent = (userData.fullName || 'charles jan paraggua').toLowerCase();
   $('#profile-program-sub').textContent = `Computer Engineering · ${userData.preferredRole || 'Student'}`;
   $('#profile-faculty').textContent = userData.facultyReference || 'Not provided';
   $('#profile-student-id').textContent = userData.studentId || '—';
   $('#profile-verification').textContent = userData.verificationStatus === 'verified' ? 'Verified' : 'Pending';
+  $('#stat-completed-projects').textContent = '0';
+  $('#stat-reviews-count').textContent = '0';
 
   try {
     const res = await listApplicationsByApplicant(dc, { userId: userData.id });
