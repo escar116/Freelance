@@ -1,10 +1,14 @@
 // ── Imports ──────────────────────────────────────────────────────────────────
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { 
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, 
+  signOut, sendPasswordResetEmail 
+} from 'firebase/auth';
 import { getDataConnect } from 'firebase/data-connect';
 import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
-  listApplicationsByApplicant, listApplicationsForMyRequests, listMyHelpRequestsWithApplications,
+  listApplicationsByApplicant, listMyHelpRequestsWithApplications,
   createApplication, updateApplicationStatus, updateHelpRequestStatus,
   createConversation, createMessage, listConversations, listMessages,
   listPendingUsers, updateUserStatus, terminateJob, completeJob, createReview
@@ -29,15 +33,6 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
-const CATEGORIES = [
-  "Software Development", "Programming", "Embedded Systems",
-  "PCB & Hardware Design", "IoT", "AI & Data", "UI/UX",
-  "Graphic Design", "Technical Documentation", "CAD & 3D Modeling"
-];
-const FACULTY = [
-  "Engr. Marites Bautista", "Engr. Rafael Domingo",
-  "Engr. Liza Fernandez", "Engr. Noel Villanueva", "Dr. Anna Salcedo"
-];
 
 // ── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;    // Firebase Auth user
@@ -47,7 +42,7 @@ let messagesInterval = null;
 let activeConvId = null;
 let isDarkTheme = true;
 
-// ── Utility ──────────────────────────────────────────────────────────────────
+// ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 const peso = (n) => '₱' + Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits: 0 });
@@ -57,11 +52,15 @@ const show = (el) => el?.classList.remove('hidden');
 
 function showToast(message, type = 'success') {
   const container = $('#toast-container');
+  if (!container) return;
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.textContent = message;
   container.appendChild(toast);
-  setTimeout(() => { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 3000);
+  setTimeout(() => {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 function compressImage(file) {
@@ -87,17 +86,19 @@ function compressImage(file) {
   });
 }
 
-// ── Section Navigation ───────────────────────────────────────────────────────
+// ── Navigation ───────────────────────────────────────────────────────────────
 function navigateTo(section) {
   activeSection = section;
   $$('.content-section').forEach(s => s.classList.add('hidden'));
   const target = $(`#section-${section}`);
-  if (target) { target.classList.remove('hidden'); target.classList.add('content-section'); }
-  $$('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (target) {
+    target.classList.remove('hidden');
+  }
+  $$('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
   const activeBtn = $(`.nav-btn[data-target="${section}"]`);
   if (activeBtn) activeBtn.classList.add('active');
 
-  // Load section data
+  // Load section specific data
   if (section === 'dashboard') loadDashboard();
   else if (section === 'requests') loadRequests();
   else if (section === 'applications') loadApplications();
@@ -110,7 +111,7 @@ function showAuth(section = 'login') {
   hide($('#app-views'));
   hide($('#loading-screen'));
   show($('#auth-views'));
-  $$('#auth-views .content-section').forEach(s => s.classList.add('hidden'));
+  $$('#auth-views section').forEach(s => s.classList.add('hidden'));
   const target = $(`#section-${section}`);
   if (target) target.classList.remove('hidden');
 }
@@ -119,19 +120,24 @@ function showApp() {
   hide($('#auth-views'));
   hide($('#loading-screen'));
   show($('#app-views'));
-  // Show/hide admin nav
+
+  // Admin visibility
   const adminNav = $('#nav-admin');
   if (adminNav) {
     if (userData?.email === ADMIN_EMAIL) show(adminNav);
     else hide(adminNav);
   }
-  // Set user name in sidebar
+
+  // Sidebar info
   const nameEl = $('#sidebar-user-name');
   if (nameEl) nameEl.textContent = userData?.fullName || currentUser?.displayName || 'User';
+  const avatarEl = $('#sidebar-user-avatar');
+  if (avatarEl) avatarEl.textContent = initials(userData?.fullName || currentUser?.displayName || 'U');
+
   navigateTo('dashboard');
 }
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// ── Auth Listener ────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -145,12 +151,11 @@ onAuthStateChanged(auth, async (user) => {
           showApp();
         }
       } else {
-        // User has Firebase auth but no PostgreSQL record
         userData = null;
         showAuth('register');
       }
     } catch (err) {
-      console.error('Error fetching user:', err);
+      console.error('Error fetching user from Data Connect:', err);
       userData = null;
       showAuth('register');
     }
@@ -177,8 +182,12 @@ function setupLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      errorEl.textContent = err.message; show(errorEl);
-    } finally { btn.disabled = false; btn.textContent = 'Log in'; }
+      errorEl.textContent = err.message || 'Invalid email or password.';
+      show(errorEl);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    }
   });
 
   googleBtn?.addEventListener('click', async () => {
@@ -188,11 +197,12 @@ function setupLogin() {
       const res = await getUser(dc, { id: result.user.uid });
       if (!res.data.user) {
         await signOut(auth);
-        errorEl.textContent = 'Account not found. Please sign up first.';
+        errorEl.textContent = 'Account not found. Please register first.';
         show(errorEl);
       }
     } catch (err) {
-      errorEl.textContent = err.message; show(errorEl);
+      errorEl.textContent = err.message || 'Google login failed.';
+      show(errorEl);
     }
   });
 
@@ -210,11 +220,15 @@ function setupRegister() {
   const certPreview = $('#register-cert-preview');
   const certDropzone = $('#register-cert-dropzone');
 
+  certDropzone?.addEventListener('click', () => certInput?.click());
+
   certInput?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      certPreview.src = url; show(certPreview); hide(certDropzone);
+      certPreview.src = url;
+      show(certPreview);
+      certDropzone.querySelector('p').textContent = `Selected: ${file.name}`;
     }
   });
 
@@ -224,20 +238,20 @@ function setupRegister() {
       const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid });
       if (res.data.user) {
-        // Already registered, just redirect
+        // Already registered
         return;
       }
       googleUser = result.user;
-      // Hide email/password fields, show google linked status
       hide($('#register-email-group'));
-      hide($('#register-password-group'));
-      hide($('#register-confirm-group'));
+      hide($('#register-password-row'));
+      hide($('#register-divider'));
+      hide(googleBtn);
       show($('#register-google-status'));
       $('#register-google-email').textContent = googleUser.email;
       $('#register-fullname').value = googleUser.displayName || '';
-      hide(googleBtn);
     } catch (err) {
-      errorEl.textContent = err.message; show(errorEl);
+      errorEl.textContent = err.message || 'Google link failed.';
+      show(errorEl);
     }
   });
 
@@ -247,10 +261,15 @@ function setupRegister() {
     const fullName = $('#register-fullname').value.trim();
     const studentId = $('#register-studentid').value.trim();
     const gender = $('#register-gender').value;
+    const role = $('#register-role').value;
     const faculty = $('#register-faculty').value;
     const btn = $('#register-submit-btn');
 
-    if (!fullName) { errorEl.textContent = 'Please enter your full name.'; show(errorEl); return; }
+    if (!fullName || !studentId) {
+      errorEl.textContent = 'Please complete all required fields.';
+      show(errorEl);
+      return;
+    }
 
     btn.disabled = true; btn.textContent = 'Creating account...';
 
@@ -263,7 +282,18 @@ function setupRegister() {
         email = $('#register-email').value.trim();
         const password = $('#register-password').value;
         const confirm = $('#register-confirm-password').value;
-        if (password !== confirm) { errorEl.textContent = 'Passwords do not match.'; show(errorEl); btn.disabled = false; btn.textContent = 'Create account'; return; }
+        if (!email || !password) {
+          errorEl.textContent = 'Please enter an email and password.';
+          show(errorEl);
+          btn.disabled = false; btn.textContent = 'Create account';
+          return;
+        }
+        if (password !== confirm) {
+          errorEl.textContent = 'Passwords do not match.';
+          show(errorEl);
+          btn.disabled = false; btn.textContent = 'Create account';
+          return;
+        }
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         uid = cred.user.uid;
       }
@@ -271,7 +301,9 @@ function setupRegister() {
       // Compress certificate
       let certUrl = 'none';
       const certFile = certInput?.files?.[0];
-      if (certFile) { certUrl = await compressImage(certFile); }
+      if (certFile) {
+        certUrl = await compressImage(certFile);
+      }
 
       await createUser(dc, {
         id: uid, email, fullName,
@@ -283,8 +315,12 @@ function setupRegister() {
 
       showAuth('pending');
     } catch (err) {
-      errorEl.textContent = err.message; show(errorEl);
-    } finally { btn.disabled = false; btn.textContent = 'Create account'; }
+      errorEl.textContent = err.message || 'Registration failed.';
+      show(errorEl);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
   });
 
   $('#register-link-login')?.addEventListener('click', (e) => { e.preventDefault(); showAuth('login'); });
@@ -300,11 +336,14 @@ function setupForgotPassword() {
     btn.disabled = true;
     try {
       await sendPasswordResetEmail(auth, email);
-      showToast('Password reset email sent! Check your inbox.');
-    } catch { /* Always show success */ }
-    finally { btn.disabled = false; showToast('If an account exists, a reset link has been sent.'); }
+    } catch { /* Ignore */ }
+    finally {
+      btn.disabled = false;
+      showToast('If an account exists, a reset link has been sent.');
+    }
   });
   $('#forgot-link-login')?.addEventListener('click', (e) => { e.preventDefault(); showAuth('login'); });
+  $('#pending-logout-btn')?.addEventListener('click', () => signOut(auth));
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
@@ -328,7 +367,6 @@ async function loadDashboard() {
     $('#stat-earnings').textContent = peso(0);
     $('#stat-rating').textContent = '0.0 ★';
 
-    // Render recent listings
     const listEl = $('#dashboard-listings');
     listEl.innerHTML = '';
     const recent = requests.slice(0, 6);
@@ -340,7 +378,7 @@ async function loadDashboard() {
         row.className = 'listing-row';
         row.innerHTML = `
           <span class="listing-title">${r.title}</span>
-          <span class="badge">${r.category || 'General'}</span>
+          <span class="badge badge-normal">${r.category || 'General'}</span>
           <span class="listing-price">${peso(r.budget)}</span>
         `;
         row.addEventListener('click', () => navigateTo('requests'));
@@ -348,7 +386,7 @@ async function loadDashboard() {
       });
     }
   } catch (err) {
-    console.error('Dashboard error:', err);
+    console.error('Dashboard load error:', err);
   }
 }
 
@@ -365,7 +403,7 @@ async function loadRequests() {
       userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }) : { data: { applications: [] } }
     ]);
     allRequests = reqRes.data.helpRequests || [];
-    const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest.id));
+    const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest?.id));
     renderRequests(allRequests, appliedIds);
   } catch (err) {
     grid.innerHTML = '<div class="empty-state">Error loading requests.</div>';
@@ -375,7 +413,6 @@ async function loadRequests() {
 
 function renderRequests(requests, appliedIds = new Set()) {
   const grid = $('#requests-grid');
-  // Apply filters
   let filtered = requests.filter(r => {
     if (requestFilters.q) {
       const hay = `${r.title} ${r.description} ${r.category}`.toLowerCase();
@@ -385,23 +422,25 @@ function renderRequests(requests, appliedIds = new Set()) {
     if (requestFilters.maxPrice && Number(r.budget) > requestFilters.maxPrice) return false;
     return true;
   });
-  // Sort
+
   if (requestFilters.sort === 'price_asc') filtered.sort((a, b) => a.budget - b.budget);
   else if (requestFilters.sort === 'price_desc') filtered.sort((a, b) => b.budget - a.budget);
 
-  $('#requests-count').textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+  $('#requests-count').textContent = `${filtered.length} request${filtered.length !== 1 ? 's' : ''} available`;
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
-    grid.innerHTML = '<div class="empty-state">No requests found.</div>';
+    grid.innerHTML = '<div class="empty-state">No matching requests found.</div>';
     return;
   }
+
   filtered.forEach(r => {
     const isMine = r.requester?.id === userData?.id;
     const hasApplied = appliedIds.has(r.id);
     const card = document.createElement('article');
     card.className = 'request-card';
     const urgencyClass = r.urgency === 'Urgent' ? 'badge-urgent' : r.urgency === 'Low' ? 'badge-low' : 'badge-normal';
+
     card.innerHTML = `
       <div class="request-card-header">
         <div class="avatar avatar-sm">${initials(r.requester?.fullName || 'S')}</div>
@@ -409,22 +448,23 @@ function renderRequests(requests, appliedIds = new Set()) {
         <span class="badge ${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
       </div>
       <h3 class="request-card-title">${r.title}</h3>
-      <p class="request-card-desc line-clamp-3">${r.description}</p>
+      <p class="request-card-desc line-clamp-3">${r.description || 'No description provided.'}</p>
       <div class="request-card-meta">
         <span class="badge">${r.category || 'General'}</span>
         ${r.deadline ? `<span class="request-card-deadline">📅 Due ${r.deadline}</span>` : ''}
       </div>
       <div class="request-card-footer">
         <div>
-          <small class="muted">Budget</small>
+          <small class="text-muted">Budget</small>
           <div class="request-card-price">${peso(r.budget)}</div>
         </div>
         <button class="btn ${isMine ? 'btn-ghost' : hasApplied ? 'btn-outline' : 'btn-primary'} btn-sm apply-btn"
-                ${isMine || hasApplied ? 'disabled' : ''} data-request-id="${r.id}">
+                ${isMine || hasApplied ? 'disabled' : ''}>
           ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Apply'}
         </button>
       </div>
     `;
+
     if (!isMine && !hasApplied) {
       card.querySelector('.apply-btn').addEventListener('click', () => openApplyDialog(r));
     }
@@ -433,13 +473,13 @@ function renderRequests(requests, appliedIds = new Set()) {
 }
 
 function setupRequestFilters() {
-  $('#filter-search')?.addEventListener('input', (e) => { requestFilters.q = e.target.value; loadRequests(); });
-  $('#filter-category')?.addEventListener('change', (e) => { requestFilters.category = e.target.value; loadRequests(); });
-  $('#filter-sort')?.addEventListener('change', (e) => { requestFilters.sort = e.target.value; loadRequests(); });
+  $('#filter-search')?.addEventListener('input', (e) => { requestFilters.q = e.target.value; renderRequests(allRequests); });
+  $('#filter-category')?.addEventListener('change', (e) => { requestFilters.category = e.target.value; renderRequests(allRequests); });
+  $('#filter-sort')?.addEventListener('change', (e) => { requestFilters.sort = e.target.value; renderRequests(allRequests); });
   $('#filter-budget')?.addEventListener('input', (e) => {
     requestFilters.maxPrice = Number(e.target.value);
     $('#filter-budget-value').textContent = peso(requestFilters.maxPrice);
-    loadRequests();
+    renderRequests(allRequests);
   });
 }
 
@@ -463,18 +503,22 @@ function setupNewRequestDialog() {
         urgency: $('#nr-urgency').value || null,
         deadline: $('#nr-deadline').value || null
       });
-      showToast('Request posted!');
+      showToast('Request posted successfully!');
       $('#dialog-new-request').close();
       e.target.reset();
       loadRequests();
     } catch (err) {
       showToast('Could not post request: ' + err.message, 'error');
-    } finally { btn.disabled = false; btn.textContent = 'Post request'; }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Post request';
+    }
   });
 }
 
 // ── Apply Dialog ─────────────────────────────────────────────────────────────
 let applyTarget = null;
+
 function openApplyDialog(request) {
   applyTarget = request;
   $('#apply-job-title').textContent = request.title;
@@ -500,11 +544,14 @@ function setupApplyDialog() {
       loadRequests();
     } catch (err) {
       showToast('Could not apply: ' + err.message, 'error');
-    } finally { btn.disabled = false; btn.textContent = 'Submit Application'; }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
   });
 }
 
-// ── Applications ─────────────────────────────────────────────────────────────
+// ── Applications Hub ─────────────────────────────────────────────────────────
 let appTab = 'posted';
 
 async function loadApplications() {
@@ -544,7 +591,7 @@ async function loadPostedJobs() {
           <div class="avatar avatar-sm">${initials(app.applicant?.fullName || '')}</div>
           <div class="candidate-info">
             <strong>${app.applicant?.fullName || 'Applicant'}</strong>
-            <small class="muted">${app.applicant?.studentId || ''}</small>
+            <small class="text-muted ml-2">${app.applicant?.studentId || ''}</small>
             <div class="candidate-message">"${app.message}"</div>
           </div>
           <div class="candidate-price">${peso(app.priceOffer)}</div>
@@ -562,7 +609,10 @@ async function loadPostedJobs() {
     if (container.children.length === 0) {
       container.innerHTML = '<div class="empty-state">No pending candidates.</div>';
     }
-  } catch (err) { container.innerHTML = '<div class="empty-state">Error loading.</div>'; console.error(err); }
+  } catch (err) {
+    container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    console.error(err);
+  }
 }
 
 async function loadMyApplications() {
@@ -573,7 +623,7 @@ async function loadMyApplications() {
     const apps = (res.data.applications || []).filter(a => a.status !== 'REJECTED');
     container.innerHTML = '';
     if (apps.length === 0) {
-      container.innerHTML = '<div class="empty-state">No applications yet.</div>';
+      container.innerHTML = '<div class="empty-state">No applications submitted yet.</div>';
       return;
     }
     apps.forEach(app => {
@@ -581,15 +631,18 @@ async function loadMyApplications() {
       card.className = 'application-card';
       const statusClass = app.status === 'APPROVED' ? 'badge-approved' : app.status === 'COMPLETED' ? 'badge-completed' : 'badge-pending';
       card.innerHTML = `
-        <div class="application-card-header">
+        <div>
           <h4>${app.helpRequest?.title || 'Job'}</h4>
-          <span class="badge ${statusClass}">${app.status === 'PENDING' ? '⏳ Pending Review' : app.status === 'APPROVED' ? '✅ Approved' : app.status}</span>
+          <small class="text-muted">Your offer: ${peso(app.priceOffer)}</small>
         </div>
-        <div class="application-card-offer">Your offer: ${peso(app.priceOffer)}</div>
+        <span class="badge ${statusClass}">${app.status === 'PENDING' ? '⏳ Pending Review' : app.status === 'APPROVED' ? '✅ Approved' : app.status}</span>
       `;
       container.appendChild(card);
     });
-  } catch (err) { container.innerHTML = '<div class="empty-state">Error loading.</div>'; console.error(err); }
+  } catch (err) {
+    container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    console.error(err);
+  }
 }
 
 async function handleApprove(application, job) {
@@ -606,7 +659,7 @@ async function handleApprove(application, job) {
       await createMessage(dc, {
         conversationId: convId,
         senderId: application.applicant.id,
-        content: `📋 Application Offer\n\nPrice: ${peso(application.priceOffer)}\nMessage: ${application.message}`
+        content: `📋 Application Offer Accepted\n\nPrice: ${peso(application.priceOffer)}\nMessage: ${application.message}`
       });
     }
     showToast('Application approved! Chat created.');
@@ -621,7 +674,9 @@ async function handleReject(application) {
     await updateApplicationStatus(dc, { id: application.id, status: 'REJECTED' });
     showToast('Application rejected.');
     loadApplications();
-  } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  }
 }
 
 function setupApplicationTabs() {
@@ -630,8 +685,13 @@ function setupApplicationTabs() {
       appTab = btn.dataset.tab;
       $$('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      if (appTab === 'posted') { show($('#posted-jobs-list')); hide($('#my-applications-list')); }
-      else { hide($('#posted-jobs-list')); show($('#my-applications-list')); }
+      if (appTab === 'posted') {
+        show($('#posted-jobs-list'));
+        hide($('#my-applications-list'));
+      } else {
+        hide($('#posted-jobs-list'));
+        show($('#my-applications-list'));
+      }
       loadApplications();
     });
   });
@@ -658,7 +718,10 @@ async function loadMessages() {
     } else {
       $('#chat-panel').innerHTML = '<div class="empty-state">No conversations yet.</div>';
     }
-  } catch (err) { convList.innerHTML = '<div class="empty-state">Error loading.</div>'; console.error(err); }
+  } catch (err) {
+    convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
+    console.error(err);
+  }
 }
 
 function renderConversationList() {
@@ -671,9 +734,9 @@ function renderConversationList() {
     item.className = `conversation-item ${conv.id === activeConvId ? 'active' : ''}`;
     item.innerHTML = `
       <div class="avatar avatar-sm">${initials(otherName || '')}</div>
-      <div class="conv-info">
-        <strong class="truncate">${otherName || 'User'}</strong>
-        <small class="muted truncate">${conv.application?.helpRequest?.title || ''}</small>
+      <div class="conv-info flex-1 truncate">
+        <strong class="truncate block">${otherName || 'User'}</strong>
+        <small class="text-muted truncate block">${conv.application?.helpRequest?.title || ''}</small>
       </div>
     `;
     item.addEventListener('click', () => selectConversation(conv.id));
@@ -683,7 +746,7 @@ function renderConversationList() {
 
 async function selectConversation(convId) {
   activeConvId = convId;
-  renderConversationList(); // Update active state
+  renderConversationList();
   if (messagesInterval) clearInterval(messagesInterval);
 
   const conv = conversations.find(c => c.id === convId);
@@ -692,19 +755,21 @@ async function selectConversation(convId) {
   const isPoster = conv.poster?.id === userData?.id;
   const otherUser = isPoster ? conv.applicant : conv.poster;
 
-  // Render chat header
   const chatHeader = $('#chat-header-content');
   chatHeader.innerHTML = `
-    <div class="avatar avatar-sm">${initials(otherUser?.fullName || '')}</div>
-    <div class="chat-header-info">
-      <strong>${otherUser?.fullName || 'User'}</strong>
-      <small class="muted">${conv.application?.helpRequest?.title || ''}</small>
+    <div class="flex items-center gap-3">
+      <div class="avatar avatar-sm">${initials(otherUser?.fullName || '')}</div>
+      <div class="chat-header-info">
+        <strong>${otherUser?.fullName || 'User'}</strong>
+        <small class="text-muted">${conv.application?.helpRequest?.title || ''}</small>
+      </div>
     </div>
     <div class="chat-header-actions">
       <button class="btn btn-outline btn-sm btn-danger" id="btn-terminate">Terminate</button>
       ${isPoster ? '<button class="btn btn-success btn-sm" id="btn-complete">Complete</button>' : ''}
     </div>
   `;
+
   $('#btn-terminate')?.addEventListener('click', async () => {
     if (!confirm('Are you sure you want to terminate this job?')) return;
     try {
@@ -712,19 +777,22 @@ async function selectConversation(convId) {
       showToast('Job terminated.');
       activeConvId = null;
       loadMessages();
-    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
   });
+
   $('#btn-complete')?.addEventListener('click', async () => {
     try {
       await completeJob(dc, { applicationId: conv.application.id, helpRequestId: conv.application.helpRequest.id });
       showToast('Job completed!');
       reviewTarget = { convId, otherUser };
       $('#dialog-review').showModal();
-    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
   });
 
-  // Show chat panel on mobile
-  show($('#chat-panel'));
   $('#messages-container')?.classList.add('chat-open');
 
   await loadChatMessages(convId);
@@ -748,7 +816,9 @@ async function loadChatMessages(convId) {
       msgArea.appendChild(div);
     });
     msgArea.scrollTop = msgArea.scrollHeight;
-  } catch (err) { console.error('Messages error:', err); }
+  } catch (err) {
+    console.error('Messages load error:', err);
+  }
 }
 
 function setupChat() {
@@ -763,14 +833,22 @@ function setupChat() {
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
       await loadChatMessages(activeConvId);
-    } catch (err) { showToast('Error sending message', 'error'); }
-    finally { sendBtn.disabled = false; input.focus(); }
+    } catch (err) {
+      showToast('Error sending message', 'error');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
   };
 
   sendBtn?.addEventListener('click', send);
-  input?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
 
-  // Mobile back button
   $('#chat-back-btn')?.addEventListener('click', () => {
     $('#messages-container')?.classList.remove('chat-open');
   });
@@ -778,7 +856,7 @@ function setupChat() {
 
 // ── Review Dialog ────────────────────────────────────────────────────────────
 function setupReviewDialog() {
-  let selectedRating = 0;
+  let selectedRating = 5;
   $$('#review-stars .star').forEach(star => {
     star.addEventListener('click', () => {
       selectedRating = Number(star.dataset.value);
@@ -802,7 +880,9 @@ function setupReviewDialog() {
       $('#dialog-review').close();
       activeConvId = null;
       loadMessages();
-    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
   });
 }
 
@@ -816,22 +896,27 @@ async function loadProfile() {
   $('#profile-student-id').textContent = userData.studentId || 'N/A';
   $('#profile-gender').textContent = userData.gender || 'N/A';
   $('#profile-faculty').textContent = userData.facultyReference || 'N/A';
-  $('#profile-verification').textContent = userData.verificationStatus || 'unverified';
+
   const vBadge = $('#profile-verification');
+  vBadge.textContent = userData.verificationStatus || 'unverified';
   vBadge.className = `badge ${userData.verificationStatus === 'verified' ? 'badge-approved' : 'badge-pending'}`;
 
-  // Load application count
   try {
     const res = await listApplicationsByApplicant(dc, { userId: userData.id });
     $('#profile-stat-applications').textContent = (res.data.applications || []).length;
-  } catch { $('#profile-stat-applications').textContent = '0'; }
+  } catch {
+    $('#profile-stat-applications').textContent = '0';
+  }
 }
 
 function setupEditProfile() {
   $('#btn-edit-profile')?.addEventListener('click', () => {
-    $('#edit-bio').value = userData?.bio || '';
-    $('#edit-availability').value = userData?.availability || 'Available';
     $('#dialog-edit-profile').showModal();
+  });
+  $('#edit-profile-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Profile updated locally.');
+    $('#dialog-edit-profile').close();
   });
 }
 
@@ -859,13 +944,13 @@ async function loadAdmin() {
           <div class="avatar">${initials(u.fullName)}</div>
           <div>
             <strong>${u.fullName}</strong>
-            <div class="muted">${u.email}</div>
-            <small class="muted">ID: ${u.studentId || 'N/A'} • Faculty: ${u.facultyReference || 'N/A'}</small>
+            <div class="text-muted">${u.email}</div>
+            <small class="text-muted">ID: ${u.studentId || 'N/A'} • Faculty: ${u.facultyReference || 'N/A'}</small>
           </div>
         </div>
         ${u.certificateUrl && u.certificateUrl !== 'none'
           ? `<img class="admin-cert-thumb" src="${u.certificateUrl}" alt="Certificate" />`
-          : '<span class="muted">No certificate</span>'}
+          : '<span class="text-muted">No certificate</span>'}
         <div class="admin-card-actions">
           <button class="btn btn-outline btn-sm btn-danger reject-btn">Reject</button>
           <button class="btn btn-success btn-sm approve-btn">Approve</button>
@@ -887,19 +972,30 @@ async function loadAdmin() {
       });
       container.appendChild(card);
     });
-  } catch (err) { container.innerHTML = '<div class="empty-state">Error loading.</div>'; console.error(err); }
+  } catch (err) {
+    container.innerHTML = '<div class="empty-state">Error loading pending users.</div>';
+    console.error(err);
+  }
 }
 
 // ── Theme Toggle ─────────────────────────────────────────────────────────────
 function setupTheme() {
   const saved = localStorage.getItem('theme');
-  if (saved === 'light') { document.body.classList.add('light-theme'); isDarkTheme = false; }
+  if (saved === 'light') {
+    document.body.classList.add('light-theme');
+    isDarkTheme = false;
+    $('#theme-icon').textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-theme');
+    isDarkTheme = true;
+    $('#theme-icon').textContent = '🌙';
+  }
 
   $('#theme-toggle')?.addEventListener('click', () => {
     isDarkTheme = !isDarkTheme;
     document.body.classList.toggle('light-theme', !isDarkTheme);
     localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-    $('#theme-icon').textContent = isDarkTheme ? '☀️' : '🌙';
+    $('#theme-icon').textContent = isDarkTheme ? '🌙' : '☀️';
   });
 }
 
@@ -911,12 +1007,11 @@ function setupLogout() {
   });
 }
 
-// ── Dialog Close Buttons ─────────────────────────────────────────────────────
+// ── Dialog Helpers ───────────────────────────────────────────────────────────
 function setupDialogCloseButtons() {
-  $$('dialog .dialog-close-btn').forEach(btn => {
-    btn.addEventListener('click', () => btn.closest('dialog').close());
+  $$('.dialog-close-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('dialog')?.close());
   });
-  // Close dialogs on backdrop click
   $$('dialog').forEach(dialog => {
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) dialog.close();
@@ -936,11 +1031,10 @@ function setupMobileSidebar() {
   };
   $('#sidebar-overlay')?.addEventListener('click', closeSidebar);
   $('#sidebar-close-btn')?.addEventListener('click', closeSidebar);
-  // Close sidebar on nav click (mobile)
   $$('.nav-btn').forEach(btn => btn.addEventListener('click', closeSidebar));
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
+// ── Initialization ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setupLogin();
   setupRegister();
@@ -957,8 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDialogCloseButtons();
   setupMobileSidebar();
 
-  // Navigation buttons
-  $$('.nav-btn').forEach(btn => {
+  $$('.nav-btn[data-target]').forEach(btn => {
     btn.addEventListener('click', () => navigateTo(btn.dataset.target));
   });
 });
