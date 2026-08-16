@@ -3,22 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WORK 4 A BIT - Freelance Job Board</title>
+    <title>WORK 4 A BIT - Campus Technical Marketplace</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
+    <!-- ==============================================
+         BACKGROUND AMBIENT CIRCUIT & BLUEPRINT DECOR
+         ============================================== -->
+    <div class="ambient-background" aria-hidden="true">
+        <!-- Blueprint Grid Backdrop -->
+        <div class="blueprint-grid"></div>
+
+        <!-- Top Right PCB Traces -->
+        <svg class="decor-pcb decor-pcb-top" viewBox="0 0 400 240" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M0 40h90l30-30h120l30 30h130" />
+            <path d="M0 120h60l40 40h80l30-30h190" />
+            <path d="M20 220h140l40-40h200" />
+            <path d="M300 10v60l40 40v90" />
+            <circle cx="90" cy="40" r="3.2" fill="currentColor" />
+            <circle cx="240" cy="40" r="3.2" fill="currentColor" />
+            <circle cx="100" cy="160" r="3.2" fill="currentColor" />
+            <circle cx="180" cy="130" r="3.2" fill="currentColor" />
+            <circle cx="200" cy="180" r="3.2" fill="currentColor" />
+            <circle cx="340" cy="110" r="3.2" fill="currentColor" />
+            <circle cx="340" cy="200" r="3.2" fill="currentColor" />
+        </svg>
+
+        <!-- Hexagon Outline Clusters -->
+        <svg class="decor-hex decor-hex-1" viewBox="0 0 80 50" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M12 1.5 22 7v11L12 23.5 2 18V7z" transform="translate(4 12)" />
+            <path d="M12 1.5 22 7v11L12 23.5 2 18V7z" transform="translate(26 2)" />
+            <path d="M12 1.5 22 7v11L12 23.5 2 18V7z" transform="translate(26 24)" />
+            <path d="M12 1.5 22 7v11L12 23.5 2 18V7z" transform="translate(48 12)" />
+        </svg>
+
+        <!-- Right Side Vertical Traces -->
+        <div class="decor-side-traces">
+            <svg class="w-full h-full" fill="none" stroke="currentColor">
+                <defs>
+                    <pattern id="side-trace-pattern" width="44" height="120" patternUnits="userSpaceOnUse">
+                        <path d="M22 0v120" stroke-width="1" />
+                        <path d="M22 60h18M22 30h10M22 90h10" stroke-width="1" />
+                        <circle cx="22" cy="60" r="3" fill="currentColor" />
+                        <circle cx="22" cy="30" r="2" fill="currentColor" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#side-trace-pattern)" />
+            </svg>
+        </div>
+    </div>
 
     <!-- ==============================================
          1. FULLPAGE LOADING SCREEN
          ============================================== -->
     <div id="loading-screen" class="loading-overlay">
         <div class="spinner"></div>
-        <p>Loading WORK 4 A BIT...</p>
+        <p class="loading-brand">WORK <span class="text-accent">4</span> A BIT</p>
     </div>
 
     <!-- ==============================================
@@ -29,11 +75,8 @@
         <!-- Login Section -->
         <section id="section-login" class="auth-card">
             <div class="auth-header">
-                <div class="logo justify-center mb-2">
-                    <div class="logo-dot"></div>
-                    <h2>WORK 4 A BIT</h2>
-                </div>
-                <p class="subtitle">Log in to your account</p>
+                <h1 class="auth-title">Welcome back</h1>
+                <p class="auth-subtitle">Log in to your account</p>
             </div>
             
             <form id="login-form">
@@ -65,16 +108,13 @@
         <!-- Register Section -->
         <section id="section-register" class="auth-card register hidden">
             <div class="auth-header">
-                <div class="logo justify-center mb-2">
-                    <div class="logo-dot"></div>
-                    <h2>Create Account</h2>
-                </div>
-                <p class="subtitle">Join WORK 4 A BIT Freelance Network</p>
+                <h1 class="auth-title">Join WORK 4 A BIT</h1>
+                <p class="auth-subtitle">Complete your student verification profile</p>
             </div>
 
             <!-- Google Status Pill -->
             <div id="register-google-status" class="google-status-box hidden">
-                <span>✓ Google Linked: <strong id="register-google-email"></strong></span>
+                <span>✓ Google Account Linked: <strong id="register-google-email"></strong></span>
             </div>
 
             <button type="button" id="register-google-btn" class="btn btn-outline btn-block mb-4">
@@ -88,7 +128,7 @@
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-fullname">Full Name *</label>
-                        <input type="text" id="register-fullname" class="form-control" placeholder="Juan Dela Cruz" required>
+                        <input type="text" id="register-fullname" class="form-control" placeholder="Charles Jan Paraggua" required>
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-studentid">Student ID *</label>
@@ -146,8 +186,8 @@
                 <div class="form-group">
                     <label class="form-label">Certificate of Enrollment (Image)</label>
                     <div id="register-cert-dropzone" class="file-dropzone">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p class="mt-2">Click or drag & drop certificate image</p>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p class="mt-1 text-muted">Click or drag & drop certificate image</p>
                         <input type="file" id="register-certificate" accept="image/*" style="display:none">
                     </div>
                     <img id="register-cert-preview" class="file-preview hidden" alt="Certificate Preview">
@@ -159,20 +199,20 @@
             </form>
 
             <div class="auth-links mt-4 text-center">
-                <p class="text-muted">Already registered? <a href="#" id="register-link-login" class="link-text font-bold">Log in here</a></p>
+                <p class="text-muted">Already have an account? <a href="#" id="register-link-login" class="link-text font-bold">Log in here</a></p>
             </div>
         </section>
 
         <!-- Forgot Password Section -->
         <section id="section-forgot-password" class="auth-card hidden">
             <div class="auth-header">
-                <h2>Reset Password</h2>
-                <p class="subtitle">Enter your email to receive a password reset link</p>
+                <h1 class="auth-title">Reset Password</h1>
+                <p class="auth-subtitle">Enter your email to receive a password reset link</p>
             </div>
             <form id="forgot-form">
                 <div class="form-group">
                     <label class="form-label" for="forgot-email">Email Address</label>
-                    <input type="email" id="forgot-email" class="form-control" placeholder="name@university.edu" required>
+                    <input type="email" id="forgot-email" class="form-control" placeholder="student@university.edu" required>
                 </div>
                 <button type="submit" id="forgot-submit-btn" class="btn btn-primary btn-block">Send Reset Link</button>
             </form>
@@ -184,103 +224,114 @@
         <!-- Pending Approval Section -->
         <section id="section-pending" class="auth-card text-center hidden">
             <div class="pending-badge">⏳</div>
-            <h2>Account Pending Verification</h2>
-            <p class="subtitle mt-2">Your enrollment certificate is currently being reviewed by an administrator. You will gain full access once verified.</p>
+            <h1 class="auth-title">Account Pending</h1>
+            <p class="text-muted mt-2">Your enrollment certificate is currently being reviewed by an administrator. You will gain access once verified.</p>
             <button type="button" id="pending-logout-btn" class="btn btn-outline mt-6">Log Out</button>
         </section>
 
     </div>
 
     <!-- ==============================================
-         3. MAIN APPLICATION VIEWS
+         3. MAIN APP (COLLAPSIBLE SIDEBAR + MAIN CONTENT)
          ============================================== -->
     <div id="app-views" class="layout hidden">
 
         <!-- Mobile Sidebar Overlay -->
         <div id="sidebar-overlay" class="mobile-overlay hidden"></div>
 
-        <!-- Sidebar Navigation -->
+        <!-- Collapsible Sidebar Navigation -->
         <aside id="sidebar" class="sidebar-nav">
-            <div class="logo">
-                <div class="logo-dot"></div>
-                <h2>WORK 4 A BIT</h2>
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-expanded">WORK <span class="text-accent">4</span> A BIT</span>
+                    <span class="logo-collapsed">W<span class="text-accent">4</span></span>
+                </div>
                 <button type="button" id="sidebar-close-btn" class="mobile-close-btn">✕</button>
             </div>
 
-            <div class="sidebar-user-pill">
-                <div class="avatar avatar-sm" id="sidebar-user-avatar">U</div>
-                <span class="truncate font-semibold" id="sidebar-user-name">User</span>
-            </div>
-
+            <!-- Top Navigation Items -->
             <nav class="nav-links">
-                <button type="button" class="nav-btn active" data-target="dashboard">
+                <button type="button" class="nav-btn active" data-target="dashboard" title="Dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Dashboard
+                    <span class="nav-btn-label">Dashboard</span>
                 </button>
-                <button type="button" class="nav-btn" data-target="requests">
+                <button type="button" class="nav-btn" data-target="requests" title="Service Requests">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    Service Requests
+                    <span class="nav-btn-label">Service Requests</span>
                 </button>
-                <button type="button" class="nav-btn" data-target="applications">
+                <button type="button" class="nav-btn" data-target="applications" title="Applications">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                    Applications
+                    <span class="nav-btn-label">Applications</span>
                 </button>
-                <button type="button" class="nav-btn" data-target="messages">
+                <button type="button" class="nav-btn" data-target="messages" title="Messages">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Messages
+                    <span class="nav-btn-label">Messages</span>
                 </button>
-                <button type="button" class="nav-btn" data-target="profile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    Profile
-                </button>
-                <button type="button" class="nav-btn hidden" id="nav-admin" data-target="admin">
+                <button type="button" class="nav-btn hidden" id="nav-admin" data-target="admin" title="Admin">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Admin
+                    <span class="nav-btn-label">Admin</span>
                 </button>
             </nav>
 
+            <!-- Bottom Sidebar Footer (Profile, Theme, Logout) -->
             <div class="sidebar-footer">
-                <button type="button" class="nav-btn" id="theme-toggle">
-                    <span id="theme-icon">🌙</span>
-                    <span>Toggle Theme</span>
+                <!-- Profile Link on Sidebar (Below next to logout) -->
+                <button type="button" class="nav-btn" data-target="profile" id="sidebar-profile-btn" title="Profile">
+                    <div class="avatar avatar-xs" id="sidebar-user-avatar">U</div>
+                    <span class="nav-btn-label truncate" id="sidebar-user-name">Profile</span>
                 </button>
-                <button type="button" class="nav-btn text-danger" id="btn-logout">
+
+                <!-- Theme Toggle -->
+                <button type="button" class="nav-btn" id="theme-toggle" title="Toggle Theme">
+                    <span id="theme-icon" class="theme-icon-slot">🌙</span>
+                    <span class="nav-btn-label">Theme</span>
+                </button>
+
+                <!-- Logout -->
+                <button type="button" class="nav-btn text-danger" id="btn-logout" title="Logout">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Logout</span>
+                    <span class="nav-btn-label">Logout</span>
                 </button>
             </div>
+
+            <!-- Desktop Collapse Toggle Button -->
+            <button type="button" id="sidebar-toggle-btn" class="sidebar-collapse-btn" title="Toggle Sidebar">
+                <svg class="icon-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Main Content View -->
         <main class="main-content">
 
             <!-- Mobile Top Bar -->
             <div class="mobile-top-bar">
                 <button type="button" id="mobile-menu-btn" class="btn btn-ghost btn-sm">☰</button>
-                <div class="logo">
-                    <div class="logo-dot"></div>
-                    <h2>WORK 4 A BIT</h2>
-                </div>
+                <div class="brand-title">WORK <span class="text-accent">4</span> A BIT</div>
             </div>
 
-            <!-- SECTION: Dashboard -->
+            <!-- ==============================================
+                 SECTION: Dashboard
+                 ============================================== -->
             <section id="section-dashboard" class="content-section">
                 <div class="page-header">
-                    <h1 class="page-title" id="dashboard-welcome">Welcome back! 👋</h1>
-                    <p class="text-muted">Here is your campus freelance activity overview.</p>
+                    <span class="eyebrow-tag">DASHBOARD</span>
+                    <h1 class="page-title" id="dashboard-welcome">Welcome back, User! 👋</h1>
+                    <div class="hero-pill-badge" id="dashboard-role-badge">Role: Offer My Skills</div>
                 </div>
 
+                <!-- 4 Stats Cards Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <span class="stat-label">Applied Jobs</span>
+                        <span class="stat-label">Applied</span>
                         <div class="stat-value" id="stat-applied">0</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Completed Jobs</span>
+                        <span class="stat-label">Completed</span>
                         <div class="stat-value" id="stat-completed">0</div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Total Earnings</span>
+                        <span class="stat-label">Earnings</span>
                         <div class="stat-value text-accent" id="stat-earnings">₱0</div>
                     </div>
                     <div class="stat-card">
@@ -289,35 +340,59 @@
                     </div>
                 </div>
 
-                <div class="glass-card mt-6">
-                    <div class="card-header-flex">
-                        <h3>RECOMMENDED LISTINGS</h3>
+                <!-- 3 Quick Action Cards -->
+                <div class="quick-actions-row mt-6">
+                    <div class="quick-action-card" id="action-post-request">
+                        <div class="qa-icon-circle">+</div>
+                        <span class="qa-title">Post a help request</span>
+                        <span class="qa-arrow">→</span>
                     </div>
-                    <div id="dashboard-listings" class="listings-list mt-4">
+                    <div class="quick-action-card" id="action-browse-services">
+                        <div class="qa-icon-circle">🔍</div>
+                        <span class="qa-title">Browse services</span>
+                        <span class="qa-arrow">→</span>
+                    </div>
+                    <div class="quick-action-card" id="action-view-profile">
+                        <div class="qa-icon-circle">👤</div>
+                        <span class="qa-title">Update my profile</span>
+                        <span class="qa-arrow">→</span>
+                    </div>
+                </div>
+
+                <!-- Recommended Listings -->
+                <div class="glass-card mt-8">
+                    <div class="flex-between mb-4">
+                        <span class="eyebrow-tag">RECOMMENDED LISTINGS</span>
+                        <button type="button" class="link-btn-text" id="dashboard-view-all">View all →</button>
+                    </div>
+                    <div id="dashboard-listings" class="listings-list">
                         <div class="empty-state">Loading listings...</div>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION: Service Requests -->
+            <!-- ==============================================
+                 SECTION: Service Requests
+                 ============================================== -->
             <section id="section-requests" class="content-section hidden">
                 <div class="page-header-flex">
                     <div>
-                        <h1 class="page-title">Service Requests</h1>
-                        <p class="text-muted">Browse peer technical tasks or post a new request</p>
+                        <span class="eyebrow-tag">PEER SUPPORT</span>
+                        <h1 class="page-title">Help Requests</h1>
+                        <p class="text-muted">Students post what they need — send an offer if you can help.</p>
                     </div>
-                    <button type="button" id="btn-post-request" class="btn btn-primary">
-                        + Post a Request
+                    <button type="button" id="btn-post-request" class="btn btn-primary btn-pill">
+                        + Post a request
                     </button>
                 </div>
 
                 <div class="requests-layout">
-                    <!-- Filter Panel -->
+                    <!-- Filter Sidebar Panel -->
                     <aside class="filter-panel">
-                        <h3>Filter Requests</h3>
+                        <h3 class="filter-heading">Filters</h3>
                         
-                        <div class="form-group mt-4">
-                            <label class="form-label" for="filter-search">Search Keywords</label>
+                        <div class="form-group mt-3">
+                            <label class="form-label" for="filter-search">Search</label>
                             <input type="text" id="filter-search" class="form-control" placeholder="Search tasks...">
                         </div>
 
@@ -339,7 +414,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Max Budget: <strong id="filter-budget-value">₱20,000</strong></label>
+                            <label class="form-label">Max budget: <strong id="filter-budget-value">₱20,000</strong></label>
                             <input type="range" id="filter-budget" class="range-slider" min="500" max="50000" step="500" value="20000">
                         </div>
 
@@ -347,13 +422,15 @@
                             <label class="form-label" for="filter-sort">Sort By</label>
                             <select id="filter-sort" class="form-control">
                                 <option value="newest">Newest First</option>
-                                <option value="price_asc">Budget: Low to High</option>
-                                <option value="price_desc">Budget: High to Low</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
                             </select>
                         </div>
+
+                        <button type="button" id="btn-reset-filters" class="link-btn-text text-sm mt-3 block text-center">Reset filters</button>
                     </aside>
 
-                    <!-- Results Column -->
+                    <!-- Requests Feed Grid -->
                     <div class="requests-results-col">
                         <div class="results-header-bar">
                             <span id="requests-count" class="text-muted">Loading requests...</span>
@@ -365,9 +442,12 @@
                 </div>
             </section>
 
-            <!-- SECTION: Applications -->
+            <!-- ==============================================
+                 SECTION: Applications Hub
+                 ============================================== -->
             <section id="section-applications" class="content-section hidden">
                 <div class="page-header">
+                    <span class="eyebrow-tag">APPLICATIONS</span>
                     <h1 class="page-title">Applications Hub</h1>
                     <p class="text-muted">Manage candidate offers for your postings & track your bids</p>
                 </div>
@@ -386,35 +466,42 @@
                 </div>
             </section>
 
-            <!-- SECTION: Messages -->
+            <!-- ==============================================
+                 SECTION: Messages & Collaboration
+                 ============================================== -->
             <section id="section-messages" class="content-section hidden">
                 <div class="page-header">
+                    <span class="eyebrow-tag">COLLABORATION</span>
                     <h1 class="page-title">Messages</h1>
-                    <p class="text-muted">Collaborate with peers on accepted project tasks</p>
                 </div>
 
                 <div id="messages-container" class="messages-layout">
-                    <!-- Conversations Sidebar -->
+                    <!-- Conversations List (Left) -->
                     <div class="conversations-sidebar">
                         <div class="conv-header">
-                            <h3>Active Chats</h3>
+                            <h3>Conversations</h3>
                         </div>
                         <div id="conversations-list" class="conversations-list">
                             <div class="loader"></div>
                         </div>
                     </div>
 
-                    <!-- Chat Window -->
+                    <!-- Chat Window (Right) -->
                     <div id="chat-panel" class="chat-panel">
+                        <!-- Chat Header -->
                         <div class="chat-header">
-                            <button type="button" id="chat-back-btn" class="btn btn-ghost btn-sm mobile-only">←</button>
+                            <button type="button" id="chat-back-btn" class="btn btn-outline btn-sm mobile-only">←</button>
                             <div id="chat-header-content" class="chat-header-content">
                                 <span class="text-muted">Select a conversation to start chatting</span>
                             </div>
                         </div>
+                        
+                        <!-- Messages Bubbles -->
                         <div id="chat-messages" class="chat-messages">
                             <div class="empty-state">No conversation selected</div>
                         </div>
+                        
+                        <!-- Chat Input Row -->
                         <div class="chat-input-row">
                             <input type="text" id="chat-input" class="form-control" placeholder="Write a message...">
                             <button type="button" id="chat-send-btn" class="btn btn-primary">Send</button>
@@ -423,60 +510,96 @@
                 </div>
             </section>
 
-            <!-- SECTION: Profile -->
+            <!-- ==============================================
+                 SECTION: Profile (Blueprint Hero Card)
+                 ============================================== -->
             <section id="section-profile" class="content-section hidden">
                 <div class="page-header">
-                    <h1 class="page-title">Student Profile</h1>
-                    <p class="text-muted">Your verified academic & freelancer identity</p>
+                    <span class="eyebrow-tag">PROFILE</span>
+                    <h1 class="page-title">User Profile</h1>
                 </div>
 
+                <!-- Hero Profile Card -->
                 <div class="profile-hero">
-                    <div class="avatar avatar-lg" id="profile-avatar">U</div>
+                    <div class="profile-avatar-circle" id="profile-avatar">CJ</div>
                     <div class="profile-hero-info">
-                        <div class="profile-name-row">
-                            <h1 id="profile-name">Student Name</h1>
-                            <span class="badge badge-normal" id="profile-role">Student</span>
-                        </div>
-                        
-                        <div class="profile-details-grid mt-4">
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Email</small>
-                                <p id="profile-email">email@student.edu</p>
+                        <h2 class="profile-user-name" id="profile-name">Charles Jan Paraggua</h2>
+                        <p class="profile-user-program" id="profile-program-sub">Computer Engineering · Student</p>
+                        <div class="profile-availability-pill" id="profile-availability-badge">Available</div>
+                    </div>
+                    <button type="button" id="btn-edit-profile" class="edit-profile-pill-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        Edit profile
+                    </button>
+                </div>
+
+                <!-- 3 Stat Boxes Row -->
+                <div class="profile-stats-row mt-6">
+                    <div class="stat-box-card">
+                        <div class="stat-big-num" id="stat-completed-projects">0</div>
+                        <div class="stat-small-label">Completed projects</div>
+                    </div>
+                    <div class="stat-box-card">
+                        <div class="stat-big-num" id="stat-reviews-count">0</div>
+                        <div class="stat-small-label">Reviews</div>
+                    </div>
+                    <div class="stat-box-card">
+                        <div class="stat-big-num" id="stat-active-services">0</div>
+                        <div class="stat-small-label">Active services</div>
+                    </div>
+                </div>
+
+                <!-- Credentials & References -->
+                <div class="profile-section-block mt-8">
+                    <h3 class="profile-block-heading">Credentials & references</h3>
+                    <div class="credentials-card mt-3">
+                        <div class="cred-grid">
+                            <div class="cred-item">
+                                <span class="cred-label">Faculty reference</span>
+                                <span class="cred-value" id="profile-faculty">Not provided</span>
                             </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Student ID</small>
-                                <p id="profile-student-id">N/A</p>
+                            <div class="cred-item">
+                                <span class="cred-label">Student ID</span>
+                                <span class="cred-value" id="profile-student-id">—</span>
                             </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Gender</small>
-                                <p id="profile-gender">N/A</p>
+                            <div class="cred-item">
+                                <span class="cred-label">Program</span>
+                                <span class="cred-value" id="profile-program-val">Computer Engineering</span>
                             </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Faculty Reference</small>
-                                <p id="profile-faculty">N/A</p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Verification Status</small>
-                                <p><span id="profile-verification" class="badge">Checking...</span></p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Active Applications</small>
-                                <p id="profile-stat-applications" class="font-bold">0</p>
+                            <div class="cred-item">
+                                <span class="cred-label">Verification Status</span>
+                                <span class="cred-value" id="profile-verification">Checking...</span>
                             </div>
                         </div>
                     </div>
-                    <button type="button" id="btn-edit-profile" class="btn btn-outline">Edit Profile</button>
+                </div>
+
+                <!-- Portfolio & Reviews -->
+                <div class="profile-section-block mt-8">
+                    <h3 class="profile-block-heading">Portfolio</h3>
+                    <p class="text-muted mt-2">No portfolio items yet.</p>
+                </div>
+
+                <div class="profile-section-block mt-8">
+                    <div class="flex-between">
+                        <h3 class="profile-block-heading">Ratings & reviews</h3>
+                        <a href="#" class="link-btn-text text-sm">See all feedback</a>
+                    </div>
+                    <p class="text-muted mt-2" id="profile-reviews-empty">No reviews yet.</p>
                 </div>
             </section>
 
-            <!-- SECTION: Admin Dashboard -->
+            <!-- ==============================================
+                 SECTION: Admin Dashboard
+                 ============================================== -->
             <section id="section-admin" class="content-section hidden">
                 <div class="page-header">
-                    <h1 class="page-title">Admin Verification Dashboard</h1>
-                    <p class="text-muted">Review student certificates of registration to approve accounts</p>
+                    <span class="eyebrow-tag">ADMINISTRATION</span>
+                    <h1 class="page-title">Student Verification Dashboard</h1>
+                    <p class="text-muted">Review student enrollment certificates and approve registrations</p>
                 </div>
 
-                <div id="admin-list" class="admin-list mt-4">
+                <div id="admin-list" class="admin-list mt-6">
                     <div class="loader"></div>
                 </div>
             </section>
@@ -485,7 +608,7 @@
     </div>
 
     <!-- ==============================================
-         4. NATIVE DIALOG MODALS
+         4. MODALS & DIALOGS
          ============================================== -->
 
     <!-- New Request Dialog -->
@@ -547,7 +670,7 @@
         </div>
     </dialog>
 
-    <!-- Apply to Request Dialog -->
+    <!-- Apply Dialog -->
     <dialog id="dialog-apply" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -566,7 +689,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" id="apply-submit" class="btn btn-primary">Submit Application</button>
+                    <button type="submit" id="apply-submit" class="btn btn-sky">Submit Application</button>
                 </div>
             </form>
         </div>
@@ -582,7 +705,7 @@
             <form id="edit-profile-form">
                 <div class="form-group">
                     <label class="form-label" for="edit-bio">Bio / Summary</label>
-                    <textarea id="edit-bio" class="form-control" rows="3" placeholder="Tell other students about your background..."></textarea>
+                    <textarea id="edit-bio" class="form-control" rows="3" placeholder="Tell peers about your technical background..."></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="edit-availability">Availability</label>
@@ -611,11 +734,11 @@
                 <div class="form-group text-center">
                     <label class="form-label">Rating</label>
                     <div class="star-rating" id="review-stars">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
+                        <span class="star filled" data-value="1">★</span>
+                        <span class="star filled" data-value="2">★</span>
+                        <span class="star filled" data-value="3">★</span>
+                        <span class="star filled" data-value="4">★</span>
+                        <span class="star filled" data-value="5">★</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -644,12 +767,10 @@
         </div>
     </dialog>
 
-    <!-- ==============================================
-         5. TOAST NOTIFICATION CONTAINER
-         ============================================== -->
+    <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Application Controller -->
+    <!-- Application Script -->
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

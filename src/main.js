@@ -35,12 +35,14 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
 
 // ── State ────────────────────────────────────────────────────────────────────
-let currentUser = null;    // Firebase Auth user
-let userData = null;       // PostgreSQL user record
+let currentUser = null;
+let userData = null;
 let activeSection = 'dashboard';
 let messagesInterval = null;
 let activeConvId = null;
-let isDarkTheme = true;
+let lastRenderedMessagesKey = '';
+let isDarkTheme = false;
+let isSidebarCollapsed = false;
 
 // ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
@@ -54,12 +56,11 @@ function showToast(message, type = 'success') {
   const container = $('#toast-container');
   if (!container) return;
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
+  toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
   toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => {
-    toast.classList.add('toast-exit');
-    setTimeout(() => toast.remove(), 300);
+    toast.remove();
   }, 3000);
 }
 
@@ -94,11 +95,11 @@ function navigateTo(section) {
   if (target) {
     target.classList.remove('hidden');
   }
-  $$('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
-  const activeBtn = $(`.nav-btn[data-target="${section}"]`);
-  if (activeBtn) activeBtn.classList.add('active');
+  
+  $$('.nav-btn[data-target]').forEach(b => {
+    b.classList.toggle('active', b.dataset.target === section);
+  });
 
-  // Load section specific data
   if (section === 'dashboard') loadDashboard();
   else if (section === 'requests') loadRequests();
   else if (section === 'applications') loadApplications();
@@ -128,11 +129,11 @@ function showApp() {
     else hide(adminNav);
   }
 
-  // Sidebar info
+  // Sidebar User Info in Footer
   const nameEl = $('#sidebar-user-name');
-  if (nameEl) nameEl.textContent = userData?.fullName || currentUser?.displayName || 'User';
+  if (nameEl) nameEl.textContent = userData?.fullName || currentUser?.displayName || 'Profile';
   const avatarEl = $('#sidebar-user-avatar');
-  if (avatarEl) avatarEl.textContent = initials(userData?.fullName || currentUser?.displayName || 'U');
+  if (avatarEl) avatarEl.textContent = initials(userData?.fullName || currentUser?.displayName || 'P');
 
   navigateTo('dashboard');
 }
@@ -238,7 +239,6 @@ function setupRegister() {
       const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid });
       if (res.data.user) {
-        // Already registered
         return;
       }
       googleUser = result.user;
@@ -298,7 +298,6 @@ function setupRegister() {
         uid = cred.user.uid;
       }
 
-      // Compress certificate
       let certUrl = 'none';
       const certFile = certInput?.files?.[0];
       if (certFile) {
@@ -354,6 +353,11 @@ async function loadDashboard() {
     welcomeEl.textContent = `Welcome back, ${firstName}! 👋`;
   }
 
+  const roleBadge = $('#dashboard-role-badge');
+  if (roleBadge) {
+    roleBadge.textContent = `Role: ${userData?.preferredRole || 'Offer My Skills'}`;
+  }
+
   try {
     const [reqRes, appRes] = await Promise.all([
       listHelpRequests(dc),
@@ -386,8 +390,16 @@ async function loadDashboard() {
       });
     }
   } catch (err) {
-    console.error('Dashboard load error:', err);
+    console.error('Dashboard error:', err);
   }
+}
+
+// ── Quick Actions ────────────────────────────────────────────────────────────
+function setupQuickActions() {
+  $('#action-post-request')?.addEventListener('click', () => $('#dialog-new-request').showModal());
+  $('#action-browse-services')?.addEventListener('click', () => navigateTo('requests'));
+  $('#action-view-profile')?.addEventListener('click', () => navigateTo('profile'));
+  $('#dashboard-view-all')?.addEventListener('click', () => navigateTo('requests'));
 }
 
 // ── Service Requests ─────────────────────────────────────────────────────────
@@ -415,7 +427,7 @@ function renderRequests(requests, appliedIds = new Set()) {
   const grid = $('#requests-grid');
   let filtered = requests.filter(r => {
     if (requestFilters.q) {
-      const hay = `${r.title} ${r.description} ${r.category}`.toLowerCase();
+      const hay = `${r.title} ${r.description} ${r.category} ${r.requester?.fullName}`.toLowerCase();
       if (!hay.includes(requestFilters.q.toLowerCase())) return false;
     }
     if (requestFilters.category && r.category !== requestFilters.category) return false;
@@ -426,7 +438,7 @@ function renderRequests(requests, appliedIds = new Set()) {
   if (requestFilters.sort === 'price_asc') filtered.sort((a, b) => a.budget - b.budget);
   else if (requestFilters.sort === 'price_desc') filtered.sort((a, b) => b.budget - a.budget);
 
-  $('#requests-count').textContent = `${filtered.length} request${filtered.length !== 1 ? 's' : ''} available`;
+  $('#requests-count').textContent = `${filtered.length} request(s) found`;
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
@@ -444,8 +456,8 @@ function renderRequests(requests, appliedIds = new Set()) {
     card.innerHTML = `
       <div class="request-card-header">
         <div class="avatar avatar-sm">${initials(r.requester?.fullName || 'S')}</div>
-        <span class="request-card-name truncate">${r.requester?.fullName || 'Student'}</span>
-        <span class="badge ${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
+        <span class="request-card-name">${r.requester?.fullName || 'Student'}</span>
+        <span class="${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
       </div>
       <h3 class="request-card-title">${r.title}</h3>
       <p class="request-card-desc line-clamp-3">${r.description || 'No description provided.'}</p>
@@ -458,9 +470,9 @@ function renderRequests(requests, appliedIds = new Set()) {
           <small class="text-muted">Budget</small>
           <div class="request-card-price">${peso(r.budget)}</div>
         </div>
-        <button class="btn ${isMine ? 'btn-ghost' : hasApplied ? 'btn-outline' : 'btn-primary'} btn-sm apply-btn"
+        <button class="btn ${isMine ? 'btn-outline' : hasApplied ? 'btn-outline' : 'btn-sky'} btn-sm apply-btn"
                 ${isMine || hasApplied ? 'disabled' : ''}>
-          ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Apply'}
+          ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Send Offer'}
         </button>
       </div>
     `;
@@ -473,12 +485,34 @@ function renderRequests(requests, appliedIds = new Set()) {
 }
 
 function setupRequestFilters() {
-  $('#filter-search')?.addEventListener('input', (e) => { requestFilters.q = e.target.value; renderRequests(allRequests); });
-  $('#filter-category')?.addEventListener('change', (e) => { requestFilters.category = e.target.value; renderRequests(allRequests); });
-  $('#filter-sort')?.addEventListener('change', (e) => { requestFilters.sort = e.target.value; renderRequests(allRequests); });
+  $('#filter-search')?.addEventListener('input', (e) => { 
+    requestFilters.q = e.target.value; 
+    renderRequests(allRequests); 
+  });
+
+  $('#filter-category')?.addEventListener('change', (e) => {
+    requestFilters.category = e.target.value;
+    renderRequests(allRequests);
+  });
+
+  $('#filter-sort')?.addEventListener('change', (e) => {
+    requestFilters.sort = e.target.value;
+    renderRequests(allRequests);
+  });
+
   $('#filter-budget')?.addEventListener('input', (e) => {
     requestFilters.maxPrice = Number(e.target.value);
     $('#filter-budget-value').textContent = peso(requestFilters.maxPrice);
+    renderRequests(allRequests);
+  });
+
+  $('#btn-reset-filters')?.addEventListener('click', () => {
+    requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest' };
+    $('#filter-search').value = '';
+    $('#filter-category').value = '';
+    $('#filter-sort').value = 'newest';
+    $('#filter-budget').value = 20000;
+    $('#filter-budget-value').textContent = '₱20,000';
     renderRequests(allRequests);
   });
 }
@@ -531,7 +565,7 @@ function setupApplyDialog() {
   $('#apply-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = $('#apply-submit');
-    btn.disabled = true; btn.textContent = 'Applying...';
+    btn.disabled = true; btn.textContent = 'Submitting...';
     try {
       await createApplication(dc, {
         helpRequestId: applyTarget.id,
@@ -539,7 +573,7 @@ function setupApplyDialog() {
         priceOffer: Number($('#apply-amount').value),
         message: $('#apply-message').value.trim()
       });
-      showToast(`Application sent! Offer: ${peso($('#apply-amount').value)}`);
+      showToast(`Offer sent: ${peso($('#apply-amount').value)}`);
       $('#dialog-apply').close();
       loadRequests();
     } catch (err) {
@@ -579,7 +613,7 @@ async function loadPostedJobs() {
         <div class="job-card-header">
           <h3>${job.title}</h3>
           <span class="badge">${peso(job.budget)}</span>
-          <span class="badge badge-normal">${pending.length} candidate${pending.length > 1 ? 's' : ''}</span>
+          <span class="badge badge-normal">${pending.length} candidate(s)</span>
         </div>
         <div class="candidates-list"></div>
       `;
@@ -591,7 +625,7 @@ async function loadPostedJobs() {
           <div class="avatar avatar-sm">${initials(app.applicant?.fullName || '')}</div>
           <div class="candidate-info">
             <strong>${app.applicant?.fullName || 'Applicant'}</strong>
-            <small class="text-muted ml-2">${app.applicant?.studentId || ''}</small>
+            <small class="text-muted">${app.applicant?.studentId || ''}</small>
             <div class="candidate-message">"${app.message}"</div>
           </div>
           <div class="candidate-price">${peso(app.priceOffer)}</div>
@@ -611,7 +645,6 @@ async function loadPostedJobs() {
     }
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
-    console.error(err);
   }
 }
 
@@ -629,19 +662,18 @@ async function loadMyApplications() {
     apps.forEach(app => {
       const card = document.createElement('div');
       card.className = 'application-card';
-      const statusClass = app.status === 'APPROVED' ? 'badge-approved' : app.status === 'COMPLETED' ? 'badge-completed' : 'badge-pending';
+      const statusClass = app.status === 'APPROVED' ? 'badge-approved' : app.status === 'COMPLETED' ? 'badge-normal' : 'badge-pending';
       card.innerHTML = `
         <div>
           <h4>${app.helpRequest?.title || 'Job'}</h4>
           <small class="text-muted">Your offer: ${peso(app.priceOffer)}</small>
         </div>
-        <span class="badge ${statusClass}">${app.status === 'PENDING' ? '⏳ Pending Review' : app.status === 'APPROVED' ? '✅ Approved' : app.status}</span>
+        <span class="badge ${statusClass}">${app.status === 'PENDING' ? '⏳ Pending' : app.status}</span>
       `;
       container.appendChild(card);
     });
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
-    console.error(err);
   }
 }
 
@@ -665,7 +697,7 @@ async function handleApprove(application, job) {
     showToast('Application approved! Chat created.');
     navigateTo('messages');
   } catch (err) {
-    showToast('Error approving: ' + err.message, 'error');
+    showToast('Error: ' + err.message, 'error');
   }
 }
 
@@ -697,7 +729,7 @@ function setupApplicationTabs() {
   });
 }
 
-// ── Messages ─────────────────────────────────────────────────────────────────
+// ── Messages & Realtime Chat (Smooth Rendering Without Flickering) ───────────
 let conversations = [];
 let reviewTarget = null;
 
@@ -720,7 +752,6 @@ async function loadMessages() {
     }
   } catch (err) {
     convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
-    console.error(err);
   }
 }
 
@@ -734,7 +765,7 @@ function renderConversationList() {
     item.className = `conversation-item ${conv.id === activeConvId ? 'active' : ''}`;
     item.innerHTML = `
       <div class="avatar avatar-sm">${initials(otherName || '')}</div>
-      <div class="conv-info flex-1 truncate">
+      <div class="flex-1 truncate">
         <strong class="truncate block">${otherName || 'User'}</strong>
         <small class="text-muted truncate block">${conv.application?.helpRequest?.title || ''}</small>
       </div>
@@ -746,6 +777,7 @@ function renderConversationList() {
 
 async function selectConversation(convId) {
   activeConvId = convId;
+  lastRenderedMessagesKey = ''; // reset cache key on conversation switch
   renderConversationList();
   if (messagesInterval) clearInterval(messagesInterval);
 
@@ -759,14 +791,14 @@ async function selectConversation(convId) {
   chatHeader.innerHTML = `
     <div class="flex items-center gap-3">
       <div class="avatar avatar-sm">${initials(otherUser?.fullName || '')}</div>
-      <div class="chat-header-info">
-        <strong>${otherUser?.fullName || 'User'}</strong>
+      <div>
+        <strong class="block">${otherUser?.fullName || 'User'}</strong>
         <small class="text-muted">${conv.application?.helpRequest?.title || ''}</small>
       </div>
     </div>
     <div class="chat-header-actions">
-      <button class="btn btn-outline btn-sm btn-danger" id="btn-terminate">Terminate</button>
-      ${isPoster ? '<button class="btn btn-success btn-sm" id="btn-complete">Complete</button>' : ''}
+      <button type="button" class="btn btn-terminate" id="btn-terminate">Terminate</button>
+      ${isPoster ? '<button type="button" class="btn btn-complete" id="btn-complete">Complete</button>' : ''}
     </div>
   `;
 
@@ -785,7 +817,7 @@ async function selectConversation(convId) {
   $('#btn-complete')?.addEventListener('click', async () => {
     try {
       await completeJob(dc, { applicationId: conv.application.id, helpRequestId: conv.application.helpRequest.id });
-      showToast('Job completed!');
+      showToast('Job marked completed!');
       reviewTarget = { convId, otherUser };
       $('#dialog-review').showModal();
     } catch (err) {
@@ -793,28 +825,44 @@ async function selectConversation(convId) {
     }
   });
 
-  $('#messages-container')?.classList.add('chat-open');
-
-  await loadChatMessages(convId);
-  messagesInterval = setInterval(() => loadChatMessages(convId), 3000);
+  await loadChatMessages(convId, true);
+  messagesInterval = setInterval(() => loadChatMessages(convId, false), 3000);
 }
 
-async function loadChatMessages(convId) {
+// Smooth message loading without DOM wipe flickering
+async function loadChatMessages(convId, isInitial = false) {
   const msgArea = $('#chat-messages');
+  if (!msgArea) return;
+
   try {
     const res = await listMessages(dc, { conversationId: convId });
     const messages = res.data.messages || [];
+    const newKey = messages.map(m => m.id).join(',');
+
+    // If messages haven't changed, don't touch the DOM (prevents flickering)
+    if (newKey === lastRenderedMessagesKey && !isInitial) {
+      return;
+    }
+
+    lastRenderedMessagesKey = newKey;
     msgArea.innerHTML = '';
+    
+    if (messages.length === 0) {
+      msgArea.innerHTML = '<div class="empty-state">No messages yet. Send a message to start!</div>';
+      return;
+    }
+
     messages.forEach(msg => {
       const isMe = msg.sender?.id === userData?.id;
       const div = document.createElement('div');
       div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
       div.innerHTML = `
         <div class="message-bubble">${msg.content}</div>
-        <small class="message-time">${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
       `;
       msgArea.appendChild(div);
     });
+
+    // Auto scroll to bottom
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch (err) {
     console.error('Messages load error:', err);
@@ -832,7 +880,7 @@ function setupChat() {
     sendBtn.disabled = true;
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      await loadChatMessages(activeConvId);
+      await loadChatMessages(activeConvId, true);
     } catch (err) {
       showToast('Error sending message', 'error');
     } finally {
@@ -886,26 +934,22 @@ function setupReviewDialog() {
   });
 }
 
-// ── Profile ──────────────────────────────────────────────────────────────────
+// ── Profile (Matches Screenshot 1 Layout) ────────────────────────────────────
 async function loadProfile() {
   if (!userData) return;
   $('#profile-avatar').textContent = initials(userData.fullName);
   $('#profile-name').textContent = userData.fullName || 'User';
-  $('#profile-role').textContent = userData.preferredRole || 'Student';
-  $('#profile-email').textContent = userData.email || '';
-  $('#profile-student-id').textContent = userData.studentId || 'N/A';
-  $('#profile-gender').textContent = userData.gender || 'N/A';
-  $('#profile-faculty').textContent = userData.facultyReference || 'N/A';
-
-  const vBadge = $('#profile-verification');
-  vBadge.textContent = userData.verificationStatus || 'unverified';
-  vBadge.className = `badge ${userData.verificationStatus === 'verified' ? 'badge-approved' : 'badge-pending'}`;
+  $('#profile-program-sub').textContent = `Computer Engineering · ${userData.preferredRole || 'Student'}`;
+  $('#profile-faculty').textContent = userData.facultyReference || 'Not provided';
+  $('#profile-student-id').textContent = userData.studentId || '—';
+  $('#profile-verification').textContent = userData.verificationStatus === 'verified' ? 'Verified' : 'Pending';
 
   try {
     const res = await listApplicationsByApplicant(dc, { userId: userData.id });
-    $('#profile-stat-applications').textContent = (res.data.applications || []).length;
+    const apps = res.data.applications || [];
+    $('#stat-active-services').textContent = apps.length;
   } catch {
-    $('#profile-stat-applications').textContent = '0';
+    $('#stat-active-services').textContent = '0';
   }
 }
 
@@ -915,7 +959,7 @@ function setupEditProfile() {
   });
   $('#edit-profile-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    showToast('Profile updated locally.');
+    showToast('Profile updated.');
     $('#dialog-edit-profile').close();
   });
 }
@@ -944,29 +988,28 @@ async function loadAdmin() {
           <div class="avatar">${initials(u.fullName)}</div>
           <div>
             <strong>${u.fullName}</strong>
-            <div class="text-muted">${u.email}</div>
-            <small class="text-muted">ID: ${u.studentId || 'N/A'} • Faculty: ${u.facultyReference || 'N/A'}</small>
+            <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'}</div>
           </div>
         </div>
-        ${u.certificateUrl && u.certificateUrl !== 'none'
-          ? `<img class="admin-cert-thumb" src="${u.certificateUrl}" alt="Certificate" />`
-          : '<span class="text-muted">No certificate</span>'}
-        <div class="admin-card-actions">
+        <div class="flex items-center gap-2">
+          ${u.certificateUrl && u.certificateUrl !== 'none'
+            ? `<button class="btn btn-outline btn-sm view-cert-btn">View Cert</button>`
+            : ''}
           <button class="btn btn-outline btn-sm btn-danger reject-btn">Reject</button>
-          <button class="btn btn-success btn-sm approve-btn">Approve</button>
+          <button class="btn btn-primary btn-sm approve-btn">Approve</button>
         </div>
       `;
-      card.querySelector('.approve-btn').addEventListener('click', async () => {
+      card.querySelector('.approve-btn')?.addEventListener('click', async () => {
         await updateUserStatus(dc, { id: u.id, status: 'verified' });
         showToast(`${u.fullName} approved!`);
         card.remove();
       });
-      card.querySelector('.reject-btn').addEventListener('click', async () => {
+      card.querySelector('.reject-btn')?.addEventListener('click', async () => {
         await updateUserStatus(dc, { id: u.id, status: 'rejected' });
         showToast(`${u.fullName} rejected.`);
         card.remove();
       });
-      card.querySelector('.admin-cert-thumb')?.addEventListener('click', () => {
+      card.querySelector('.view-cert-btn')?.addEventListener('click', () => {
         $('#cert-preview-img').src = u.certificateUrl;
         $('#dialog-certificate').showModal();
       });
@@ -974,28 +1017,56 @@ async function loadAdmin() {
     });
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading pending users.</div>';
-    console.error(err);
   }
+}
+
+// ── Collapsible Sidebar Toggle ───────────────────────────────────────────────
+function setupCollapsibleSidebar() {
+  const savedCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+  if (savedCollapsed) {
+    isSidebarCollapsed = true;
+    $('#sidebar')?.classList.add('collapsed');
+    $('#app-views')?.classList.add('sidebar-collapsed');
+  }
+
+  $('#sidebar-toggle-btn')?.addEventListener('click', () => {
+    isSidebarCollapsed = !isSidebarCollapsed;
+    $('#sidebar')?.classList.toggle('collapsed', isSidebarCollapsed);
+    $('#app-views')?.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+    localStorage.setItem('sidebar_collapsed', isSidebarCollapsed ? 'true' : 'false');
+  });
+
+  // Mobile sidebar drawer
+  $('#mobile-menu-btn')?.addEventListener('click', () => {
+    $('#sidebar')?.classList.add('sidebar-open');
+    show($('#sidebar-overlay'));
+  });
+  const closeMobileSidebar = () => {
+    $('#sidebar')?.classList.remove('sidebar-open');
+    hide($('#sidebar-overlay'));
+  };
+  $('#sidebar-overlay')?.addEventListener('click', closeMobileSidebar);
+  $('#sidebar-close-btn')?.addEventListener('click', closeMobileSidebar);
 }
 
 // ── Theme Toggle ─────────────────────────────────────────────────────────────
 function setupTheme() {
   const saved = localStorage.getItem('theme');
-  if (saved === 'light') {
-    document.body.classList.add('light-theme');
-    isDarkTheme = false;
+  if (saved === 'dark') {
+    document.body.classList.add('dark-theme');
+    isDarkTheme = true;
     $('#theme-icon').textContent = '☀️';
   } else {
-    document.body.classList.remove('light-theme');
-    isDarkTheme = true;
+    document.body.classList.remove('dark-theme');
+    isDarkTheme = false;
     $('#theme-icon').textContent = '🌙';
   }
 
   $('#theme-toggle')?.addEventListener('click', () => {
     isDarkTheme = !isDarkTheme;
-    document.body.classList.toggle('light-theme', !isDarkTheme);
+    document.body.classList.toggle('dark-theme', isDarkTheme);
     localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-    $('#theme-icon').textContent = isDarkTheme ? '🌙' : '☀️';
+    $('#theme-icon').textContent = isDarkTheme ? '☀️' : '🌙';
   });
 }
 
@@ -1019,26 +1090,12 @@ function setupDialogCloseButtons() {
   });
 }
 
-// ── Mobile Sidebar ───────────────────────────────────────────────────────────
-function setupMobileSidebar() {
-  $('#mobile-menu-btn')?.addEventListener('click', () => {
-    $('#sidebar').classList.add('sidebar-open');
-    show($('#sidebar-overlay'));
-  });
-  const closeSidebar = () => {
-    $('#sidebar').classList.remove('sidebar-open');
-    hide($('#sidebar-overlay'));
-  };
-  $('#sidebar-overlay')?.addEventListener('click', closeSidebar);
-  $('#sidebar-close-btn')?.addEventListener('click', closeSidebar);
-  $$('.nav-btn').forEach(btn => btn.addEventListener('click', closeSidebar));
-}
-
 // ── Initialization ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setupLogin();
   setupRegister();
   setupForgotPassword();
+  setupQuickActions();
   setupRequestFilters();
   setupNewRequestDialog();
   setupApplyDialog();
@@ -1046,12 +1103,16 @@ document.addEventListener('DOMContentLoaded', () => {
   setupChat();
   setupReviewDialog();
   setupEditProfile();
+  setupCollapsibleSidebar();
   setupTheme();
   setupLogout();
   setupDialogCloseButtons();
-  setupMobileSidebar();
 
   $$('.nav-btn[data-target]').forEach(btn => {
-    btn.addEventListener('click', () => navigateTo(btn.dataset.target));
+    btn.addEventListener('click', () => {
+      navigateTo(btn.dataset.target);
+      $('#sidebar')?.classList.remove('sidebar-open');
+      hide($('#sidebar-overlay'));
+    });
   });
 });
