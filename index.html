@@ -165,11 +165,11 @@
                 </div>
 
                 <div class="form-row" id="register-password-row">
-                    <div class="form-group flex-1">
+                    <div class="form-group flex-1" id="register-password-group">
                         <label class="form-label" for="register-password">Password *</label>
                         <input type="password" id="register-password" class="form-control" placeholder="••••••••">
                     </div>
-                    <div class="form-group flex-1">
+                    <div class="form-group flex-1" id="register-confirm-group">
                         <label class="form-label" for="register-confirm-password">Confirm Password *</label>
                         <input type="password" id="register-confirm-password" class="form-control" placeholder="••••••••">
                     </div>
@@ -277,13 +277,12 @@
                 </button>
             </nav>
 
-            <!-- Bottom Profile & Logout Footer (Replicated User Profile Bar) -->
+            <!-- Bottom Profile & Logout Footer (Clean Name + Highlight Leave Button, 'Pro' Removed) -->
             <div class="sidebar-user-footer">
                 <div class="user-footer-profile" data-target="profile" title="View Profile">
                     <div class="avatar avatar-sm avatar-photo" id="sidebar-user-avatar">CP</div>
                     <div class="user-footer-details">
                         <span class="user-footer-name" id="sidebar-user-name">charles jan paraggua</span>
-                        <span class="user-footer-role">Pro</span>
                     </div>
                 </div>
                 <!-- Highlight Leave/Logout Icon Button -->
@@ -308,37 +307,37 @@
                 </div>
 
                 <!-- ==========================================================================
-                     4. SECTION: DASHBOARD (SCREEN 4 REPLICA)
+                     4. SECTION: DASHBOARD (REAL DYNAMIC DATA ONLY)
                      ========================================================================== -->
                 <section id="section-dashboard" class="content-section">
                     <!-- Top Greeting Header -->
                     <div class="dashboard-top-header">
                         <div>
-                            <h1 class="welcome-heading" id="dashboard-welcome">Welcome back, Juan! 👋</h1>
+                            <h1 class="welcome-heading" id="dashboard-welcome">Welcome back, Student! 👋</h1>
                             <p class="welcome-subtext">Here's what's happening with your account today.</p>
                         </div>
                         <div class="top-user-avatar" id="dashboard-avatar-btn" data-target="profile" title="View Profile">
-                            <div class="avatar avatar-md" id="dashboard-user-avatar">JD</div>
+                            <div class="avatar avatar-md" id="dashboard-user-avatar">ST</div>
                         </div>
                     </div>
 
-                    <!-- 4 Top Stat Cards -->
+                    <!-- 4 Top Stat Cards (Real dynamic values) -->
                     <div class="dashboard-stats-grid mt-6">
                         <div class="dash-stat-card">
                             <span class="stat-card-label">Active Applications</span>
-                            <div class="stat-card-number" id="stat-applied">5</div>
+                            <div class="stat-card-number" id="stat-applied">0</div>
                         </div>
                         <div class="dash-stat-card">
                             <span class="stat-card-label">Jobs Completed</span>
-                            <div class="stat-card-number text-green" id="stat-completed">12</div>
+                            <div class="stat-card-number text-green" id="stat-completed">0</div>
                         </div>
                         <div class="dash-stat-card">
                             <span class="stat-card-label">Total Earnings</span>
-                            <div class="stat-card-number" id="stat-earnings">₱5,250</div>
+                            <div class="stat-card-number" id="stat-earnings">₱0</div>
                         </div>
                         <div class="dash-stat-card">
                             <span class="stat-card-label">Average Rating</span>
-                            <div class="stat-card-number" id="stat-rating">4.8 <span class="text-amber">★</span></div>
+                            <div class="stat-card-number" id="stat-rating">0.0 <span class="text-amber">★</span></div>
                         </div>
                     </div>
 
@@ -347,49 +346,12 @@
                         <!-- Left: Recommended Jobs Card -->
                         <div class="dash-card">
                             <div class="dash-card-header">
-                                <h2 class="dash-card-title">Recommended Jobs</h2>
+                                <h2 class="dash-card-title">Recommended Services</h2>
                                 <button type="button" class="view-all-link" id="dash-view-all-jobs">View all</button>
                             </div>
 
                             <div id="dashboard-listings" class="jobs-list-feed">
-                                <div class="job-list-item">
-                                    <div class="job-icon-box job-icon-green">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
-                                    </div>
-                                    <div class="job-item-info">
-                                        <h3 class="job-item-title">Logo Design for Cafe</h3>
-                                        <p class="job-item-subtext">₱800 - ₱1,100 · Remote</p>
-                                    </div>
-                                    <button type="button" class="bookmark-btn" title="Bookmark">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                                    </button>
-                                </div>
-
-                                <div class="job-list-item">
-                                    <div class="job-icon-box job-icon-purple">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                    </div>
-                                    <div class="job-item-info">
-                                        <h3 class="job-item-title">Data Entry Assistant</h3>
-                                        <p class="job-item-subtext">₱300 - ₱600 · Part-time</p>
-                                    </div>
-                                    <button type="button" class="bookmark-btn" title="Bookmark">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                                    </button>
-                                </div>
-
-                                <div class="job-list-item">
-                                    <div class="job-icon-box job-icon-cyan">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                                    </div>
-                                    <div class="job-item-info">
-                                        <h3 class="job-item-title">Video Editing</h3>
-                                        <p class="job-item-subtext">₱700 - ₱1,000 · Remote</p>
-                                    </div>
-                                    <button type="button" class="bookmark-btn" title="Bookmark">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                                    </button>
-                                </div>
+                                <div class="loader"></div>
                             </div>
                         </div>
 
@@ -402,27 +364,7 @@
                                     <button type="button" class="view-all-link" id="dash-view-all-apps">View all</button>
                                 </div>
                                 <div class="recent-apps-list" id="dashboard-recent-apps">
-                                    <div class="app-row-item">
-                                        <div class="avatar avatar-sm">SM</div>
-                                        <div class="app-row-info">
-                                            <h4 class="app-row-title">Social Media Assistant</h4>
-                                            <p class="app-row-meta">Applied · Aug 12, 2024</p>
-                                        </div>
-                                    </div>
-                                    <div class="app-row-item">
-                                        <div class="avatar avatar-sm">GD</div>
-                                        <div class="app-row-info">
-                                            <h4 class="app-row-title">Graphic Designer</h4>
-                                            <p class="app-row-meta"><span class="text-amber font-semibold">Under Review</span> · Aug 11, 2024</p>
-                                        </div>
-                                    </div>
-                                    <div class="app-row-item">
-                                        <div class="avatar avatar-sm">CW</div>
-                                        <div class="app-row-info">
-                                            <h4 class="app-row-title">Content Writer</h4>
-                                            <p class="app-row-meta">Applied · Aug 10, 2024</p>
-                                        </div>
-                                    </div>
+                                    <div class="loader"></div>
                                 </div>
                             </div>
 
@@ -433,16 +375,7 @@
                                     <button type="button" class="view-all-link" id="dash-view-all-messages">View all</button>
                                 </div>
                                 <div class="recent-messages-list" id="dashboard-recent-messages">
-                                    <div class="message-row-item">
-                                        <div class="avatar avatar-sm">MS</div>
-                                        <div class="message-row-info">
-                                            <div class="flex-between">
-                                                <h4 class="message-row-name">Maria Santos</h4>
-                                                <span class="message-row-time">11m ago</span>
-                                            </div>
-                                            <p class="message-row-text">Hi! Are you available for the job?</p>
-                                        </div>
-                                    </div>
+                                    <div class="loader"></div>
                                 </div>
                             </div>
                         </div>
@@ -520,7 +453,7 @@
                 </section>
 
                 <!-- ==========================================================================
-                     6. SECTION: APPLICATIONS HUB (SCREEN 8 & POSTED CANDIDATES)
+                     6. SECTION: APPLICATIONS HUB
                      ========================================================================== -->
                 <section id="section-applications" class="content-section hidden">
                     <div class="page-header">
@@ -543,7 +476,7 @@
                 </section>
 
                 <!-- ==========================================================================
-                     7. SECTION: MESSAGES (SCREEN 9 REPLICA)
+                     7. SECTION: MESSAGES
                      ========================================================================== -->
                 <section id="section-messages" class="content-section hidden">
                     <div class="page-header">
@@ -583,7 +516,7 @@
                 </section>
 
                 <!-- ==========================================================================
-                     8. SECTION: TRANSACTIONS (SCREEN 10 REPLICA)
+                     8. SECTION: TRANSACTIONS (DYNAMIC DATA)
                      ========================================================================== -->
                 <section id="section-transactions" class="content-section hidden">
                     <div class="page-header">
@@ -595,23 +528,23 @@
                     <div class="transaction-stats-grid mt-6">
                         <div class="trans-stat-card">
                             <span class="stat-card-label">Total Earnings</span>
-                            <div class="stat-card-number">₱5,250</div>
+                            <div class="stat-card-number" id="trans-total-earnings">₱0</div>
                         </div>
                         <div class="trans-stat-card">
                             <span class="stat-card-label">Pending</span>
-                            <div class="stat-card-number text-amber">₱1,000</div>
+                            <div class="stat-card-number text-amber" id="trans-pending-earnings">₱0</div>
                         </div>
                         <div class="trans-stat-card">
                             <span class="stat-card-label">Completed</span>
-                            <div class="stat-card-number text-green">₱4,250</div>
+                            <div class="stat-card-number text-green" id="trans-completed-earnings">₱0</div>
                         </div>
                     </div>
 
                     <!-- Filter Tabs -->
                     <div class="tabs mt-6">
-                        <button type="button" class="tab-btn active" data-filter="all">All</button>
-                        <button type="button" class="tab-btn" data-filter="pending">Pending</button>
-                        <button type="button" class="tab-btn" data-filter="completed">Completed</button>
+                        <button type="button" class="tab-btn active trans-tab" data-filter="all">All</button>
+                        <button type="button" class="tab-btn trans-tab" data-filter="pending">Pending</button>
+                        <button type="button" class="tab-btn trans-tab" data-filter="completed">Completed</button>
                     </div>
 
                     <!-- Transactions Data Table Card -->
@@ -626,36 +559,9 @@
                                         <th>Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="transactions-tbody">
                                     <tr>
-                                        <td><strong>Logo Design for Cafe</strong></td>
-                                        <td>Aug 10, 2024</td>
-                                        <td><strong>₱1,000</strong></td>
-                                        <td><span class="badge badge-approved">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Data Encoding Project</strong></td>
-                                        <td>Aug 12, 2024</td>
-                                        <td><strong>₱500</strong></td>
-                                        <td><span class="badge badge-pending">Pending</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Social Media Assistant</strong></td>
-                                        <td>Jul 28, 2024</td>
-                                        <td><strong>₱800</strong></td>
-                                        <td><span class="badge badge-approved">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Video Editing Project</strong></td>
-                                        <td>Jul 25, 2024</td>
-                                        <td><strong>₱1,200</strong></td>
-                                        <td><span class="badge badge-approved">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Poster Design</strong></td>
-                                        <td>Jul 20, 2024</td>
-                                        <td><strong>₱750</strong></td>
-                                        <td><span class="badge badge-approved">Completed</span></td>
+                                        <td colspan="4" class="text-center text-muted" style="padding: 2rem;">No transaction history found.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -664,7 +570,7 @@
                 </section>
 
                 <!-- ==========================================================================
-                     9. SECTION: RATINGS & FEEDBACK (SCREEN 11 REPLICA)
+                     9. SECTION: RATINGS & FEEDBACK (DYNAMIC DATA)
                      ========================================================================== -->
                 <section id="section-ratings" class="content-section hidden">
                     <div class="page-header">
@@ -681,18 +587,18 @@
                             <p class="text-muted text-sm">How was your experience working with peers?</p>
                             
                             <div class="star-rating-large mt-3">
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
+                                <span class="star filled" data-val="1">★</span>
+                                <span class="star filled" data-val="2">★</span>
+                                <span class="star filled" data-val="3">★</span>
+                                <span class="star filled" data-val="4">★</span>
+                                <span class="star filled" data-val="5">★</span>
                             </div>
-                            <div class="rating-verdict-text text-green font-bold text-center mt-1">Excellent!</div>
+                            <div class="rating-verdict-text text-green font-bold text-center mt-1" id="inline-rating-verdict">Excellent!</div>
 
                             <form id="inline-rating-form" class="mt-4">
                                 <div class="form-group">
                                     <label class="form-label" for="inline-feedback-text">Write your feedback (optional)</label>
-                                    <textarea id="inline-feedback-text" class="form-control" rows="3" placeholder="He is very kind and gives clear instructions. Great experience!"></textarea>
+                                    <textarea id="inline-feedback-text" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-purple btn-block">Submit Rating</button>
                             </form>
@@ -704,10 +610,10 @@
                                 <h2 class="dash-card-title">Your Ratings</h2>
                             </div>
                             <div class="rating-score-row">
-                                <div class="rating-huge-num">4.8</div>
+                                <div class="rating-huge-num" id="ratings-avg-score">0.0</div>
                                 <div class="rating-score-meta">
                                     <span>out of 5</span>
-                                    <small class="text-muted block">Based on 24 reviews</small>
+                                    <small class="text-muted block" id="ratings-total-count">Based on 0 reviews</small>
                                 </div>
                             </div>
 
@@ -715,18 +621,18 @@
                             <div class="rating-bars-list mt-4">
                                 <div class="rating-bar-row">
                                     <span>5 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 85%"></div></div>
-                                    <span class="text-muted">20</span>
+                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
+                                    <span class="text-muted">0</span>
                                 </div>
                                 <div class="rating-bar-row">
                                     <span>4 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 12%"></div></div>
-                                    <span class="text-muted">3</span>
+                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
+                                    <span class="text-muted">0</span>
                                 </div>
                                 <div class="rating-bar-row">
                                     <span>3 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 4%"></div></div>
-                                    <span class="text-muted">1</span>
+                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
+                                    <span class="text-muted">0</span>
                                 </div>
                                 <div class="rating-bar-row">
                                     <span>2 ★</span>
@@ -747,24 +653,14 @@
                         <div class="dash-card-header">
                             <h2 class="dash-card-title">Recent Feedback</h2>
                         </div>
-                        <div class="feedback-feed-list">
-                            <div class="feedback-item">
-                                <div class="avatar avatar-sm">JP</div>
-                                <div class="feedback-content">
-                                    <div class="flex-between">
-                                        <strong>John Paul</strong>
-                                        <div class="text-amber text-sm">★★★★★</div>
-                                    </div>
-                                    <p class="feedback-comment">Great employer! Clear instructions and fast payment. Thank you!</p>
-                                    <small class="text-muted">Aug 11, 2024</small>
-                                </div>
-                            </div>
+                        <div class="feedback-feed-list" id="ratings-feedback-list">
+                            <div class="empty-state text-center text-muted" style="padding: 1.5rem;">No reviews received yet.</div>
                         </div>
                     </div>
                 </section>
 
                 <!-- ==========================================================================
-                     10. SECTION: PROFILE & PORTFOLIO (SCREEN 5 REPLICA)
+                     10. SECTION: PROFILE & PORTFOLIO
                      ========================================================================== -->
                 <section id="section-profile" class="content-section hidden">
                     <div class="page-header">
@@ -815,7 +711,7 @@
                 </section>
 
                 <!-- ==========================================================================
-                     11. SECTION: ADMINISTRATOR DASHBOARD (SCREEN 12 REPLICA)
+                     11. SECTION: ADMINISTRATOR DASHBOARD
                      ========================================================================== -->
                 <section id="section-admin" class="content-section hidden">
                     <div class="page-header">
