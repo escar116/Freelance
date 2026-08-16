@@ -3,60 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WORK 4 A BIT - Freelance Job Board</title>
-    <!-- Fonts -->
+    <title>WORK 4 A BIT - Campus Freelance Network</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
     <!-- ==============================================
-         1. FULLPAGE LOADING SCREEN
+         1. LOADING OVERLAY
          ============================================== -->
     <div id="loading-screen" class="loading-overlay">
         <div class="spinner"></div>
-        <p>Loading WORK 4 A BIT...</p>
+        <p class="loading-text">WORK 4 A BIT</p>
     </div>
 
     <!-- ==============================================
-         2. AUTH VIEWS (Login / Register / Forgot / Pending)
+         2. TOP NAVIGATION HEADER
+         ============================================== -->
+    <header id="top-navbar" class="top-navbar hidden">
+        <div class="nav-container">
+            <!-- Brand Logo -->
+            <a href="#" class="brand-logo" data-nav="dashboard">
+                <span class="logo-text">WORK 4 A BIT</span>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="top-search-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="global-search-input" placeholder="Search services, students, skills...">
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="top-nav-links">
+                <button type="button" class="nav-link-btn active" data-target="dashboard">Home</button>
+                <button type="button" class="nav-link-btn" data-target="requests">Help Requests</button>
+                <button type="button" class="nav-link-btn" data-target="applications">Applications</button>
+                <button type="button" class="nav-link-btn" data-target="messages">Messages</button>
+                <button type="button" class="nav-link-btn" data-target="profile">Profile</button>
+                <button type="button" class="nav-link-btn hidden" id="nav-admin" data-target="admin">Admin</button>
+                
+                <button type="button" id="theme-toggle" class="icon-nav-btn" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                
+                <button type="button" id="btn-logout" class="nav-link-btn logout-link">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Logout
+                </button>
+            </nav>
+
+            <!-- Mobile Menu Toggle -->
+            <button type="button" id="mobile-nav-toggle" class="mobile-toggle-btn">☰</button>
+        </div>
+    </header>
+
+    <!-- ==============================================
+         3. AUTHENTICATION VIEWS
          ============================================== -->
     <div id="auth-views" class="auth-container hidden">
 
         <!-- Login Section -->
         <section id="section-login" class="auth-card">
             <div class="auth-header">
-                <div class="logo justify-center mb-2">
-                    <div class="logo-dot"></div>
-                    <h2>WORK 4 A BIT</h2>
-                </div>
-                <p class="subtitle">Log in to your account</p>
+                <h2>Welcome back</h2>
+                <p class="subtitle">Log in to your WORK 4 A BIT account</p>
             </div>
             
             <form id="login-form">
                 <div class="form-group">
                     <label class="form-label" for="login-email">Email</label>
-                    <input type="email" id="login-email" class="form-control" placeholder="name@university.edu" required>
+                    <input type="email" id="login-email" class="form-input" placeholder="student@university.edu" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="login-password">Password</label>
-                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
                 </div>
                 <p id="login-error" class="error-message hidden"></p>
-                <button type="submit" id="login-submit-btn" class="btn btn-primary btn-block">Log in</button>
+                <button type="submit" id="login-submit-btn" class="btn btn-dark btn-block">Log in</button>
             </form>
 
-            <div class="divider"><span>OR</span></div>
+            <div class="auth-divider"><span>OR</span></div>
 
             <button type="button" id="login-google-btn" class="btn btn-outline btn-block">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
                 Continue with Google
             </button>
 
-            <div class="auth-links mt-4 text-center">
+            <div class="auth-links text-center mt-4">
                 <a href="#" id="login-link-forgot" class="link-text">Forgot password?</a>
                 <p class="mt-2 text-muted">Don't have an account? <a href="#" id="login-link-register" class="link-text font-bold">Register here</a></p>
             </div>
@@ -65,15 +102,12 @@
         <!-- Register Section -->
         <section id="section-register" class="auth-card register hidden">
             <div class="auth-header">
-                <div class="logo justify-center mb-2">
-                    <div class="logo-dot"></div>
-                    <h2>Create Account</h2>
-                </div>
-                <p class="subtitle">Join WORK 4 A BIT Freelance Network</p>
+                <h2>Create an Account</h2>
+                <p class="subtitle">Join the verified student technical marketplace</p>
             </div>
 
             <!-- Google Status Pill -->
-            <div id="register-google-status" class="google-status-box hidden">
+            <div id="register-google-status" class="google-status-pill hidden">
                 <span>✓ Google Linked: <strong id="register-google-email"></strong></span>
             </div>
 
@@ -82,24 +116,24 @@
                 Continue with Google
             </button>
 
-            <div id="register-divider" class="divider"><span>OR FILL DETAILS</span></div>
+            <div id="register-divider" class="auth-divider"><span>OR FILL DETAILS</span></div>
 
             <form id="register-form">
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-fullname">Full Name *</label>
-                        <input type="text" id="register-fullname" class="form-control" placeholder="Juan Dela Cruz" required>
+                        <input type="text" id="register-fullname" class="form-input" placeholder="Charles Jan Paraggua" required>
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-studentid">Student ID *</label>
-                        <input type="text" id="register-studentid" class="form-control" placeholder="2022-12345" required>
+                        <input type="text" id="register-studentid" class="form-input" placeholder="2022-12345" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-gender">Gender</label>
-                        <select id="register-gender" class="form-control">
+                        <select id="register-gender" class="form-input">
                             <option value="" disabled selected>Select gender</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
@@ -109,7 +143,7 @@
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="register-role">Preferred Role</label>
-                        <select id="register-role" class="form-control">
+                        <select id="register-role" class="form-input">
                             <option value="Offer My Skills">Offer My Skills</option>
                             <option value="Need Technical Assistance">Need Technical Assistance</option>
                         </select>
@@ -118,7 +152,7 @@
 
                 <div class="form-group">
                     <label class="form-label" for="register-faculty">Faculty Reference</label>
-                    <select id="register-faculty" class="form-control">
+                    <select id="register-faculty" class="form-input">
                         <option value="Engr. Marites Bautista">Engr. Marites Bautista</option>
                         <option value="Engr. Rafael Domingo">Engr. Rafael Domingo</option>
                         <option value="Engr. Liza Fernandez">Engr. Liza Fernandez</option>
@@ -129,25 +163,25 @@
 
                 <div class="form-group" id="register-email-group">
                     <label class="form-label" for="register-email">Email Address *</label>
-                    <input type="email" id="register-email" class="form-control" placeholder="student@university.edu">
+                    <input type="email" id="register-email" class="form-input" placeholder="student@university.edu">
                 </div>
 
                 <div class="form-row" id="register-password-row">
                     <div class="form-group flex-1" id="register-password-group">
                         <label class="form-label" for="register-password">Password *</label>
-                        <input type="password" id="register-password" class="form-control" placeholder="••••••••">
+                        <input type="password" id="register-password" class="form-input" placeholder="••••••••">
                     </div>
                     <div class="form-group flex-1" id="register-confirm-group">
                         <label class="form-label" for="register-confirm-password">Confirm Password *</label>
-                        <input type="password" id="register-confirm-password" class="form-control" placeholder="••••••••">
+                        <input type="password" id="register-confirm-password" class="form-input" placeholder="••••••••">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Certificate of Enrollment (Image)</label>
                     <div id="register-cert-dropzone" class="file-dropzone">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p class="mt-2">Click or drag & drop certificate image</p>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p class="mt-2 text-muted">Click to select Certificate Image</p>
                         <input type="file" id="register-certificate" accept="image/*" style="display:none">
                     </div>
                     <img id="register-cert-preview" class="file-preview hidden" alt="Certificate Preview">
@@ -155,10 +189,10 @@
 
                 <p id="register-error" class="error-message hidden"></p>
 
-                <button type="submit" id="register-submit-btn" class="btn btn-primary btn-block mt-4">Create account</button>
+                <button type="submit" id="register-submit-btn" class="btn btn-dark btn-block mt-4">Create account</button>
             </form>
 
-            <div class="auth-links mt-4 text-center">
+            <div class="auth-links text-center mt-4">
                 <p class="text-muted">Already registered? <a href="#" id="register-link-login" class="link-text font-bold">Log in here</a></p>
             </div>
         </section>
@@ -172,342 +206,360 @@
             <form id="forgot-form">
                 <div class="form-group">
                     <label class="form-label" for="forgot-email">Email Address</label>
-                    <input type="email" id="forgot-email" class="form-control" placeholder="name@university.edu" required>
+                    <input type="email" id="forgot-email" class="form-input" placeholder="student@university.edu" required>
                 </div>
-                <button type="submit" id="forgot-submit-btn" class="btn btn-primary btn-block">Send Reset Link</button>
+                <button type="submit" id="forgot-submit-btn" class="btn btn-dark btn-block">Send Reset Link</button>
             </form>
-            <div class="auth-links mt-4 text-center">
+            <div class="auth-links text-center mt-4">
                 <a href="#" id="forgot-link-login" class="link-text">← Back to Login</a>
             </div>
         </section>
 
-        <!-- Pending Approval Section -->
+        <!-- Pending Verification Section -->
         <section id="section-pending" class="auth-card text-center hidden">
-            <div class="pending-badge">⏳</div>
+            <div class="pending-icon">⏳</div>
             <h2>Account Pending Verification</h2>
-            <p class="subtitle mt-2">Your enrollment certificate is currently being reviewed by an administrator. You will gain full access once verified.</p>
+            <p class="subtitle mt-2">Your enrollment certificate is currently being reviewed by an administrator. You will gain access as soon as it is approved.</p>
             <button type="button" id="pending-logout-btn" class="btn btn-outline mt-6">Log Out</button>
         </section>
 
     </div>
 
     <!-- ==============================================
-         3. MAIN APPLICATION VIEWS
+         4. MAIN APP CONTENT CONTAINER
          ============================================== -->
-    <div id="app-views" class="layout hidden">
+    <div id="app-views" class="app-main-container hidden">
 
-        <!-- Mobile Sidebar Overlay -->
-        <div id="sidebar-overlay" class="mobile-overlay hidden"></div>
-
-        <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="sidebar-nav">
-            <div class="logo">
-                <div class="logo-dot"></div>
-                <h2>WORK 4 A BIT</h2>
-                <button type="button" id="sidebar-close-btn" class="mobile-close-btn">✕</button>
+        <!-- ==============================================
+             SECTION: Dashboard
+             ============================================== -->
+        <section id="section-dashboard" class="content-section">
+            <div class="hero-header-box">
+                <span class="eyebrow-tag">DASHBOARD</span>
+                <h1 class="hero-title" id="dashboard-welcome">Welcome back, User</h1>
+                <div class="hero-pill-badge" id="dashboard-role-badge">Role: Offer My Skills</div>
             </div>
 
-            <div class="sidebar-user-pill">
-                <div class="avatar avatar-sm" id="sidebar-user-avatar">U</div>
-                <span class="truncate font-semibold" id="sidebar-user-name">User</span>
-            </div>
-
-            <nav class="nav-links">
-                <button type="button" class="nav-btn active" data-target="dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Dashboard
-                </button>
-                <button type="button" class="nav-btn" data-target="requests">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    Service Requests
-                </button>
-                <button type="button" class="nav-btn" data-target="applications">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                    Applications
-                </button>
-                <button type="button" class="nav-btn" data-target="messages">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Messages
-                </button>
-                <button type="button" class="nav-btn" data-target="profile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    Profile
-                </button>
-                <button type="button" class="nav-btn hidden" id="nav-admin" data-target="admin">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Admin
-                </button>
-            </nav>
-
-            <div class="sidebar-footer">
-                <button type="button" class="nav-btn" id="theme-toggle">
-                    <span id="theme-icon">🌙</span>
-                    <span>Toggle Theme</span>
-                </button>
-                <button type="button" class="nav-btn text-danger" id="btn-logout">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-
-            <!-- Mobile Top Bar -->
-            <div class="mobile-top-bar">
-                <button type="button" id="mobile-menu-btn" class="btn btn-ghost btn-sm">☰</button>
-                <div class="logo">
-                    <div class="logo-dot"></div>
-                    <h2>WORK 4 A BIT</h2>
+            <!-- 3 Quick Action Cards -->
+            <div class="quick-actions-row">
+                <div class="quick-action-card" id="action-post-request">
+                    <div class="qa-icon-circle">+</div>
+                    <span class="qa-title">Post a help request</span>
+                    <span class="qa-arrow">→</span>
+                </div>
+                <div class="quick-action-card" id="action-browse-services">
+                    <div class="qa-icon-circle">🔍</div>
+                    <span class="qa-title">Browse requests</span>
+                    <span class="qa-arrow">→</span>
+                </div>
+                <div class="quick-action-card" id="action-view-profile">
+                    <div class="qa-icon-circle">👤</div>
+                    <span class="qa-title">Update my profile</span>
+                    <span class="qa-arrow">→</span>
                 </div>
             </div>
 
-            <!-- SECTION: Dashboard -->
-            <section id="section-dashboard" class="content-section">
-                <div class="page-header">
-                    <h1 class="page-title" id="dashboard-welcome">Welcome back! 👋</h1>
-                    <p class="text-muted">Here is your campus freelance activity overview.</p>
-                </div>
+            <!-- Categories Pill Section -->
+            <div class="categories-section mt-8">
+                <span class="eyebrow-tag">CATEGORIES</span>
+                <h2 class="section-heading">Explore Computer Engineering skills</h2>
+                <p class="section-subtext">Every listing belongs to a discipline you already study.</p>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-label">Applied Jobs</span>
-                        <div class="stat-value" id="stat-applied">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Completed Jobs</span>
-                        <div class="stat-value" id="stat-completed">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Total Earnings</span>
-                        <div class="stat-value text-accent" id="stat-earnings">₱0</div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Rating</span>
-                        <div class="stat-value" id="stat-rating">0.0 ★</div>
-                    </div>
+                <div class="category-pills-row" id="dashboard-category-pills">
+                    <button type="button" class="cat-pill active">Software Development</button>
+                    <button type="button" class="cat-pill">Programming</button>
+                    <button type="button" class="cat-pill">Embedded Systems</button>
+                    <button type="button" class="cat-pill">PCB & Hardware Design</button>
+                    <button type="button" class="cat-pill">IoT</button>
+                    <button type="button" class="cat-pill">AI & Data</button>
+                    <button type="button" class="cat-pill">UI/UX</button>
+                    <button type="button" class="cat-pill">Graphic Design</button>
+                    <button type="button" class="cat-pill">Technical Documentation</button>
+                    <button type="button" class="cat-pill">CAD & 3D Modeling</button>
                 </div>
+            </div>
 
-                <div class="glass-card mt-6">
-                    <div class="card-header-flex">
-                        <h3>RECOMMENDED LISTINGS</h3>
-                    </div>
-                    <div id="dashboard-listings" class="listings-list mt-4">
-                        <div class="empty-state">Loading listings...</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION: Service Requests -->
-            <section id="section-requests" class="content-section hidden">
-                <div class="page-header-flex">
+            <!-- Featured / Recommended Listings -->
+            <div class="featured-section mt-8">
+                <div class="flex-between">
                     <div>
-                        <h1 class="page-title">Service Requests</h1>
-                        <p class="text-muted">Browse peer technical tasks or post a new request</p>
+                        <span class="eyebrow-tag">POPULAR NOW</span>
+                        <h2 class="section-heading">Featured Requests</h2>
                     </div>
-                    <button type="button" id="btn-post-request" class="btn btn-primary">
-                        + Post a Request
-                    </button>
+                    <button type="button" class="link-btn-text" id="dashboard-view-all">View all →</button>
                 </div>
 
-                <div class="requests-layout">
-                    <!-- Filter Panel -->
-                    <aside class="filter-panel">
-                        <h3>Filter Requests</h3>
-                        
-                        <div class="form-group mt-4">
-                            <label class="form-label" for="filter-search">Search Keywords</label>
-                            <input type="text" id="filter-search" class="form-control" placeholder="Search tasks...">
-                        </div>
+                <div id="dashboard-listings" class="listings-grid mt-4">
+                    <div class="empty-state">Loading listings...</div>
+                </div>
+            </div>
+        </section>
 
-                        <div class="form-group">
-                            <label class="form-label" for="filter-category">Category</label>
-                            <select id="filter-category" class="form-control">
-                                <option value="">All Categories</option>
-                                <option value="Software Development">Software Development</option>
-                                <option value="Programming">Programming</option>
-                                <option value="Embedded Systems">Embedded Systems</option>
-                                <option value="PCB & Hardware Design">PCB & Hardware Design</option>
-                                <option value="IoT">IoT</option>
-                                <option value="AI & Data">AI & Data</option>
-                                <option value="UI/UX">UI/UX</option>
-                                <option value="Graphic Design">Graphic Design</option>
-                                <option value="Technical Documentation">Technical Documentation</option>
-                                <option value="CAD & 3D Modeling">CAD & 3D Modeling</option>
-                            </select>
-                        </div>
+        <!-- ==============================================
+             SECTION: Service / Help Requests
+             ============================================== -->
+        <section id="section-requests" class="content-section hidden">
+            <div class="page-top-header">
+                <div>
+                    <span class="eyebrow-tag">PEER SUPPORT</span>
+                    <h1 class="hero-title">Help Requests</h1>
+                    <p class="section-subtext">Students post what they need — send an offer if you can help.</p>
+                </div>
+                <button type="button" id="btn-post-request" class="btn btn-dark btn-pill">
+                    + Post a request
+                </button>
+            </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Max Budget: <strong id="filter-budget-value">₱20,000</strong></label>
-                            <input type="range" id="filter-budget" class="range-slider" min="500" max="50000" step="500" value="20000">
-                        </div>
+            <!-- Big Search Input -->
+            <div class="requests-big-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="filter-search" placeholder="Search requests, categories, students...">
+            </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="filter-sort">Sort By</label>
-                            <select id="filter-sort" class="form-control">
-                                <option value="newest">Newest First</option>
-                                <option value="price_asc">Budget: Low to High</option>
-                                <option value="price_desc">Budget: High to Low</option>
-                            </select>
-                        </div>
-                    </aside>
-
-                    <!-- Results Column -->
-                    <div class="requests-results-col">
-                        <div class="results-header-bar">
-                            <span id="requests-count" class="text-muted">Loading requests...</span>
-                        </div>
-                        <div id="requests-grid" class="requests-grid">
-                            <div class="loader"></div>
-                        </div>
+            <div class="requests-layout-grid mt-6">
+                <!-- Left Sidebar Filters -->
+                <aside class="filters-card">
+                    <h3 class="filter-title">Category</h3>
+                    <div class="filter-category-pills">
+                        <button type="button" class="cat-filter-btn active" data-cat="">All</button>
+                        <button type="button" class="cat-filter-btn" data-cat="Software Development">Software Development</button>
+                        <button type="button" class="cat-filter-btn" data-cat="Programming">Programming</button>
+                        <button type="button" class="cat-filter-btn" data-cat="Embedded Systems">Embedded Systems</button>
+                        <button type="button" class="cat-filter-btn" data-cat="PCB & Hardware Design">PCB & Hardware Design</button>
+                        <button type="button" class="cat-filter-btn" data-cat="IoT">IoT</button>
+                        <button type="button" class="cat-filter-btn" data-cat="AI & Data">AI & Data</button>
+                        <button type="button" class="cat-filter-btn" data-cat="UI/UX">UI/UX</button>
+                        <button type="button" class="cat-filter-btn" data-cat="Graphic Design">Graphic Design</button>
+                        <button type="button" class="cat-filter-btn" data-cat="Technical Documentation">Technical Documentation</button>
+                        <button type="button" class="cat-filter-btn" data-cat="CAD & 3D Modeling">CAD & 3D Modeling</button>
                     </div>
-                </div>
-            </section>
 
-            <!-- SECTION: Applications -->
-            <section id="section-applications" class="content-section hidden">
-                <div class="page-header">
-                    <h1 class="page-title">Applications Hub</h1>
-                    <p class="text-muted">Manage candidate offers for your postings & track your bids</p>
-                </div>
-
-                <div class="tabs">
-                    <button type="button" class="tab-btn active" data-tab="posted">Posted Services</button>
-                    <button type="button" class="tab-btn" data-tab="applied">My Applications</button>
-                </div>
-
-                <div id="posted-jobs-list" class="apps-list">
-                    <div class="loader"></div>
-                </div>
-
-                <div id="my-applications-list" class="apps-list hidden">
-                    <div class="loader"></div>
-                </div>
-            </section>
-
-            <!-- SECTION: Messages -->
-            <section id="section-messages" class="content-section hidden">
-                <div class="page-header">
-                    <h1 class="page-title">Messages</h1>
-                    <p class="text-muted">Collaborate with peers on accepted project tasks</p>
-                </div>
-
-                <div id="messages-container" class="messages-layout">
-                    <!-- Conversations Sidebar -->
-                    <div class="conversations-sidebar">
-                        <div class="conv-header">
-                            <h3>Active Chats</h3>
+                    <div class="filter-group mt-6">
+                        <div class="flex-between">
+                            <label class="filter-label">Max budget: <strong id="filter-budget-value">₱20,000</strong></label>
                         </div>
-                        <div id="conversations-list" class="conversations-list">
-                            <div class="loader"></div>
+                        <input type="range" id="filter-budget" class="filter-slider" min="500" max="50000" step="500" value="20000">
+                    </div>
+
+                    <div class="filter-group mt-4 flex-between">
+                        <label class="filter-label">Verified only</label>
+                        <label class="switch-toggle">
+                            <input type="checkbox" id="filter-verified-toggle">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="filter-group mt-6">
+                        <label class="filter-label">Sort by</label>
+                        <div class="sort-pills">
+                            <button type="button" class="sort-pill-btn active" data-sort="newest">Newest</button>
+                            <button type="button" class="sort-pill-btn" data-sort="price_asc">Price: low to high</button>
+                            <button type="button" class="sort-pill-btn" data-sort="price_desc">Price: high to low</button>
                         </div>
                     </div>
 
-                    <!-- Chat Window -->
-                    <div id="chat-panel" class="chat-panel">
-                        <div class="chat-header">
-                            <button type="button" id="chat-back-btn" class="btn btn-ghost btn-sm mobile-only">←</button>
-                            <div id="chat-header-content" class="chat-header-content">
-                                <span class="text-muted">Select a conversation to start chatting</span>
-                            </div>
+                    <button type="button" id="btn-reset-filters" class="link-btn-text reset-filter-link mt-6">Reset filters</button>
+                </aside>
+
+                <!-- Right Request Cards Grid -->
+                <div class="requests-feed-col">
+                    <div class="results-meta-bar">
+                        <span id="requests-count" class="text-muted">Loading requests...</span>
+                    </div>
+                    <div id="requests-grid" class="requests-grid">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================================
+             SECTION: Applications Hub
+             ============================================== -->
+        <section id="section-applications" class="content-section hidden">
+            <div class="page-top-header">
+                <div>
+                    <span class="eyebrow-tag">JOB OFFERS & CANDIDATES</span>
+                    <h1 class="hero-title">Applications Hub</h1>
+                    <p class="section-subtext">Manage offers for your posts and track your submitted bids.</p>
+                </div>
+            </div>
+
+            <div class="pill-tabs-nav">
+                <button type="button" class="tab-pill-btn active" data-tab="posted">Posted Services</button>
+                <button type="button" class="tab-pill-btn" data-tab="applied">My Applications</button>
+            </div>
+
+            <div id="posted-jobs-list" class="apps-feed-container">
+                <div class="loader"></div>
+            </div>
+
+            <div id="my-applications-list" class="apps-feed-container hidden">
+                <div class="loader"></div>
+            </div>
+        </section>
+
+        <!-- ==============================================
+             SECTION: Messages
+             ============================================== -->
+        <section id="section-messages" class="content-section hidden">
+            <div class="page-top-header">
+                <div>
+                    <span class="eyebrow-tag">CHAT & COLLABORATION</span>
+                    <h1 class="hero-title">Messages</h1>
+                </div>
+            </div>
+
+            <div id="messages-container" class="chat-card-layout">
+                <!-- Left: Conversations Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <h3>Active Chats</h3>
+                    </div>
+                    <div id="conversations-list" class="chat-conversations-list">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+
+                <!-- Right: Active Chat View -->
+                <div id="chat-panel" class="chat-main-panel">
+                    <div class="chat-panel-header">
+                        <button type="button" id="chat-back-btn" class="btn btn-outline btn-sm mobile-only">←</button>
+                        <div id="chat-header-content" class="chat-header-user">
+                            <span class="text-muted">Select a conversation to start chatting</span>
                         </div>
-                        <div id="chat-messages" class="chat-messages">
-                            <div class="empty-state">No conversation selected</div>
+                    </div>
+                    <div id="chat-messages" class="chat-messages-area">
+                        <div class="empty-state">No active conversation selected</div>
+                    </div>
+                    <div class="chat-input-bar">
+                        <input type="text" id="chat-input" class="chat-text-input" placeholder="Type your message...">
+                        <button type="button" id="chat-send-btn" class="btn btn-dark">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================================
+             SECTION: Profile
+             ============================================== -->
+        <section id="section-profile" class="content-section hidden">
+            
+            <!-- Profile Hero Card (Matches Screenshot 1) -->
+            <div class="profile-hero-card">
+                <div class="profile-avatar-circle" id="profile-avatar">CJ</div>
+                <div class="profile-user-info">
+                    <h1 class="profile-user-name" id="profile-name">Charles Jan Paraggua</h1>
+                    <p class="profile-user-program" id="profile-program-sub">Computer Engineering · Student</p>
+                    <div class="profile-availability-pill" id="profile-availability-badge">Available</div>
+                </div>
+                <button type="button" id="btn-edit-profile" class="edit-profile-pill-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    Edit profile
+                </button>
+            </div>
+
+            <!-- 3 Stat Cards Grid (Matches Screenshot 1) -->
+            <div class="profile-stats-row mt-6">
+                <div class="stat-box-card">
+                    <div class="stat-big-num" id="stat-completed-projects">0</div>
+                    <div class="stat-small-label">Completed projects</div>
+                </div>
+                <div class="stat-box-card">
+                    <div class="stat-big-num" id="stat-reviews-count">0</div>
+                    <div class="stat-small-label">Reviews</div>
+                </div>
+                <div class="stat-box-card">
+                    <div class="stat-big-num" id="stat-active-services">0</div>
+                    <div class="stat-small-label">Active services</div>
+                </div>
+            </div>
+
+            <!-- Credentials & References (Matches Screenshot 1) -->
+            <div class="profile-section-block mt-8">
+                <h3 class="profile-block-heading">Credentials & references</h3>
+                <div class="credentials-card mt-3">
+                    <div class="cred-grid">
+                        <div class="cred-item">
+                            <span class="cred-label">Faculty reference</span>
+                            <span class="cred-value" id="profile-faculty">Not provided</span>
                         </div>
-                        <div class="chat-input-row">
-                            <input type="text" id="chat-input" class="form-control" placeholder="Write a message...">
-                            <button type="button" id="chat-send-btn" class="btn btn-primary">Send</button>
+                        <div class="cred-item">
+                            <span class="cred-label">Student ID</span>
+                            <span class="cred-value" id="profile-student-id">—</span>
+                        </div>
+                        <div class="cred-item">
+                            <span class="cred-label">Program</span>
+                            <span class="cred-value" id="profile-program-val">Computer Engineering</span>
+                        </div>
+                        <div class="cred-item">
+                            <span class="cred-label">Verification Status</span>
+                            <span class="cred-value" id="profile-verification">Checking...</span>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- SECTION: Profile -->
-            <section id="section-profile" class="content-section hidden">
-                <div class="page-header">
-                    <h1 class="page-title">Student Profile</h1>
-                    <p class="text-muted">Your verified academic & freelancer identity</p>
+            <!-- Portfolio Section -->
+            <div class="profile-section-block mt-8">
+                <h3 class="profile-block-heading">Portfolio</h3>
+                <p class="text-muted mt-2">No portfolio items yet.</p>
+            </div>
+
+            <!-- Ratings & Reviews Section -->
+            <div class="profile-section-block mt-8">
+                <div class="flex-between">
+                    <h3 class="profile-block-heading">Ratings & reviews</h3>
+                    <a href="#" class="link-btn-text">See all feedback</a>
                 </div>
+                <p class="text-muted mt-2" id="profile-reviews-empty">No reviews yet.</p>
+            </div>
 
-                <div class="profile-hero">
-                    <div class="avatar avatar-lg" id="profile-avatar">U</div>
-                    <div class="profile-hero-info">
-                        <div class="profile-name-row">
-                            <h1 id="profile-name">Student Name</h1>
-                            <span class="badge badge-normal" id="profile-role">Student</span>
-                        </div>
-                        
-                        <div class="profile-details-grid mt-4">
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Email</small>
-                                <p id="profile-email">email@student.edu</p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Student ID</small>
-                                <p id="profile-student-id">N/A</p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Gender</small>
-                                <p id="profile-gender">N/A</p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Faculty Reference</small>
-                                <p id="profile-faculty">N/A</p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Verification Status</small>
-                                <p><span id="profile-verification" class="badge">Checking...</span></p>
-                            </div>
-                            <div class="profile-detail-item">
-                                <small class="text-muted">Active Applications</small>
-                                <p id="profile-stat-applications" class="font-bold">0</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" id="btn-edit-profile" class="btn btn-outline">Edit Profile</button>
+        </section>
+
+        <!-- ==============================================
+             SECTION: Admin Dashboard
+             ============================================== -->
+        <section id="section-admin" class="content-section hidden">
+            <div class="page-top-header">
+                <div>
+                    <span class="eyebrow-tag">ADMINISTRATION</span>
+                    <h1 class="hero-title">Student Verification</h1>
+                    <p class="section-subtext">Review uploaded certificates of enrollment to approve registrations.</p>
                 </div>
-            </section>
+            </div>
 
-            <!-- SECTION: Admin Dashboard -->
-            <section id="section-admin" class="content-section hidden">
-                <div class="page-header">
-                    <h1 class="page-title">Admin Verification Dashboard</h1>
-                    <p class="text-muted">Review student certificates of registration to approve accounts</p>
-                </div>
+            <div id="admin-list" class="admin-cards-list mt-6">
+                <div class="loader"></div>
+            </div>
+        </section>
 
-                <div id="admin-list" class="admin-list mt-4">
-                    <div class="loader"></div>
-                </div>
-            </section>
-
-        </main>
     </div>
 
     <!-- ==============================================
-         4. NATIVE DIALOG MODALS
+         5. MODAL DIALOGS
          ============================================== -->
 
     <!-- New Request Dialog -->
-    <dialog id="dialog-new-request" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <dialog id="dialog-new-request" class="clean-dialog">
+        <div class="dialog-inner">
+            <div class="dialog-header">
                 <h2>Post a Help Request</h2>
                 <button type="button" class="dialog-close-btn">✕</button>
             </div>
             <form id="new-request-form">
                 <div class="form-group">
                     <label class="form-label" for="nr-title">Task Title *</label>
-                    <input type="text" id="nr-title" class="form-control" placeholder="e.g. Need assistance with Arduino sensor coding" required>
+                    <input type="text" id="nr-title" class="form-input" placeholder="e.g. Need assistance with Arduino sensor coding" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="nr-description">Description *</label>
-                    <textarea id="nr-description" class="form-control" rows="4" placeholder="Detail your project requirements and deliverables..." required></textarea>
+                    <textarea id="nr-description" class="form-input" rows="4" placeholder="Detail your project requirements and deliverables..." required></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-category">Category</label>
-                        <select id="nr-category" class="form-control">
+                        <select id="nr-category" class="form-input">
                             <option value="Software Development">Software Development</option>
                             <option value="Programming">Programming</option>
                             <option value="Embedded Systems">Embedded Systems</option>
@@ -522,7 +574,7 @@
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-urgency">Urgency</label>
-                        <select id="nr-urgency" class="form-control">
+                        <select id="nr-urgency" class="form-input">
                             <option value="Normal">Normal</option>
                             <option value="Low">Low</option>
                             <option value="Urgent">Urgent 🔥</option>
@@ -532,78 +584,78 @@
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-budget">Budget (₱) *</label>
-                        <input type="number" id="nr-budget" class="form-control" placeholder="500" min="50" required>
+                        <input type="number" id="nr-budget" class="form-input" placeholder="500" min="50" required>
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-deadline">Deadline</label>
-                        <input type="date" id="nr-deadline" class="form-control">
+                        <input type="date" id="nr-deadline" class="form-input">
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="dialog-actions">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" id="new-request-submit" class="btn btn-primary">Post request</button>
+                    <button type="submit" id="new-request-submit" class="btn btn-dark">Post request</button>
                 </div>
             </form>
         </div>
     </dialog>
 
     <!-- Apply to Request Dialog -->
-    <dialog id="dialog-apply" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Apply to Help Request</h2>
+    <dialog id="dialog-apply" class="clean-dialog">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <h2>Apply & Send Offer</h2>
                 <button type="button" class="dialog-close-btn">✕</button>
             </div>
             <p class="text-muted mb-4" id="apply-job-title">Job Title</p>
             <form id="apply-form">
                 <div class="form-group">
                     <label class="form-label" for="apply-amount">Your Price Offer (₱) *</label>
-                    <input type="number" id="apply-amount" class="form-control" min="1" required>
+                    <input type="number" id="apply-amount" class="form-input" min="1" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="apply-message">Your Proposal / Pitch *</label>
-                    <textarea id="apply-message" class="form-control" rows="4" placeholder="Explain your relevant skills and how you can assist..." required></textarea>
+                    <textarea id="apply-message" class="form-input" rows="4" placeholder="Explain how you can solve this task..." required></textarea>
                 </div>
-                <div class="modal-footer">
+                <div class="dialog-actions">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" id="apply-submit" class="btn btn-primary">Submit Application</button>
+                    <button type="submit" id="apply-submit" class="btn btn-sky">Send Offer</button>
                 </div>
             </form>
         </div>
     </dialog>
 
     <!-- Edit Profile Dialog -->
-    <dialog id="dialog-edit-profile" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <dialog id="dialog-edit-profile" class="clean-dialog">
+        <div class="dialog-inner">
+            <div class="dialog-header">
                 <h2>Edit Profile</h2>
                 <button type="button" class="dialog-close-btn">✕</button>
             </div>
             <form id="edit-profile-form">
                 <div class="form-group">
                     <label class="form-label" for="edit-bio">Bio / Summary</label>
-                    <textarea id="edit-bio" class="form-control" rows="3" placeholder="Tell other students about your background..."></textarea>
+                    <textarea id="edit-bio" class="form-input" rows="3" placeholder="Tell peers about your technical background..."></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="edit-availability">Availability</label>
-                    <select id="edit-availability" class="form-control">
+                    <select id="edit-availability" class="form-input">
                         <option value="Available">Available</option>
                         <option value="Busy">Busy</option>
                         <option value="Unavailable">Unavailable</option>
                     </select>
                 </div>
-                <div class="modal-footer">
+                <div class="dialog-actions">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-dark">Save Changes</button>
                 </div>
             </form>
         </div>
     </dialog>
 
     <!-- Review Dialog -->
-    <dialog id="dialog-review" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <dialog id="dialog-review" class="clean-dialog">
+        <div class="dialog-inner">
+            <div class="dialog-header">
                 <h2>Leave a Review</h2>
                 <button type="button" class="dialog-close-btn">✕</button>
             </div>
@@ -611,45 +663,43 @@
                 <div class="form-group text-center">
                     <label class="form-label">Rating</label>
                     <div class="star-rating" id="review-stars">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
+                        <span class="star filled" data-value="1">★</span>
+                        <span class="star filled" data-value="2">★</span>
+                        <span class="star filled" data-value="3">★</span>
+                        <span class="star filled" data-value="4">★</span>
+                        <span class="star filled" data-value="5">★</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="review-comment">Comment & Feedback</label>
-                    <textarea id="review-comment" class="form-control" rows="3" placeholder="Share your experience working with this peer..." required></textarea>
+                    <label class="form-label" for="review-comment">Feedback & Comments</label>
+                    <textarea id="review-comment" class="form-input" rows="3" placeholder="Write feedback for your peer..." required></textarea>
                 </div>
-                <div class="modal-footer">
+                <div class="dialog-actions">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                    <button type="submit" class="btn btn-dark">Submit Review</button>
                 </div>
             </form>
         </div>
     </dialog>
 
     <!-- Certificate Preview Dialog -->
-    <dialog id="dialog-certificate" class="modal">
-        <div class="modal-content text-center">
-            <div class="modal-header">
+    <dialog id="dialog-certificate" class="clean-dialog">
+        <div class="dialog-inner text-center">
+            <div class="dialog-header">
                 <h2>Certificate Preview</h2>
                 <button type="button" class="dialog-close-btn">✕</button>
             </div>
-            <img id="cert-preview-img" class="cert-full-image mt-4" src="" alt="Certificate Full Size">
-            <div class="modal-footer">
+            <img id="cert-preview-img" class="cert-modal-preview mt-4" src="" alt="Certificate">
+            <div class="dialog-actions mt-4">
                 <button type="button" class="btn btn-outline dialog-close-btn">Close</button>
             </div>
         </div>
     </dialog>
 
-    <!-- ==============================================
-         5. TOAST NOTIFICATION CONTAINER
-         ============================================== -->
+    <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Application Controller -->
+    <!-- Application Script -->
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>
