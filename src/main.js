@@ -35,12 +35,12 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
 
 // ── State ────────────────────────────────────────────────────────────────────
-let currentUser = null;
-let userData = null;
+let currentUser = null;    // Firebase Auth user
+let userData = null;       // PostgreSQL user record
 let activeSection = 'dashboard';
 let messagesInterval = null;
 let activeConvId = null;
-let isDarkTheme = false;
+let isDarkTheme = true;
 
 // ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
@@ -54,11 +54,12 @@ function showToast(message, type = 'success') {
   const container = $('#toast-container');
   if (!container) return;
   const toast = document.createElement('div');
-  toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
+  toast.className = `toast toast-${type}`;
   toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => {
-    toast.remove();
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
 
@@ -93,10 +94,9 @@ function navigateTo(section) {
   if (target) {
     target.classList.remove('hidden');
   }
-  
-  $$('.nav-link-btn[data-target]').forEach(b => {
-    b.classList.toggle('active', b.dataset.target === section);
-  });
+  $$('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
+  const activeBtn = $(`.nav-btn[data-target="${section}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
 
   // Load section specific data
   if (section === 'dashboard') loadDashboard();
@@ -109,7 +109,6 @@ function navigateTo(section) {
 
 function showAuth(section = 'login') {
   hide($('#app-views'));
-  hide($('#top-navbar'));
   hide($('#loading-screen'));
   show($('#auth-views'));
   $$('#auth-views section').forEach(s => s.classList.add('hidden'));
@@ -120,15 +119,20 @@ function showAuth(section = 'login') {
 function showApp() {
   hide($('#auth-views'));
   hide($('#loading-screen'));
-  show($('#top-navbar'));
   show($('#app-views'));
 
-  // Admin tab visibility
+  // Admin visibility
   const adminNav = $('#nav-admin');
   if (adminNav) {
     if (userData?.email === ADMIN_EMAIL) show(adminNav);
     else hide(adminNav);
   }
+
+  // Sidebar info
+  const nameEl = $('#sidebar-user-name');
+  if (nameEl) nameEl.textContent = userData?.fullName || currentUser?.displayName || 'User';
+  const avatarEl = $('#sidebar-user-avatar');
+  if (avatarEl) avatarEl.textContent = initials(userData?.fullName || currentUser?.displayName || 'U');
 
   navigateTo('dashboard');
 }
@@ -234,6 +238,7 @@ function setupRegister() {
       const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid });
       if (res.data.user) {
+        // Already registered
         return;
       }
       googleUser = result.user;
@@ -293,6 +298,7 @@ function setupRegister() {
         uid = cred.user.uid;
       }
 
+      // Compress certificate
       let certUrl = 'none';
       const certFile = certInput?.files?.[0];
       if (certFile) {
@@ -345,17 +351,21 @@ async function loadDashboard() {
   const welcomeEl = $('#dashboard-welcome');
   if (welcomeEl) {
     const firstName = (userData?.fullName || 'User').split(' ')[0];
-    welcomeEl.textContent = `Welcome back, ${firstName}`;
-  }
-
-  const roleBadge = $('#dashboard-role-badge');
-  if (roleBadge) {
-    roleBadge.textContent = `Role: ${userData?.preferredRole || 'Offer My Skills'}`;
+    welcomeEl.textContent = `Welcome back, ${firstName}! 👋`;
   }
 
   try {
-    const reqRes = await listHelpRequests(dc);
+    const [reqRes, appRes] = await Promise.all([
+      listHelpRequests(dc),
+      userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }) : { data: { applications: [] } }
+    ]);
     const requests = reqRes.data.helpRequests || [];
+    const applications = appRes.data.applications || [];
+
+    $('#stat-applied').textContent = applications.length;
+    $('#stat-completed').textContent = '0';
+    $('#stat-earnings').textContent = peso(0);
+    $('#stat-rating').textContent = '0.0 ★';
 
     const listEl = $('#dashboard-listings');
     listEl.innerHTML = '';
@@ -364,58 +374,25 @@ async function loadDashboard() {
       listEl.innerHTML = '<div class="empty-state">No listings found.</div>';
     } else {
       recent.forEach(r => {
-        const card = document.createElement('div');
-        card.className = 'request-card';
-        const urgencyClass = r.urgency === 'Urgent' ? 'badge-urgent' : r.urgency === 'Low' ? 'badge-low' : 'badge-normal';
-        card.innerHTML = `
-          <div class="request-card-header">
-            <div class="avatar avatar-sm">${initials(r.requester?.fullName || 'S')}</div>
-            <span class="request-card-name">${r.requester?.fullName || 'Student'}</span>
-            <span class="${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
-          </div>
-          <h3 class="request-card-title">${r.title}</h3>
-          <p class="request-card-desc line-clamp-3">${r.description || 'No description provided.'}</p>
-          <div class="request-card-meta">
-            <span class="request-tag">${r.category || 'General'}</span>
-            ${r.deadline ? `<span class="request-due-date">📅 Due ${r.deadline}</span>` : ''}
-          </div>
-          <div class="request-card-footer">
-            <div>
-              <div class="request-budget-label">Budget</div>
-              <div class="request-budget-val">${peso(r.budget)}</div>
-            </div>
-            <button class="btn btn-sky btn-sm" data-nav="requests">Send Offer</button>
-          </div>
+        const row = document.createElement('div');
+        row.className = 'listing-row';
+        row.innerHTML = `
+          <span class="listing-title">${r.title}</span>
+          <span class="badge badge-normal">${r.category || 'General'}</span>
+          <span class="listing-price">${peso(r.budget)}</span>
         `;
-        card.querySelector('button').addEventListener('click', () => navigateTo('requests'));
-        listEl.appendChild(card);
+        row.addEventListener('click', () => navigateTo('requests'));
+        listEl.appendChild(row);
       });
     }
   } catch (err) {
-    console.error('Dashboard error:', err);
+    console.error('Dashboard load error:', err);
   }
-}
-
-// ── Quick Actions ────────────────────────────────────────────────────────────
-function setupQuickActions() {
-  $('#action-post-request')?.addEventListener('click', () => $('#dialog-new-request').showModal());
-  $('#action-browse-services')?.addEventListener('click', () => navigateTo('requests'));
-  $('#action-view-profile')?.addEventListener('click', () => navigateTo('profile'));
-  $('#dashboard-view-all')?.addEventListener('click', () => navigateTo('requests'));
-
-  $$('#dashboard-category-pills .cat-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      $$('#dashboard-category-pills .cat-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      requestFilters.category = pill.textContent.trim();
-      navigateTo('requests');
-    });
-  });
 }
 
 // ── Service Requests ─────────────────────────────────────────────────────────
 let allRequests = [];
-let requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest', verifiedOnly: false };
+let requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest' };
 
 async function loadRequests() {
   const grid = $('#requests-grid');
@@ -438,19 +415,18 @@ function renderRequests(requests, appliedIds = new Set()) {
   const grid = $('#requests-grid');
   let filtered = requests.filter(r => {
     if (requestFilters.q) {
-      const hay = `${r.title} ${r.description} ${r.category} ${r.requester?.fullName}`.toLowerCase();
+      const hay = `${r.title} ${r.description} ${r.category}`.toLowerCase();
       if (!hay.includes(requestFilters.q.toLowerCase())) return false;
     }
     if (requestFilters.category && r.category !== requestFilters.category) return false;
     if (requestFilters.maxPrice && Number(r.budget) > requestFilters.maxPrice) return false;
-    if (requestFilters.verifiedOnly && r.requester?.verificationStatus !== 'verified') return false;
     return true;
   });
 
   if (requestFilters.sort === 'price_asc') filtered.sort((a, b) => a.budget - b.budget);
   else if (requestFilters.sort === 'price_desc') filtered.sort((a, b) => b.budget - a.budget);
 
-  $('#requests-count').textContent = `${filtered.length} request(s) found`;
+  $('#requests-count').textContent = `${filtered.length} request${filtered.length !== 1 ? 's' : ''} available`;
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
@@ -468,23 +444,23 @@ function renderRequests(requests, appliedIds = new Set()) {
     card.innerHTML = `
       <div class="request-card-header">
         <div class="avatar avatar-sm">${initials(r.requester?.fullName || 'S')}</div>
-        <span class="request-card-name">${r.requester?.fullName || 'Student'}</span>
-        <span class="${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
+        <span class="request-card-name truncate">${r.requester?.fullName || 'Student'}</span>
+        <span class="badge ${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
       </div>
       <h3 class="request-card-title">${r.title}</h3>
-      <p class="request-card-desc">${r.description || 'No description provided.'}</p>
+      <p class="request-card-desc line-clamp-3">${r.description || 'No description provided.'}</p>
       <div class="request-card-meta">
-        <span class="request-tag">${r.category || 'General'}</span>
-        ${r.deadline ? `<span class="request-due-date">📅 Due ${r.deadline}</span>` : ''}
+        <span class="badge">${r.category || 'General'}</span>
+        ${r.deadline ? `<span class="request-card-deadline">📅 Due ${r.deadline}</span>` : ''}
       </div>
       <div class="request-card-footer">
         <div>
-          <div class="request-budget-label">Budget</div>
-          <div class="request-budget-val">${peso(r.budget)}</div>
+          <small class="text-muted">Budget</small>
+          <div class="request-card-price">${peso(r.budget)}</div>
         </div>
-        <button class="btn ${isMine ? 'btn-outline' : hasApplied ? 'btn-outline' : 'btn-sky'} btn-sm apply-btn"
+        <button class="btn ${isMine ? 'btn-ghost' : hasApplied ? 'btn-outline' : 'btn-primary'} btn-sm apply-btn"
                 ${isMine || hasApplied ? 'disabled' : ''}>
-          ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Send Offer'}
+          ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Apply'}
         </button>
       </div>
     `;
@@ -497,54 +473,12 @@ function renderRequests(requests, appliedIds = new Set()) {
 }
 
 function setupRequestFilters() {
-  $('#filter-search')?.addEventListener('input', (e) => { 
-    requestFilters.q = e.target.value; 
-    renderRequests(allRequests); 
-  });
-  
-  $('#global-search-input')?.addEventListener('input', (e) => { 
-    requestFilters.q = e.target.value; 
-    if (activeSection !== 'requests') navigateTo('requests');
-    else renderRequests(allRequests); 
-  });
-
-  $$('.cat-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      $$('.cat-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      requestFilters.category = btn.dataset.cat;
-      renderRequests(allRequests);
-    });
-  });
-
-  $$('.sort-pill-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      $$('.sort-pill-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      requestFilters.sort = btn.dataset.sort;
-      renderRequests(allRequests);
-    });
-  });
-
+  $('#filter-search')?.addEventListener('input', (e) => { requestFilters.q = e.target.value; renderRequests(allRequests); });
+  $('#filter-category')?.addEventListener('change', (e) => { requestFilters.category = e.target.value; renderRequests(allRequests); });
+  $('#filter-sort')?.addEventListener('change', (e) => { requestFilters.sort = e.target.value; renderRequests(allRequests); });
   $('#filter-budget')?.addEventListener('input', (e) => {
     requestFilters.maxPrice = Number(e.target.value);
     $('#filter-budget-value').textContent = peso(requestFilters.maxPrice);
-    renderRequests(allRequests);
-  });
-
-  $('#filter-verified-toggle')?.addEventListener('change', (e) => {
-    requestFilters.verifiedOnly = e.target.checked;
-    renderRequests(allRequests);
-  });
-
-  $('#btn-reset-filters')?.addEventListener('click', () => {
-    requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest', verifiedOnly: false };
-    $('#filter-search').value = '';
-    $('#filter-budget').value = 20000;
-    $('#filter-budget-value').textContent = '₱20,000';
-    $('#filter-verified-toggle').checked = false;
-    $$('.cat-filter-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
-    $$('.sort-pill-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     renderRequests(allRequests);
   });
 }
@@ -597,7 +531,7 @@ function setupApplyDialog() {
   $('#apply-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = $('#apply-submit');
-    btn.disabled = true; btn.textContent = 'Submitting...';
+    btn.disabled = true; btn.textContent = 'Applying...';
     try {
       await createApplication(dc, {
         helpRequestId: applyTarget.id,
@@ -605,14 +539,14 @@ function setupApplyDialog() {
         priceOffer: Number($('#apply-amount').value),
         message: $('#apply-message').value.trim()
       });
-      showToast(`Offer sent: ${peso($('#apply-amount').value)}`);
+      showToast(`Application sent! Offer: ${peso($('#apply-amount').value)}`);
       $('#dialog-apply').close();
       loadRequests();
     } catch (err) {
       showToast('Could not apply: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Send Offer';
+      btn.textContent = 'Submit Application';
     }
   });
 }
@@ -640,33 +574,30 @@ async function loadPostedJobs() {
       const pending = (job.applications_on_helpRequest || []).filter(a => a.status === 'PENDING');
       if (pending.length === 0) return;
       const jobEl = document.createElement('div');
-      jobEl.className = 'stat-box-card';
+      jobEl.className = 'job-card';
       jobEl.innerHTML = `
-        <div class="flex-between mb-4">
-          <div>
-            <h3>${job.title}</h3>
-            <span class="text-muted">Budget: ${peso(job.budget)}</span>
-          </div>
-          <span class="badge-normal">${pending.length} candidate(s)</span>
+        <div class="job-card-header">
+          <h3>${job.title}</h3>
+          <span class="badge">${peso(job.budget)}</span>
+          <span class="badge badge-normal">${pending.length} candidate${pending.length > 1 ? 's' : ''}</span>
         </div>
         <div class="candidates-list"></div>
       `;
       const candList = jobEl.querySelector('.candidates-list');
       pending.forEach(app => {
         const row = document.createElement('div');
-        row.className = 'conversation-item flex-between';
+        row.className = 'candidate-row';
         row.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="avatar avatar-sm">${initials(app.applicant?.fullName || '')}</div>
-            <div>
-              <strong>${app.applicant?.fullName || 'Applicant'}</strong>
-              <div class="text-muted text-sm">"${app.message}"</div>
-            </div>
+          <div class="avatar avatar-sm">${initials(app.applicant?.fullName || '')}</div>
+          <div class="candidate-info">
+            <strong>${app.applicant?.fullName || 'Applicant'}</strong>
+            <small class="text-muted ml-2">${app.applicant?.studentId || ''}</small>
+            <div class="candidate-message">"${app.message}"</div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-sky">${peso(app.priceOffer)}</span>
-            <button class="btn btn-outline btn-sm reject-btn">Reject</button>
-            <button class="btn btn-dark btn-sm approve-btn">Approve</button>
+          <div class="candidate-price">${peso(app.priceOffer)}</div>
+          <div class="candidate-actions">
+            <button class="btn btn-outline btn-sm btn-danger reject-btn">Reject</button>
+            <button class="btn btn-primary btn-sm approve-btn">Approve</button>
           </div>
         `;
         row.querySelector('.approve-btn').addEventListener('click', () => handleApprove(app, job));
@@ -680,6 +611,7 @@ async function loadPostedJobs() {
     }
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    console.error(err);
   }
 }
 
@@ -696,18 +628,20 @@ async function loadMyApplications() {
     }
     apps.forEach(app => {
       const card = document.createElement('div');
-      card.className = 'stat-box-card flex-between';
+      card.className = 'application-card';
+      const statusClass = app.status === 'APPROVED' ? 'badge-approved' : app.status === 'COMPLETED' ? 'badge-completed' : 'badge-pending';
       card.innerHTML = `
         <div>
           <h4>${app.helpRequest?.title || 'Job'}</h4>
           <small class="text-muted">Your offer: ${peso(app.priceOffer)}</small>
         </div>
-        <span class="${app.status === 'APPROVED' ? 'badge-normal' : 'badge-low'}">${app.status === 'PENDING' ? '⏳ Pending' : app.status}</span>
+        <span class="badge ${statusClass}">${app.status === 'PENDING' ? '⏳ Pending Review' : app.status === 'APPROVED' ? '✅ Approved' : app.status}</span>
       `;
       container.appendChild(card);
     });
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading applications.</div>';
+    console.error(err);
   }
 }
 
@@ -725,13 +659,13 @@ async function handleApprove(application, job) {
       await createMessage(dc, {
         conversationId: convId,
         senderId: application.applicant.id,
-        content: `Offer Accepted: ${peso(application.priceOffer)}\n\n${application.message}`
+        content: `📋 Application Offer Accepted\n\nPrice: ${peso(application.priceOffer)}\nMessage: ${application.message}`
       });
     }
     showToast('Application approved! Chat created.');
     navigateTo('messages');
   } catch (err) {
-    showToast('Error: ' + err.message, 'error');
+    showToast('Error approving: ' + err.message, 'error');
   }
 }
 
@@ -746,10 +680,10 @@ async function handleReject(application) {
 }
 
 function setupApplicationTabs() {
-  $$('.tab-pill-btn').forEach(btn => {
+  $$('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       appTab = btn.dataset.tab;
-      $$('.tab-pill-btn').forEach(b => b.classList.remove('active'));
+      $$('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       if (appTab === 'posted') {
         show($('#posted-jobs-list'));
@@ -786,6 +720,7 @@ async function loadMessages() {
     }
   } catch (err) {
     convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
+    console.error(err);
   }
 }
 
@@ -799,9 +734,9 @@ function renderConversationList() {
     item.className = `conversation-item ${conv.id === activeConvId ? 'active' : ''}`;
     item.innerHTML = `
       <div class="avatar avatar-sm">${initials(otherName || '')}</div>
-      <div class="flex-1 truncate">
-        <strong>${otherName || 'User'}</strong>
-        <div class="text-muted text-sm truncate">${conv.application?.helpRequest?.title || ''}</div>
+      <div class="conv-info flex-1 truncate">
+        <strong class="truncate block">${otherName || 'User'}</strong>
+        <small class="text-muted truncate block">${conv.application?.helpRequest?.title || ''}</small>
       </div>
     `;
     item.addEventListener('click', () => selectConversation(conv.id));
@@ -822,13 +757,16 @@ async function selectConversation(convId) {
 
   const chatHeader = $('#chat-header-content');
   chatHeader.innerHTML = `
-    <div>
-      <strong>${otherUser?.fullName || 'User'}</strong>
-      <div class="text-muted text-sm">${conv.application?.helpRequest?.title || ''}</div>
+    <div class="flex items-center gap-3">
+      <div class="avatar avatar-sm">${initials(otherUser?.fullName || '')}</div>
+      <div class="chat-header-info">
+        <strong>${otherUser?.fullName || 'User'}</strong>
+        <small class="text-muted">${conv.application?.helpRequest?.title || ''}</small>
+      </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button class="btn btn-outline btn-sm" id="btn-terminate">Terminate</button>
-      ${isPoster ? '<button class="btn btn-dark btn-sm" id="btn-complete">Complete</button>' : ''}
+    <div class="chat-header-actions">
+      <button class="btn btn-outline btn-sm btn-danger" id="btn-terminate">Terminate</button>
+      ${isPoster ? '<button class="btn btn-success btn-sm" id="btn-complete">Complete</button>' : ''}
     </div>
   `;
 
@@ -855,6 +793,8 @@ async function selectConversation(convId) {
     }
   });
 
+  $('#messages-container')?.classList.add('chat-open');
+
   await loadChatMessages(convId);
   messagesInterval = setInterval(() => loadChatMessages(convId), 3000);
 }
@@ -871,12 +811,13 @@ async function loadChatMessages(convId) {
       div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
       div.innerHTML = `
         <div class="message-bubble">${msg.content}</div>
+        <small class="message-time">${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
       `;
       msgArea.appendChild(div);
     });
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch (err) {
-    console.error('Messages error:', err);
+    console.error('Messages load error:', err);
   }
 }
 
@@ -906,6 +847,10 @@ function setupChat() {
       e.preventDefault();
       send();
     }
+  });
+
+  $('#chat-back-btn')?.addEventListener('click', () => {
+    $('#messages-container')?.classList.remove('chat-open');
   });
 }
 
@@ -941,22 +886,26 @@ function setupReviewDialog() {
   });
 }
 
-// ── Profile (Matches Screenshot 1) ───────────────────────────────────────────
+// ── Profile ──────────────────────────────────────────────────────────────────
 async function loadProfile() {
   if (!userData) return;
   $('#profile-avatar').textContent = initials(userData.fullName);
   $('#profile-name').textContent = userData.fullName || 'User';
-  $('#profile-program-sub').textContent = `Computer Engineering · ${userData.preferredRole || 'Student'}`;
-  $('#profile-faculty').textContent = userData.facultyReference || 'Not provided';
-  $('#profile-student-id').textContent = userData.studentId || '—';
-  $('#profile-verification').textContent = userData.verificationStatus === 'verified' ? 'Verified' : 'Pending';
+  $('#profile-role').textContent = userData.preferredRole || 'Student';
+  $('#profile-email').textContent = userData.email || '';
+  $('#profile-student-id').textContent = userData.studentId || 'N/A';
+  $('#profile-gender').textContent = userData.gender || 'N/A';
+  $('#profile-faculty').textContent = userData.facultyReference || 'N/A';
+
+  const vBadge = $('#profile-verification');
+  vBadge.textContent = userData.verificationStatus || 'unverified';
+  vBadge.className = `badge ${userData.verificationStatus === 'verified' ? 'badge-approved' : 'badge-pending'}`;
 
   try {
     const res = await listApplicationsByApplicant(dc, { userId: userData.id });
-    const apps = res.data.applications || [];
-    $('#stat-active-services').textContent = apps.length;
+    $('#profile-stat-applications').textContent = (res.data.applications || []).length;
   } catch {
-    $('#stat-active-services').textContent = '0';
+    $('#profile-stat-applications').textContent = '0';
   }
 }
 
@@ -966,7 +915,7 @@ function setupEditProfile() {
   });
   $('#edit-profile-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    showToast('Profile updated.');
+    showToast('Profile updated locally.');
     $('#dialog-edit-profile').close();
   });
 }
@@ -989,34 +938,35 @@ async function loadAdmin() {
     }
     users.forEach(u => {
       const card = document.createElement('div');
-      card.className = 'stat-box-card flex-between';
+      card.className = 'admin-card';
       card.innerHTML = `
-        <div class="flex items-center gap-3">
+        <div class="admin-card-info">
           <div class="avatar">${initials(u.fullName)}</div>
           <div>
             <strong>${u.fullName}</strong>
-            <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'}</div>
+            <div class="text-muted">${u.email}</div>
+            <small class="text-muted">ID: ${u.studentId || 'N/A'} • Faculty: ${u.facultyReference || 'N/A'}</small>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          ${u.certificateUrl && u.certificateUrl !== 'none'
-            ? `<button class="btn btn-outline btn-sm view-cert-btn">View Cert</button>`
-            : ''}
-          <button class="btn btn-outline btn-sm reject-btn">Reject</button>
-          <button class="btn btn-dark btn-sm approve-btn">Approve</button>
+        ${u.certificateUrl && u.certificateUrl !== 'none'
+          ? `<img class="admin-cert-thumb" src="${u.certificateUrl}" alt="Certificate" />`
+          : '<span class="text-muted">No certificate</span>'}
+        <div class="admin-card-actions">
+          <button class="btn btn-outline btn-sm btn-danger reject-btn">Reject</button>
+          <button class="btn btn-success btn-sm approve-btn">Approve</button>
         </div>
       `;
-      card.querySelector('.approve-btn')?.addEventListener('click', async () => {
+      card.querySelector('.approve-btn').addEventListener('click', async () => {
         await updateUserStatus(dc, { id: u.id, status: 'verified' });
         showToast(`${u.fullName} approved!`);
         card.remove();
       });
-      card.querySelector('.reject-btn')?.addEventListener('click', async () => {
+      card.querySelector('.reject-btn').addEventListener('click', async () => {
         await updateUserStatus(dc, { id: u.id, status: 'rejected' });
         showToast(`${u.fullName} rejected.`);
         card.remove();
       });
-      card.querySelector('.view-cert-btn')?.addEventListener('click', () => {
+      card.querySelector('.admin-cert-thumb')?.addEventListener('click', () => {
         $('#cert-preview-img').src = u.certificateUrl;
         $('#dialog-certificate').showModal();
       });
@@ -1024,27 +974,28 @@ async function loadAdmin() {
     });
   } catch (err) {
     container.innerHTML = '<div class="empty-state">Error loading pending users.</div>';
+    console.error(err);
   }
 }
 
 // ── Theme Toggle ─────────────────────────────────────────────────────────────
 function setupTheme() {
   const saved = localStorage.getItem('theme');
-  if (saved === 'dark') {
-    document.body.classList.add('dark-theme');
-    isDarkTheme = true;
+  if (saved === 'light') {
+    document.body.classList.add('light-theme');
+    isDarkTheme = false;
     $('#theme-icon').textContent = '☀️';
   } else {
-    document.body.classList.remove('dark-theme');
-    isDarkTheme = false;
+    document.body.classList.remove('light-theme');
+    isDarkTheme = true;
     $('#theme-icon').textContent = '🌙';
   }
 
   $('#theme-toggle')?.addEventListener('click', () => {
     isDarkTheme = !isDarkTheme;
-    document.body.classList.toggle('dark-theme', isDarkTheme);
+    document.body.classList.toggle('light-theme', !isDarkTheme);
     localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-    $('#theme-icon').textContent = isDarkTheme ? '☀️' : '🌙';
+    $('#theme-icon').textContent = isDarkTheme ? '🌙' : '☀️';
   });
 }
 
@@ -1068,12 +1019,26 @@ function setupDialogCloseButtons() {
   });
 }
 
+// ── Mobile Sidebar ───────────────────────────────────────────────────────────
+function setupMobileSidebar() {
+  $('#mobile-menu-btn')?.addEventListener('click', () => {
+    $('#sidebar').classList.add('sidebar-open');
+    show($('#sidebar-overlay'));
+  });
+  const closeSidebar = () => {
+    $('#sidebar').classList.remove('sidebar-open');
+    hide($('#sidebar-overlay'));
+  };
+  $('#sidebar-overlay')?.addEventListener('click', closeSidebar);
+  $('#sidebar-close-btn')?.addEventListener('click', closeSidebar);
+  $$('.nav-btn').forEach(btn => btn.addEventListener('click', closeSidebar));
+}
+
 // ── Initialization ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setupLogin();
   setupRegister();
   setupForgotPassword();
-  setupQuickActions();
   setupRequestFilters();
   setupNewRequestDialog();
   setupApplyDialog();
@@ -1084,13 +1049,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTheme();
   setupLogout();
   setupDialogCloseButtons();
+  setupMobileSidebar();
 
-  $$('.nav-link-btn[data-target]').forEach(btn => {
+  $$('.nav-btn[data-target]').forEach(btn => {
     btn.addEventListener('click', () => navigateTo(btn.dataset.target));
-  });
-
-  $('[data-nav="dashboard"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    navigateTo('dashboard');
   });
 });
