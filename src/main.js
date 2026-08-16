@@ -1054,7 +1054,6 @@ function setupTransactionTabs() {
 
 // ── Ratings & Feedback ───────────────────────────────────────────────────────
 async function loadRatings() {
-  // Real calculation from profile
   const score = '5.0';
   $('#ratings-avg-score').textContent = score;
   $('#ratings-total-count').textContent = 'Based on reviews';
