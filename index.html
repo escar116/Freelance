@@ -511,26 +511,30 @@
             </section>
 
             <!-- ==============================================
-                 SECTION: Profile (Matches Screenshot Exactly)
+                 SECTION: Profile (Blueprint Hero Card)
                  ============================================== -->
-            <section id="section-profile" class="content-section profile-page-container hidden">
-                
-                <!-- Main Profile Hero Card -->
+            <section id="section-profile" class="content-section hidden">
+                <div class="page-header">
+                    <span class="eyebrow-tag">PROFILE</span>
+                    <h1 class="page-title">User Profile</h1>
+                </div>
+
+                <!-- Hero Profile Card -->
                 <div class="profile-hero">
                     <div class="profile-avatar-circle" id="profile-avatar">CJ</div>
                     <div class="profile-hero-info">
-                        <h2 class="profile-user-name" id="profile-name">charles jan paraggua</h2>
+                        <h2 class="profile-user-name" id="profile-name">Charles Jan Paraggua</h2>
                         <p class="profile-user-program" id="profile-program-sub">Computer Engineering · Student</p>
                         <div class="profile-availability-pill" id="profile-availability-badge">Available</div>
                     </div>
                     <button type="button" id="btn-edit-profile" class="edit-profile-pill-btn">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        <span>Edit profile</span>
+                        Edit profile
                     </button>
                 </div>
 
-                <!-- Row of 3 Stat Cards -->
-                <div class="profile-stats-row">
+                <!-- 3 Stat Boxes Row -->
+                <div class="profile-stats-row mt-6">
                     <div class="stat-box-card">
                         <div class="stat-big-num" id="stat-completed-projects">0</div>
                         <div class="stat-small-label">Completed projects</div>
@@ -545,10 +549,10 @@
                     </div>
                 </div>
 
-                <!-- Credentials & references -->
-                <div class="profile-section-block">
+                <!-- Credentials & References -->
+                <div class="profile-section-block mt-8">
                     <h3 class="profile-block-heading">Credentials & references</h3>
-                    <div class="credentials-card">
+                    <div class="credentials-card mt-3">
                         <div class="cred-grid">
                             <div class="cred-item">
                                 <span class="cred-label">Faculty reference</span>
@@ -563,26 +567,25 @@
                                 <span class="cred-value" id="profile-program-val">Computer Engineering</span>
                             </div>
                             <div class="cred-item">
-                                <span class="cred-label">Verification status</span>
+                                <span class="cred-label">Verification Status</span>
                                 <span class="cred-value" id="profile-verification">Checking...</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Portfolio -->
-                <div class="profile-section-block">
+                <!-- Portfolio & Reviews -->
+                <div class="profile-section-block mt-8">
                     <h3 class="profile-block-heading">Portfolio</h3>
-                    <p class="profile-empty-text">No portfolio items yet.</p>
+                    <p class="text-muted mt-2">No portfolio items yet.</p>
                 </div>
 
-                <!-- Ratings & reviews -->
-                <div class="profile-section-block">
+                <div class="profile-section-block mt-8">
                     <div class="flex-between">
                         <h3 class="profile-block-heading">Ratings & reviews</h3>
-                        <a href="#" class="profile-feedback-link">See all feedback</a>
+                        <a href="#" class="link-btn-text text-sm">See all feedback</a>
                     </div>
-                    <p class="profile-empty-text" id="profile-reviews-empty">No reviews yet.</p>
+                    <p class="text-muted mt-2" id="profile-reviews-empty">No reviews yet.</p>
                 </div>
             </section>
 
