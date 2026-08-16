@@ -40,8 +40,8 @@ let userData = null;
 let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
 let autoRefreshTimer = null;
 let activeConvId = null;
-let lastMessagesDigest = '';
-let lastConversationsDigest = '';
+let renderedMsgIds = new Set();
+let pendingTempMessages = [];
 
 // ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
@@ -393,7 +393,6 @@ async function loadDashboard(isSilent = false) {
     const applications = appRes.data.applications || [];
     const conversations = convRes.data.conversations || [];
 
-    // Real calculated statistics
     const activeApps = applications.filter(a => a.status === 'PENDING' || a.status === 'APPROVED').length;
     const completedJobs = applications.filter(a => a.status === 'COMPLETED').length;
     const totalEarnings = applications
@@ -833,7 +832,7 @@ function setupApplicationTabs() {
   });
 }
 
-// ── Messages & Realtime Chat Engine ──────────────────────────────────────────
+// ── Messages & Rock-Solid Realtime Chat Engine ───────────────────────────────
 let conversations = [];
 let reviewTarget = null;
 
@@ -860,10 +859,6 @@ async function loadMessages(isSilent = false) {
 
 function renderConversationList() {
   const convList = $('#conversations-list');
-  const digest = conversations.map(c => c.id).join(',');
-  if (digest === lastConversationsDigest && convList.children.length > 0) return;
-  lastConversationsDigest = digest;
-
   convList.innerHTML = '';
   conversations.forEach(conv => {
     const isPoster = conv.poster?.id === userData?.id;
@@ -883,8 +878,11 @@ function renderConversationList() {
 }
 
 async function selectConversation(convId) {
+  if (activeConvId !== convId) {
+    renderedMsgIds.clear();
+    pendingTempMessages = [];
+  }
   activeConvId = convId;
-  lastMessagesDigest = '';
   renderConversationList();
 
   const conv = conversations.find(c => c.id === convId);
@@ -936,8 +934,8 @@ async function selectConversation(convId) {
   await pollMessages(true);
 }
 
-// Background poller for chat messages without flickering
-async function pollMessages(forceInitial = false) {
+// Robust message poller: never wipes pending local messages and preserves scroll
+async function pollMessages(isFullReset = false) {
   if (!activeConvId) return;
   const msgArea = $('#chat-messages');
   if (!msgArea) return;
@@ -945,33 +943,53 @@ async function pollMessages(forceInitial = false) {
   try {
     const res = await listMessages(dc, { conversationId: activeConvId });
     const messages = res.data.messages || [];
-    const newDigest = messages.map(m => `${m.id}-${m.createdAt}`).join('|');
 
-    if (newDigest === lastMessagesDigest && !forceInitial) {
-      return;
+    if (isFullReset) {
+      renderedMsgIds.clear();
+      msgArea.innerHTML = '';
     }
 
-    lastMessagesDigest = newDigest;
-    msgArea.innerHTML = '';
-    
-    if (messages.length === 0) {
+    // Remove empty placeholder if messages arrived
+    if (messages.length > 0 || pendingTempMessages.length > 0) {
+      const emptyState = msgArea.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+    } else if (msgArea.children.length === 0) {
       msgArea.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No messages yet. Send a message to start!</div>';
       return;
     }
 
+    let hasNew = false;
     messages.forEach(msg => {
-      const isMe = msg.sender?.id === userData?.id;
-      const div = document.createElement('div');
-      div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
-      div.innerHTML = `
-        <div class="message-bubble">${msg.content}</div>
-      `;
-      msgArea.appendChild(div);
+      if (!renderedMsgIds.has(msg.id)) {
+        renderedMsgIds.add(msg.id);
+        hasNew = true;
+
+        // Check if there was a matching pending temp message
+        const tempIdx = pendingTempMessages.findIndex(t => t.content === msg.content);
+        if (tempIdx !== -1) {
+          const tempEl = pendingTempMessages[tempIdx].el;
+          if (tempEl && tempEl.parentNode) {
+            tempEl.dataset.msgId = msg.id;
+            tempEl.removeAttribute('data-temp');
+            pendingTempMessages.splice(tempIdx, 1);
+            return;
+          }
+        }
+
+        const isMe = msg.sender?.id === userData?.id;
+        const div = document.createElement('div');
+        div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
+        div.dataset.msgId = msg.id;
+        div.innerHTML = `<div class="message-bubble">${msg.content}</div>`;
+        msgArea.appendChild(div);
+      }
     });
 
-    msgArea.scrollTop = msgArea.scrollHeight;
+    if (hasNew || isFullReset) {
+      msgArea.scrollTop = msgArea.scrollHeight;
+    }
   } catch (err) {
-    console.error('Chat poll error:', err);
+    console.error('Chat polling error:', err);
   }
 }
 
@@ -984,24 +1002,31 @@ function setupChat() {
     if (!content || !activeConvId) return;
     input.value = '';
 
-    // Optimistic message append for 0ms instant UI update
     const msgArea = $('#chat-messages');
     const emptyState = msgArea.querySelector('.empty-state');
     if (emptyState) emptyState.remove();
 
+    // Render message immediately into the UI (0ms latency, protected from vanishing)
     const tempDiv = document.createElement('div');
     tempDiv.className = 'message outgoing';
+    tempDiv.dataset.temp = 'true';
     tempDiv.innerHTML = `<div class="message-bubble">${content}</div>`;
     msgArea.appendChild(tempDiv);
     msgArea.scrollTop = msgArea.scrollHeight;
 
+    const tempObj = { content, el: tempDiv, time: Date.now() };
+    pendingTempMessages.push(tempObj);
+
     sendBtn.disabled = true;
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      await pollMessages(true);
+      // Poll confirmed message from server
+      await pollMessages(false);
     } catch (err) {
-      showToast('Error sending message', 'error');
+      showToast('Error sending message: ' + err.message, 'error');
       tempDiv.remove();
+      const idx = pendingTempMessages.indexOf(tempObj);
+      if (idx !== -1) pendingTempMessages.splice(idx, 1);
     } finally {
       sendBtn.disabled = false;
       input.focus();

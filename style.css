@@ -291,7 +291,7 @@ button {
 }
 
 /* ==========================================================================
-   3. SIDEBAR NAVIGATION & BOTTOM USER PROFILE (Matches User Reference Image)
+   3. SIDEBAR NAVIGATION & BOTTOM USER PROFILE
    ========================================================================== */
 .layout {
     display: flex;
@@ -374,7 +374,6 @@ button {
     color: var(--text-on-dark);
 }
 
-/* Active Nav Button: Solid Purple Rounded Box (Screenshot 4) */
 .nav-btn.active {
     background-color: var(--primary-purple);
     color: #ffffff;
@@ -382,7 +381,6 @@ button {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
-/* Replicated User Profile Footer with Highlighted Leave/Logout Icon */
 .sidebar-user-footer {
     display: flex;
     align-items: center;
@@ -430,13 +428,6 @@ button {
     text-overflow: ellipsis;
 }
 
-.user-footer-role {
-    font-size: 0.72rem;
-    color: #818cf8;
-    font-weight: 600;
-}
-
-/* Highlight Leave/Logout Icon Button */
 .sidebar-leave-btn {
     width: 34px;
     height: 34px;
@@ -483,7 +474,6 @@ button {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile top bar (hidden on desktop) */
 .mobile-close-btn, .mobile-only, .mobile-top-bar {
     display: none;
 }
@@ -520,7 +510,6 @@ button {
     transform: scale(1.05);
 }
 
-/* 4 Top Stat Cards Grid */
 .dashboard-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -559,7 +548,6 @@ button {
 .text-green { color: var(--color-green); }
 .text-amber { color: var(--color-amber); }
 
-/* 2-Column Main Dashboard Grid */
 .dashboard-main-grid {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
@@ -599,7 +587,6 @@ button {
     text-decoration: underline;
 }
 
-/* Recommended Jobs Feed */
 .jobs-list-feed {
     display: flex;
     flex-direction: column;
@@ -663,7 +650,6 @@ button {
     color: var(--primary-purple);
 }
 
-/* Right Stack (Recent Applications + Messages) */
 .dash-right-stack {
     display: flex;
     flex-direction: column;
@@ -682,6 +668,7 @@ button {
     gap: 0.85rem;
     padding: 0.65rem 0;
     border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
 }
 
 .app-row-item:last-child {
@@ -715,6 +702,7 @@ button {
     align-items: flex-start;
     gap: 0.85rem;
     padding: 0.75rem 0;
+    cursor: pointer;
 }
 
 .message-row-info {
@@ -739,7 +727,7 @@ button {
 }
 
 /* ==========================================================================
-   6. FIND SERVICES VIEW (SCREEN 7 REPLICA)
+   6. FIND SERVICES VIEW
    ========================================================================== */
 .page-header-flex {
     display: flex;
@@ -968,18 +956,20 @@ button {
 }
 
 /* ==========================================================================
-   8. MESSAGING & CHAT SYSTEM (SCREEN 9 REPLICA)
+   8. MESSAGING & CHAT SYSTEM (FIXED: Never pushes chatbox out of viewport)
    ========================================================================== */
 .messages-layout {
     display: grid;
     grid-template-columns: 300px 1fr;
-    height: calc(100vh - 180px);
-    min-height: 540px;
+    height: calc(100vh - 170px);
+    min-height: 520px;
+    max-height: 800px;
     background: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: var(--radius-card);
     overflow: hidden;
     box-shadow: var(--shadow-card);
+    position: relative;
 }
 
 .conversations-sidebar {
@@ -987,17 +977,21 @@ button {
     display: flex;
     flex-direction: column;
     background: #fafbfc;
+    height: 100%;
+    min-height: 0;
 }
 
 .conv-header {
-    padding: 1.25rem;
+    padding: 1.15rem 1.25rem;
     border-bottom: 1px solid var(--border-card);
     font-size: 0.95rem;
     font-weight: 700;
+    flex-shrink: 0;
 }
 
 .conversations-list {
-    flex-grow: 1;
+    flex: 1 1 0%;
+    min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -1007,7 +1001,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.85rem;
-    padding: 1rem 1.25rem;
+    padding: 0.95rem 1.25rem;
     border-bottom: 1px solid var(--border-light);
     cursor: pointer;
     transition: var(--transition);
@@ -1022,19 +1016,25 @@ button {
     border-left: 3px solid var(--primary-purple);
 }
 
+/* Dedicated flex container ensuring input is pinned to bottom */
 .chat-panel {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
 }
 
 .chat-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     border-bottom: 1px solid var(--border-card);
     background: #ffffff;
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 .chat-header-content {
@@ -1075,8 +1075,10 @@ button {
 
 .btn-complete:hover { background: var(--primary-purple-hover); }
 
+/* Scrollable messages area with min-height: 0 so it never stretches parent */
 .chat-messages {
-    flex-grow: 1;
+    flex: 1 1 0%;
+    min-height: 0;
     overflow-y: auto;
     padding: 1.5rem;
     display: flex;
@@ -1088,7 +1090,8 @@ button {
 .message {
     display: flex;
     flex-direction: column;
-    max-width: 70%;
+    max-width: 75%;
+    animation: fadeIn 0.15s ease;
 }
 
 .message.outgoing {
@@ -1106,12 +1109,14 @@ button {
     font-size: 0.9rem;
     line-height: 1.5;
     white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .message.outgoing .message-bubble {
     background-color: var(--primary-purple);
     color: #ffffff;
     border-radius: 16px 16px 4px 16px;
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
 }
 
 .message.incoming .message-bubble {
@@ -1120,16 +1125,19 @@ button {
     border-radius: 16px 16px 16px 4px;
 }
 
+/* Chat Input Row: Always visible and pinned to bottom */
 .chat-input-row {
     display: flex;
     gap: 0.75rem;
-    padding: 1.15rem 1.5rem;
+    padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-card);
     background: #ffffff;
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 /* ==========================================================================
-   9. TRANSACTIONS VIEW (SCREEN 10 REPLICA)
+   9. TRANSACTIONS VIEW
    ========================================================================== */
 .transaction-stats-grid {
     display: grid;
@@ -1178,7 +1186,7 @@ button {
 }
 
 /* ==========================================================================
-   10. RATINGS & FEEDBACK VIEW (SCREEN 11 REPLICA)
+   10. RATINGS & FEEDBACK VIEW
    ========================================================================== */
 .ratings-layout-grid {
     display: grid;
@@ -1259,7 +1267,7 @@ button {
 }
 
 /* ==========================================================================
-   11. PROFILE & PORTFOLIO VIEW (SCREEN 5 REPLICA)
+   11. PROFILE & PORTFOLIO VIEW
    ========================================================================== */
 .profile-hero {
     background: var(--bg-card);
