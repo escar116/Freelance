@@ -39,9 +39,11 @@ let currentUser = null;
 let userData = null;
 let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
 let autoRefreshTimer = null;
+let chatPollTimer = null;
 let activeConvId = null;
 let renderedMsgIds = new Set();
 let pendingTempMessages = [];
+let lastConversationsDigest = '';
 
 // ── DOM Helpers ──────────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
@@ -86,13 +88,23 @@ function compressImage(file) {
   });
 }
 
-// ── Background Auto-Refresh Engine (Keeps All Screens In Sync) ────────────────
-function startAutoRefresh() {
+// ── Realtime Multi-Client Synchronization Engine ─────────────────────────────
+function startBackgroundSync() {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (chatPollTimer) clearInterval(chatPollTimer);
+
+  // High-frequency Real-time Chat Sync (Every 1.2s for active chat)
+  chatPollTimer = setInterval(() => {
+    if (userData && activeSection === 'messages' && activeConvId) {
+      pollMessages(false);
+    }
+  }, 1200);
+
+  // Background view synchronization (Every 3.5s)
   autoRefreshTimer = setInterval(() => {
     if (!userData) return;
     if (activeSection === 'messages') {
-      pollMessages();
+      loadMessages(true); // Sync new conversations in sidebar
     } else if (activeSection === 'dashboard') {
       loadDashboard(true);
     } else if (activeSection === 'applications') {
@@ -100,8 +112,24 @@ function startAutoRefresh() {
     } else if (activeSection === 'services') {
       loadServices(true);
     }
-  }, 4000);
+  }, 3500);
 }
+
+// Instant sync when tab gains focus
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && userData) {
+    if (activeSection === 'messages') {
+      loadMessages(true);
+      if (activeConvId) pollMessages(false);
+    } else if (activeSection === 'dashboard') {
+      loadDashboard(true);
+    } else if (activeSection === 'applications') {
+      loadApplications(true);
+    } else if (activeSection === 'services') {
+      loadServices(true);
+    }
+  }
+});
 
 // ── Navigation ───────────────────────────────────────────────────────────────
 function navigateTo(section) {
@@ -130,6 +158,7 @@ function navigateTo(section) {
 
 function showAuth(section = 'login') {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
   hide($('#app-views'));
   hide($('#loading-screen'));
   show($('#auth-views'));
@@ -163,7 +192,7 @@ function showApp() {
   if (topAvatar) topAvatar.textContent = userInitials;
 
   navigateTo(activeSection || 'dashboard');
-  startAutoRefresh();
+  startBackgroundSync();
 }
 
 // ── Auth Listener ────────────────────────────────────────────────────────────
@@ -404,7 +433,7 @@ async function loadDashboard(isSilent = false) {
     $('#stat-earnings').textContent = peso(totalEarnings);
     $('#stat-rating').innerHTML = '5.0 <span class="text-amber">★</span>';
 
-    // Populate Recommended Services
+    // Recommended Services Feed
     const listEl = $('#dashboard-listings');
     if (!isSilent) listEl.innerHTML = '';
     if (requests.length === 0) {
@@ -432,7 +461,7 @@ async function loadDashboard(isSilent = false) {
       });
     }
 
-    // Populate Recent Applications
+    // Recent Applications Feed
     const recentAppsEl = $('#dashboard-recent-apps');
     if (!isSilent) recentAppsEl.innerHTML = '';
     if (applications.length === 0) {
@@ -455,7 +484,7 @@ async function loadDashboard(isSilent = false) {
       });
     }
 
-    // Populate Recent Messages
+    // Recent Messages Feed
     const recentMsgEl = $('#dashboard-recent-messages');
     if (!isSilent) recentMsgEl.innerHTML = '';
     if (conversations.length === 0) {
@@ -832,13 +861,13 @@ function setupApplicationTabs() {
   });
 }
 
-// ── Messages & Rock-Solid Realtime Chat Engine ───────────────────────────────
+// ── Messages & Realtime Chat Engine ──────────────────────────────────────────
 let conversations = [];
 let reviewTarget = null;
 
 async function loadMessages(isSilent = false) {
   const convList = $('#conversations-list');
-  if (!isSilent) convList.innerHTML = '<div class="loader"></div>';
+  if (!isSilent && convList.children.length === 0) convList.innerHTML = '<div class="loader"></div>';
   try {
     const res = await listConversations(dc, { userId: userData.id });
     conversations = (res.data.conversations || []).filter(c =>
@@ -848,7 +877,11 @@ async function loadMessages(isSilent = false) {
     if (conversations.length > 0 && !activeConvId) {
       selectConversation(conversations[0].id);
     } else if (activeConvId) {
-      selectConversation(activeConvId);
+      // Keep conversation view alive
+      const exists = conversations.some(c => c.id === activeConvId);
+      if (!exists && conversations.length > 0) {
+        selectConversation(conversations[0].id);
+      }
     } else {
       $('#chat-panel').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No conversations yet.</div>';
     }
@@ -859,6 +892,10 @@ async function loadMessages(isSilent = false) {
 
 function renderConversationList() {
   const convList = $('#conversations-list');
+  const digest = conversations.map(c => c.id).join(',');
+  if (digest === lastConversationsDigest && convList.children.length > 0) return;
+  lastConversationsDigest = digest;
+
   convList.innerHTML = '';
   conversations.forEach(conv => {
     const isPoster = conv.poster?.id === userData?.id;
@@ -934,7 +971,7 @@ async function selectConversation(convId) {
   await pollMessages(true);
 }
 
-// Robust message poller: never wipes pending local messages and preserves scroll
+// High-speed realtime message synchronization
 async function pollMessages(isFullReset = false) {
   if (!activeConvId) return;
   const msgArea = $('#chat-messages');
@@ -949,7 +986,6 @@ async function pollMessages(isFullReset = false) {
       msgArea.innerHTML = '';
     }
 
-    // Remove empty placeholder if messages arrived
     if (messages.length > 0 || pendingTempMessages.length > 0) {
       const emptyState = msgArea.querySelector('.empty-state');
       if (emptyState) emptyState.remove();
@@ -964,7 +1000,7 @@ async function pollMessages(isFullReset = false) {
         renderedMsgIds.add(msg.id);
         hasNew = true;
 
-        // Check if there was a matching pending temp message
+        // Check if there was a matching pending temp message from sender
         const tempIdx = pendingTempMessages.findIndex(t => t.content === msg.content);
         if (tempIdx !== -1) {
           const tempEl = pendingTempMessages[tempIdx].el;
@@ -989,7 +1025,7 @@ async function pollMessages(isFullReset = false) {
       msgArea.scrollTop = msgArea.scrollHeight;
     }
   } catch (err) {
-    console.error('Chat polling error:', err);
+    console.error('Chat sync error:', err);
   }
 }
 
@@ -1006,7 +1042,7 @@ function setupChat() {
     const emptyState = msgArea.querySelector('.empty-state');
     if (emptyState) emptyState.remove();
 
-    // Render message immediately into the UI (0ms latency, protected from vanishing)
+    // Render outgoing bubble instantly
     const tempDiv = document.createElement('div');
     tempDiv.className = 'message outgoing';
     tempDiv.dataset.temp = 'true';
@@ -1020,7 +1056,7 @@ function setupChat() {
     sendBtn.disabled = true;
     try {
       await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      // Poll confirmed message from server
+      // Trigger instant poll to update server message state
       await pollMessages(false);
     } catch (err) {
       showToast('Error sending message: ' + err.message, 'error');
@@ -1266,6 +1302,7 @@ function setupLogout() {
   $('#btn-logout')?.addEventListener('click', async (e) => {
     e.preventDefault();
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+    if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
     sessionStorage.removeItem('active_section');
     await signOut(auth);
   });
