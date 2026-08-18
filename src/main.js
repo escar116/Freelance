@@ -960,7 +960,7 @@ async function loadMessages(isSilent = false) {
 
 function renderConversationList() {
   const convList = $('#conversations-list');
-  const digest = conversations.map(c => c.id).join(',');
+  const digest = conversations.map(c => c.id).join(',') + '|' + activeConvId;
   if (digest === lastConversationsDigest && convList.children.length > 0) return;
   lastConversationsDigest = digest;
 
@@ -986,6 +986,8 @@ async function selectConversation(convId) {
   if (activeConvId !== convId) {
     renderedMsgIds.clear();
     pendingTempMessages = [];
+    const msgArea = $('#chat-messages');
+    if (msgArea) msgArea.innerHTML = '<div class="loader"></div>';
   }
   activeConvId = convId;
   renderConversationList();
