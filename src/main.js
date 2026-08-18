@@ -1391,12 +1391,12 @@ function renderReviewsProfile(reviews) {
   });
   
   $('#ratings-feedback-list').innerHTML = reviews.map(r => `
-    <div class="feedback-item mb-4 pb-4 border-b border-gray-700">
+    <div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);">
       <div class="flex justify-between items-start">
-        <strong class="text-white">${r.reviewer.fullName}</strong>
-        <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+        <strong style="color: var(--text-heading);">${r.reviewer.fullName}</strong>
+        <span class="font-bold" style="color: var(--color-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
       </div>
-      <p class="text-sm text-gray-300 mt-2">${r.comment || ''}</p>
+      <p class="text-sm mt-2 text-muted">${r.comment || ''}</p>
     </div>
   `).join('');
 }
@@ -1434,12 +1434,12 @@ window.openViewProfileDialog = async function(userId) {
       $('#vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
     } else {
       $('#vp-ratings-list').innerHTML = reviews.map(r => `
-        <div class="feedback-item mb-3 pb-3 border-b border-gray-700">
+        <div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);">
           <div class="flex justify-between items-start">
-            <strong class="text-white text-sm">${r.reviewer.fullName}</strong>
-            <span class="text-yellow-400 text-xs">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+            <strong class="text-sm" style="color: var(--text-heading);">${r.reviewer.fullName}</strong>
+            <span class="text-xs" style="color: var(--color-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
           </div>
-          <p class="text-xs text-gray-300 mt-1">${r.comment || ''}</p>
+          <p class="text-xs mt-1 text-muted">${r.comment || ''}</p>
         </div>
       `).join('');
     }
