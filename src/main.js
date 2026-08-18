@@ -1516,7 +1516,7 @@ async function loadAdmin() {
     adminPendingData = adminUsersData.filter(u => u.verificationStatus === 'pending');
 
     // 1. Registered Students Count
-    const totalStudents = adminUsersData.length;
+    const totalStudents = adminUsersData.filter(u => u.verificationStatus !== 'pending').length;
     $('#admin-stat-registered').textContent = totalStudents;
 
     // 2. Pending Verification Count
@@ -1584,7 +1584,6 @@ function renderAdminPending() {
     card.className = 'admin-card';
     card.innerHTML = `
       <div class="admin-card-info">
-        <div class="avatar">${initials(u.fullName)}</div>
         <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
         <div>
           <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</strong>
@@ -1646,7 +1645,7 @@ function renderAdminUsers() {
   const tbody = $('#admin-all-users-tbody');
   if (!tbody) return;
 
-  let list = adminUsersData;
+  let list = adminUsersData.filter(u => u.verificationStatus !== 'pending');
   if (adminSearchQuery) {
     const q = adminSearchQuery.toLowerCase();
     list = list.filter(u =>

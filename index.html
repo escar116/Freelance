@@ -1057,22 +1057,40 @@
             </div>
 
             <div class="dash-card mt-4">
-                <h3 class="dash-card-title mb-2">Platform Statistics</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <h3 class="dash-card-title mb-3">Platform Statistics</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
                     <div>
-                        <h4 class="font-bold text-xs text-muted mb-1 uppercase">As Applicant</h4>
-                        <div class="flex gap-2 text-sm">
-                            <span class="text-amber" title="Pending">Pending: <strong id="vp-app-pending">0</strong></span>
-                            <span class="text-green" title="Completed">Completed: <strong id="vp-app-completed">0</strong></span>
-                            <span class="text-red" title="Terminated">Terminated: <strong id="vp-app-terminated">0</strong></span>
+                        <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Applicant</h4>
+                        <div class="cred-grid" style="gap: 1.5rem;">
+                            <div class="cred-item">
+                                <span class="cred-label">Pending</span>
+                                <span class="cred-value font-bold text-amber" id="vp-app-pending">0</span>
+                            </div>
+                            <div class="cred-item">
+                                <span class="cred-label">Completed</span>
+                                <span class="cred-value font-bold text-green" id="vp-app-completed">0</span>
+                            </div>
+                            <div class="cred-item">
+                                <span class="cred-label">Terminated</span>
+                                <span class="cred-value font-bold text-red" id="vp-app-terminated">0</span>
+                            </div>
                         </div>
                     </div>
                     <div>
-                        <h4 class="font-bold text-xs text-muted mb-1 uppercase">As Employer</h4>
-                        <div class="flex gap-2 text-sm">
-                            <span class="text-amber" title="Pending">Pending: <strong id="vp-emp-pending">0</strong></span>
-                            <span class="text-green" title="Completed">Completed: <strong id="vp-emp-completed">0</strong></span>
-                            <span class="text-red" title="Terminated">Terminated: <strong id="vp-emp-terminated">0</strong></span>
+                        <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Employer</h4>
+                        <div class="cred-grid" style="gap: 1.5rem;">
+                            <div class="cred-item">
+                                <span class="cred-label">Pending</span>
+                                <span class="cred-value font-bold text-amber" id="vp-emp-pending">0</span>
+                            </div>
+                            <div class="cred-item">
+                                <span class="cred-label">Completed</span>
+                                <span class="cred-value font-bold text-green" id="vp-emp-completed">0</span>
+                            </div>
+                            <div class="cred-item">
+                                <span class="cred-label">Terminated</span>
+                                <span class="cred-value font-bold text-red" id="vp-emp-terminated">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
