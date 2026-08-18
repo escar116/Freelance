@@ -768,11 +768,96 @@
                 <section id="section-admin" class="content-section hidden">
                     <div class="page-header">
                         <h1 class="page-title">Administrator Dashboard</h1>
-                        <p class="text-muted">Overview of the platform and pending student verifications</p>
+                        <p class="text-muted">Comprehensive platform analytics, user directory, and verification management</p>
                     </div>
 
-                    <div id="admin-list" class="admin-list mt-6">
-                        <div class="loader"></div>
+                    <!-- 6 Platform-wide Metrics Counters -->
+                    <div class="admin-stats-grid mt-6">
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Registered Students</span>
+                            <div class="stat-card-number" id="admin-stat-registered">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Pending Verification</span>
+                            <div class="stat-card-number text-amber" id="admin-stat-pending">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Active Jobs</span>
+                            <div class="stat-card-number" id="admin-stat-active-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Completed Jobs</span>
+                            <div class="stat-card-number text-green" id="admin-stat-completed-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Terminated Jobs</span>
+                            <div class="stat-card-number text-red" id="admin-stat-terminated-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Total Transactions</span>
+                            <div class="stat-card-number" id="admin-stat-total-transactions">₱0</div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Management Tabs -->
+                    <div class="tabs mt-6">
+                        <button type="button" class="tab-btn active admin-tab-btn" data-admintab="pending">Pending Verifications (<span id="admin-pending-tab-badge">0</span>)</button>
+                        <button type="button" class="tab-btn admin-tab-btn" data-admintab="users">All Registered Students</button>
+                        <button type="button" class="tab-btn admin-tab-btn" data-admintab="applications">All Applications & Bids</button>
+                    </div>
+
+                    <!-- Search Filter for Admin -->
+                    <div class="admin-search-bar mt-4 mb-4">
+                        <input type="text" id="admin-search-input" class="form-control" placeholder="Search by name, student ID, email, faculty...">
+                    </div>
+
+                    <!-- Tab 1: Pending Verifications -->
+                    <div id="admin-tab-pending" class="admin-tab-content">
+                        <div id="admin-list" class="admin-list">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: All Users Directory -->
+                    <div id="admin-tab-users" class="admin-tab-content hidden">
+                        <div class="transactions-table-wrapper dash-card">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Student ID</th>
+                                        <th>Role / Faculty</th>
+                                        <th>Status</th>
+                                        <th>Certificate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-all-users-tbody">
+                                    <tr><td colspan="6" class="text-center"><div class="loader"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: All Applications -->
+                    <div id="admin-tab-applications" class="admin-tab-content hidden">
+                        <div class="transactions-table-wrapper dash-card">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Job Title</th>
+                                        <th>Applicant</th>
+                                        <th>Student ID</th>
+                                        <th>Offer</th>
+                                        <th>Message</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-all-apps-tbody">
+                                    <tr><td colspan="6" class="text-center"><div class="loader"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
@@ -923,6 +1008,22 @@
                     <button type="submit" class="btn btn-purple">Submit Rating</button>
                 </div>
             </form>
+        </div>
+    </dialog>
+
+    <!-- Applicant Full Details Modal -->
+    <dialog id="dialog-applicant-details" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Applicant Full Information</h2>
+                <button type="button" class="dialog-close-btn">✕</button>
+            </div>
+            <div id="applicant-modal-body" class="space-y-3 mt-3">
+                <!-- Injected via JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline dialog-close-btn">Close</button>
+            </div>
         </div>
     </dialog>
 

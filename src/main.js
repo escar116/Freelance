@@ -12,7 +12,8 @@ import {
   createApplication, updateApplicationStatus, updateHelpRequestStatus,
   createConversation, createMessage, listConversations, listMessages,
   listMessagesRef, listConversationsRef,
-  listPendingUsers, updateUserStatus, terminateJob, completeJob, createReview
+  listPendingUsers, listAllUsers, listAllHelpRequestsAdmin, listAllApplicationsAdmin,
+  updateUserStatus, terminateJob, completeJob, createReview
 } from '@work4abit/dataconnect';
 
 // ── Firebase Config ──────────────────────────────────────────────────────────
@@ -1299,63 +1300,345 @@ function setupEditProfile() {
   });
 }
 
-// ── Admin Dashboard ──────────────────────────────────────────────────────────
+// ── Admin Dashboard & Platform Intelligence ─────────────────────────────────
+let adminActiveTab = 'pending';
+let adminUsersData = [];
+let adminPendingData = [];
+let adminAppsData = [];
+let adminRequestsData = [];
+let adminSearchQuery = '';
+
 async function loadAdmin() {
   if (userData?.email !== ADMIN_EMAIL) {
     navigateTo('dashboard');
     return;
   }
-  const container = $('#admin-list');
-  container.innerHTML = '<div class="loader"></div>';
+
   try {
-    const res = await listPendingUsers(dc, SERVER_ONLY);
-    const users = res.data.users || [];
-    container.innerHTML = '';
-    if (users.length === 0) {
-      container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">✅ All caught up! No pending registrations.</div>';
-      return;
-    }
-    users.forEach(u => {
-      const card = document.createElement('div');
-      card.className = 'admin-card';
-      card.innerHTML = `
-        <div class="admin-card-info">
-          <div class="avatar">${initials(u.fullName)}</div>
-          <div>
-            <strong>${u.fullName}</strong>
-            <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'}</div>
+    const [usersRes, reqsRes, appsRes] = await Promise.all([
+      listAllUsers(dc, SERVER_ONLY),
+      listAllHelpRequestsAdmin(dc, SERVER_ONLY),
+      listAllApplicationsAdmin(dc, SERVER_ONLY)
+    ]);
+
+    adminUsersData = usersRes.data?.users || [];
+    adminRequestsData = reqsRes.data?.helpRequests || [];
+    adminAppsData = appsRes.data?.applications || [];
+    adminPendingData = adminUsersData.filter(u => u.verificationStatus === 'pending');
+
+    // 1. Registered Students Count
+    const totalStudents = adminUsersData.length;
+    $('#admin-stat-registered').textContent = totalStudents;
+
+    // 2. Pending Verification Count
+    const pendingCount = adminPendingData.length;
+    $('#admin-stat-pending').textContent = pendingCount;
+    const tabBadge = $('#admin-pending-tab-badge');
+    if (tabBadge) tabBadge.textContent = pendingCount;
+
+    // 3. Active Jobs Count
+    const activeJobs = adminRequestsData.filter(r => r.status === 'OPEN' || !r.status).length;
+    $('#admin-stat-active-jobs').textContent = activeJobs;
+
+    // 4. Completed Jobs Count
+    const completedJobs = adminRequestsData.filter(r => r.status === 'COMPLETED').length;
+    $('#admin-stat-completed-jobs').textContent = completedJobs;
+
+    // 5. Terminated Jobs Count
+    const terminatedJobs = adminAppsData.filter(a => a.status === 'TERMINATED').length;
+    $('#admin-stat-terminated-jobs').textContent = terminatedJobs;
+
+    // 6. Total Transactions Across Whole Website (Sum of completed earnings)
+    const totalTrans = adminAppsData
+      .filter(a => a.status === 'COMPLETED')
+      .reduce((sum, a) => sum + (Number(a.priceOffer) || 0), 0);
+    $('#admin-stat-total-transactions').textContent = peso(totalTrans);
+
+    // Render active tab view
+    renderCurrentAdminTab();
+
+  } catch (err) {
+    console.error('Admin data load error:', err);
+    showToast('Error loading platform metrics: ' + err.message, 'error');
+  }
+}
+
+function renderCurrentAdminTab() {
+  if (adminActiveTab === 'pending') renderAdminPending();
+  else if (adminActiveTab === 'users') renderAdminUsers();
+  else if (adminActiveTab === 'applications') renderAdminApplications();
+}
+
+function renderAdminPending() {
+  const container = $('#admin-list');
+  if (!container) return;
+  
+  let list = adminPendingData;
+  if (adminSearchQuery) {
+    const q = adminSearchQuery.toLowerCase();
+    list = list.filter(u => 
+      (u.fullName || '').toLowerCase().includes(q) ||
+      (u.studentId || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.facultyReference || '').toLowerCase().includes(q)
+    );
+  }
+
+  container.innerHTML = '';
+  if (list.length === 0) {
+    container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">✅ No pending student verifications.</div>';
+    return;
+  }
+
+  list.forEach(u => {
+    const card = document.createElement('div');
+    card.className = 'admin-card';
+    card.innerHTML = `
+      <div class="admin-card-info">
+        <div class="avatar">${initials(u.fullName)}</div>
+        <div>
+          <strong>${u.fullName}</strong>
+          <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'} • ${u.preferredRole || 'Student'}</div>
+          <div class="admin-card-meta">
+            <span class="badge badge-pending">Pending</span>
+            <small class="text-muted">Faculty: ${u.facultyReference || 'None'}</small>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          ${u.certificateUrl && u.certificateUrl !== 'none'
-            ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View Cert</button>`
-            : ''}
-          <button type="button" class="btn btn-outline btn-sm reject-btn">Reject</button>
-          <button type="button" class="btn btn-purple btn-sm approve-btn">Approve</button>
-        </div>
-      `;
-      card.querySelector('.approve-btn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" class="btn btn-outline btn-sm view-profile-btn">Full Info</button>
+        ${u.certificateUrl && u.certificateUrl !== 'none'
+          ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID / Cert</button>`
+          : ''}
+        <button type="button" class="btn btn-outline btn-sm reject-btn">Reject</button>
+        <button type="button" class="btn btn-purple btn-sm approve-btn">Approve</button>
+      </div>
+    `;
+
+    card.querySelector('.view-profile-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openApplicantDetails(u);
+    });
+
+    card.querySelector('.approve-btn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
         await updateUserStatus(dc, { id: u.id, status: 'verified' });
-        showToast(`${u.fullName} approved!`);
-        card.remove();
-      });
-      card.querySelector('.reject-btn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
+        showToast(`${u.fullName} approved and verified!`);
+        loadAdmin();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+
+    card.querySelector('.reject-btn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
         await updateUserStatus(dc, { id: u.id, status: 'rejected' });
         showToast(`${u.fullName} rejected.`);
-        card.remove();
-      });
-      card.querySelector('.view-cert-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        $('#cert-preview-img').src = u.certificateUrl;
-        $('#dialog-certificate').showModal();
-      });
-      container.appendChild(card);
+        loadAdmin();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
     });
-  } catch (err) {
-    container.innerHTML = '<div class="empty-state">Error loading pending users.</div>';
+
+    card.querySelector('.view-cert-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      $('#cert-preview-img').src = u.certificateUrl;
+      $('#dialog-certificate').showModal();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function renderAdminUsers() {
+  const tbody = $('#admin-all-users-tbody');
+  if (!tbody) return;
+
+  let list = adminUsersData;
+  if (adminSearchQuery) {
+    const q = adminSearchQuery.toLowerCase();
+    list = list.filter(u => 
+      (u.fullName || '').toLowerCase().includes(q) ||
+      (u.studentId || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.facultyReference || '').toLowerCase().includes(q)
+    );
   }
+
+  tbody.innerHTML = '';
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">No registered students found.</td></tr>';
+    return;
+  }
+
+  list.forEach(u => {
+    const tr = document.createElement('tr');
+    const isVerified = u.verificationStatus === 'verified';
+    const isPending = u.verificationStatus === 'pending';
+    const badgeClass = isVerified ? 'badge-approved' : isPending ? 'badge-pending' : 'badge-rejected';
+
+    tr.innerHTML = `
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="avatar avatar-sm">${initials(u.fullName)}</div>
+          <div>
+            <strong>${u.fullName}</strong>
+            <div class="text-xs text-muted">${u.email}</div>
+          </div>
+        </div>
+      </td>
+      <td><strong>${u.studentId || '—'}</strong></td>
+      <td>
+        <div>${u.preferredRole || 'Student'}</div>
+        <small class="text-muted">${u.facultyReference || 'No Faculty'}</small>
+      </td>
+      <td><span class="badge ${badgeClass}">${u.verificationStatus || 'Unknown'}</span></td>
+      <td>
+        ${u.certificateUrl && u.certificateUrl !== 'none'
+          ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID</button>`
+          : '<span class="text-muted text-xs">None</span>'}
+      </td>
+      <td>
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn btn-outline btn-sm view-info-btn">Details</button>
+          ${!isVerified ? `<button type="button" class="btn btn-purple btn-sm quick-verify-btn">Verify</button>` : ''}
+        </div>
+      </td>
+    `;
+
+    tr.querySelector('.view-info-btn')?.addEventListener('click', () => openApplicantDetails(u));
+    tr.querySelector('.view-cert-btn')?.addEventListener('click', () => {
+      $('#cert-preview-img').src = u.certificateUrl;
+      $('#dialog-certificate').showModal();
+    });
+    tr.querySelector('.quick-verify-btn')?.addEventListener('click', async () => {
+      await updateUserStatus(dc, { id: u.id, status: 'verified' });
+      showToast(`${u.fullName} marked as verified.`);
+      loadAdmin();
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function renderAdminApplications() {
+  const tbody = $('#admin-all-apps-tbody');
+  if (!tbody) return;
+
+  let list = adminAppsData;
+  if (adminSearchQuery) {
+    const q = adminSearchQuery.toLowerCase();
+    list = list.filter(a => 
+      (a.helpRequest?.title || '').toLowerCase().includes(q) ||
+      (a.applicant?.fullName || '').toLowerCase().includes(q) ||
+      (a.applicant?.studentId || '').toLowerCase().includes(q) ||
+      (a.message || '').toLowerCase().includes(q)
+    );
+  }
+
+  tbody.innerHTML = '';
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">No applications submitted yet.</td></tr>';
+    return;
+  }
+
+  list.forEach(a => {
+    const tr = document.createElement('tr');
+    const isCompleted = a.status === 'COMPLETED';
+    const isApproved = a.status === 'APPROVED';
+    const badgeClass = isCompleted ? 'badge-approved' : isApproved ? 'badge-normal' : a.status === 'TERMINATED' ? 'badge-rejected' : 'badge-pending';
+
+    tr.innerHTML = `
+      <td><strong>${a.helpRequest?.title || 'Service Request'}</strong></td>
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="avatar avatar-sm">${initials(a.applicant?.fullName || '')}</div>
+          <div>
+            <strong>${a.applicant?.fullName || 'Applicant'}</strong>
+            <div class="text-xs text-muted">${a.applicant?.email || ''}</div>
+          </div>
+        </div>
+      </td>
+      <td>${a.applicant?.studentId || '—'}</td>
+      <td><strong>${peso(a.priceOffer)}</strong></td>
+      <td><div class="truncate" style="max-width: 220px;">"${a.message}"</div></td>
+      <td><span class="badge ${badgeClass}">${a.status || 'Pending'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openApplicantDetails(user) {
+  const body = $('#applicant-modal-body');
+  if (!body) return;
+
+  const isVerified = user.verificationStatus === 'verified';
+  const isPending = user.verificationStatus === 'pending';
+  const badgeClass = isVerified ? 'badge-approved' : isPending ? 'badge-pending' : 'badge-rejected';
+
+  body.innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <div class="avatar avatar-md">${initials(user.fullName)}</div>
+      <div>
+        <h3 class="font-bold text-lg">${user.fullName}</h3>
+        <p class="text-muted text-sm">${user.email}</p>
+        <span class="badge ${badgeClass} mt-1">${user.verificationStatus || 'Pending'}</span>
+      </div>
+    </div>
+
+    <div class="applicant-detail-grid">
+      <div class="applicant-detail-item">
+        <span class="text-xs text-muted font-bold">STUDENT ID</span>
+        <strong>${user.studentId || 'Not provided'}</strong>
+      </div>
+      <div class="applicant-detail-item">
+        <span class="text-xs text-muted font-bold">GENDER</span>
+        <strong>${user.gender || 'Not specified'}</strong>
+      </div>
+      <div class="applicant-detail-item">
+        <span class="text-xs text-muted font-bold">PREFERRED ROLE</span>
+        <strong>${user.preferredRole || 'Student Freelancer'}</strong>
+      </div>
+      <div class="applicant-detail-item">
+        <span class="text-xs text-muted font-bold">FACULTY REFERENCE</span>
+        <strong>${user.facultyReference || 'None'}</strong>
+      </div>
+    </div>
+
+    ${user.certificateUrl && user.certificateUrl !== 'none' ? `
+      <div class="mt-4">
+        <span class="text-xs text-muted font-bold block mb-1">STUDENT ID / CERTIFICATE PREVIEW</span>
+        <img src="${user.certificateUrl}" class="admin-cert-thumb" style="width: 100%; max-height: 240px; object-fit: contain; background: #000; border-radius: 8px;" alt="Student Document">
+      </div>
+    ` : '<p class="text-muted text-sm mt-3">No certificate document uploaded.</p>'}
+  `;
+
+  $('#dialog-applicant-details')?.showModal();
+}
+
+function setupAdminTabs() {
+  $$('.admin-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      adminActiveTab = btn.dataset.admintab;
+      $$('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      $$('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+      $(`#admin-tab-${adminActiveTab}`)?.classList.remove('hidden');
+
+      renderCurrentAdminTab();
+    });
+  });
+}
+
+function setupAdminSearch() {
+  $('#admin-search-input')?.addEventListener('input', (e) => {
+    adminSearchQuery = e.target.value.trim();
+    renderCurrentAdminTab();
+  });
 }
 
 // ── Mobile Sidebar ───────────────────────────────────────────────────────────
@@ -1420,6 +1703,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEditProfile();
   setupMobileSidebar();
   setupLogout();
+  setupAdminTabs();
+  setupAdminSearch();
   setupDialogCloseButtons();
 
   $$('.nav-btn[data-target]').forEach(btn => {

@@ -138,3 +138,63 @@ query ListMessages($conversationId: UUID!) @auth(level: PUBLIC) {
     }
   }
 }
+
+query ListAllUsers @auth(level: PUBLIC) {
+  users {
+    id
+    email
+    fullName
+    studentId
+    facultyReference
+    certificateUrl
+    verificationStatus
+    preferredRole
+    gender
+  }
+}
+
+query ListAllHelpRequestsAdmin @auth(level: PUBLIC) {
+  helpRequests {
+    id
+    title
+    budget
+    status
+    category
+    urgency
+    deadline
+    requester {
+      id
+      fullName
+      studentId
+      email
+    }
+  }
+}
+
+query ListAllApplicationsAdmin @auth(level: PUBLIC) {
+  applications {
+    id
+    priceOffer
+    status
+    message
+    createdAt
+    helpRequest {
+      id
+      title
+      status
+      budget
+    }
+    applicant {
+      id
+      fullName
+      studentId
+      email
+      facultyReference
+      gender
+      preferredRole
+      certificateUrl
+      verificationStatus
+    }
+  }
+}
+

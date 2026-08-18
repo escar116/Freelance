@@ -1489,6 +1489,12 @@ button {
 /* ==========================================================================
    12. ADMIN DASHBOARD VIEW
    ========================================================================== */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
 .admin-list {
     display: flex;
     flex-direction: column;
@@ -1505,6 +1511,11 @@ button {
     justify-content: space-between;
     gap: 1.5rem;
     box-shadow: var(--shadow-card);
+    transition: var(--transition);
+}
+
+.admin-card:hover {
+    box-shadow: var(--shadow-hover);
 }
 
 .admin-card-info {
@@ -1514,6 +1525,14 @@ button {
     flex-grow: 1;
 }
 
+.admin-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
 .admin-cert-thumb {
     width: 80px;
     height: 55px;
@@ -1521,7 +1540,31 @@ button {
     border-radius: 6px;
     border: 1px solid var(--border-card);
     cursor: pointer;
+    transition: var(--transition);
 }
+
+.admin-cert-thumb:hover {
+    transform: scale(1.04);
+}
+
+.applicant-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    background: var(--bg-main);
+    padding: 1.25rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-card);
+}
+
+.applicant-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.text-red { color: var(--color-red); }
+.badge-rejected { background: var(--color-red-bg); color: var(--color-red); }
 
 /* ==========================================================================
    13. BUTTONS, BADGES, AVATARS & INPUTS
