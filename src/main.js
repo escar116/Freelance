@@ -160,7 +160,7 @@ function navigateTo(section) {
   else if (section === 'admin') loadAdmin();
 }
 
-function showAuth(section = 'login') {
+function showAuth(section = 'landing') {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
   if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
   if (messageSubscription) { messageSubscription(); messageSubscription = null; }
@@ -226,9 +226,65 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     currentUser = null;
     userData = null;
-    showAuth('login');
+    showAuth('landing');
   }
 });
+
+// ── Landing Page ─────────────────────────────────────────────────────────────
+function setupLanding() {
+  const form = $('#landing-quick-login-form');
+  const googleBtn = $('#landing-google-btn');
+  const errorEl = $('#landing-login-error');
+  const registerBtn = $('#landing-register-btn');
+  const topRegisterBtn = $('#landing-top-register-btn');
+  const topLoginBtn = $('#landing-top-login-btn');
+  const forgotLink = $('#landing-forgot-link');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hide(errorEl);
+    const email = $('#landing-login-email').value.trim();
+    const password = $('#landing-login-password').value;
+    const btn = $('#landing-login-btn');
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      errorEl.textContent = err.message || 'Invalid email or password.';
+      show(errorEl);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  });
+
+  googleBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    hide(errorEl);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
+      if (!res.data.user) {
+        await signOut(auth);
+        errorEl.textContent = 'Account not found. Please click Sign Up to register.';
+        show(errorEl);
+      }
+    } catch (err) {
+      errorEl.textContent = err.message || 'Google login failed.';
+      show(errorEl);
+    }
+  });
+
+  registerBtn?.addEventListener('click', (e) => { e.preventDefault(); showAuth('register'); });
+  topRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); showAuth('register'); });
+  topLoginBtn?.addEventListener('click', (e) => { 
+    e.preventDefault(); 
+    $('#landing-login-email')?.focus();
+  });
+  forgotLink?.addEventListener('click', (e) => { e.preventDefault(); showAuth('forgot-password'); });
+  $('#login-link-home')?.addEventListener('click', (e) => { e.preventDefault(); showAuth('landing'); });
+  $('#register-link-home')?.addEventListener('click', (e) => { e.preventDefault(); showAuth('landing'); });
+}
 
 // ── Login ────────────────────────────────────────────────────────────────────
 function setupLogin() {
@@ -1348,6 +1404,7 @@ function setupDialogCloseButtons() {
 
 // ── Initialization ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  setupLanding();
   setupLogin();
   setupRegister();
   setupForgotPassword();
