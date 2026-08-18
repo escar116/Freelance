@@ -1,3 +1,9 @@
 import { defineConfig } from 'vite';
 
-export default defineConfig({});
+export default defineConfig({
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+    }
+  }
+});
