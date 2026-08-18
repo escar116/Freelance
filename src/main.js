@@ -1,9 +1,9 @@
 // ── Imports ──────────────────────────────────────────────────────────────────
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, 
-  signOut, sendPasswordResetEmail 
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
+  signOut, sendPasswordResetEmail
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
 import {
@@ -35,7 +35,9 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const ADMIN_EMAILS = [
-  'charlesjanparaggua@gmail.com'
+  'charlesjanparaggua@gmail.com',
+  'anryurmanita@gmail.com',
+  'taguinodanathasia@gmail.com'
   // Add new admin emails here separated by commas:
   // 'anotheradmin@email.com'
 ];
@@ -150,7 +152,7 @@ function navigateTo(section) {
   if (target) {
     target.classList.remove('hidden');
   }
-  
+
   $$('.nav-btn[data-target]').forEach(b => {
     b.classList.toggle('active', b.dataset.target === section);
   });
@@ -193,7 +195,7 @@ function showApp() {
   // User Profile in Sidebar Footer & Header
   const userName = userData?.fullName || currentUser?.displayName || 'Student User';
   const userInitials = initials(userName);
-  
+
   const sidebarName = $('#sidebar-user-name');
   if (sidebarName) sidebarName.textContent = userName;
   const sidebarAvatar = $('#sidebar-user-avatar');
@@ -282,8 +284,8 @@ function setupLanding() {
 
   registerBtn?.addEventListener('click', (e) => { e.preventDefault(); showAuth('register'); });
   topRegisterBtn?.addEventListener('click', (e) => { e.preventDefault(); showAuth('register'); });
-  topLoginBtn?.addEventListener('click', (e) => { 
-    e.preventDefault(); 
+  topLoginBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
     $('#landing-login-email')?.focus();
   });
   forgotLink?.addEventListener('click', (e) => { e.preventDefault(); showAuth('forgot-password'); });
@@ -678,9 +680,9 @@ function renderServices(requests, appliedIds = new Set()) {
 }
 
 function setupServiceFilters() {
-  $('#filter-search')?.addEventListener('input', (e) => { 
-    requestFilters.q = e.target.value; 
-    renderServices(allRequests); 
+  $('#filter-search')?.addEventListener('input', (e) => {
+    requestFilters.q = e.target.value;
+    renderServices(allRequests);
   });
 
   $('#filter-category')?.addEventListener('change', (e) => {
@@ -1177,7 +1179,7 @@ async function loadTransactions() {
 
     const completed = apps.filter(a => a.status === 'COMPLETED');
     const pending = apps.filter(a => a.status === 'PENDING' || a.status === 'APPROVED');
-    
+
     const completedTotal = completed.reduce((sum, a) => sum + (Number(a.priceOffer) || 0), 0);
     const pendingTotal = pending.reduce((sum, a) => sum + (Number(a.priceOffer) || 0), 0);
     const grandTotal = completedTotal + pendingTotal;
@@ -1376,11 +1378,11 @@ function renderCurrentAdminTab() {
 function renderAdminPending() {
   const container = $('#admin-list');
   if (!container) return;
-  
+
   let list = adminPendingData;
   if (adminSearchQuery) {
     const q = adminSearchQuery.toLowerCase();
-    list = list.filter(u => 
+    list = list.filter(u =>
       (u.fullName || '').toLowerCase().includes(q) ||
       (u.studentId || '').toLowerCase().includes(q) ||
       (u.email || '').toLowerCase().includes(q) ||
@@ -1412,8 +1414,8 @@ function renderAdminPending() {
       <div class="flex items-center gap-2">
         <button type="button" class="btn btn-outline btn-sm view-profile-btn">Full Info</button>
         ${u.certificateUrl && u.certificateUrl !== 'none'
-          ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID / Cert</button>`
-          : ''}
+        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID / Cert</button>`
+        : ''}
         <button type="button" class="btn btn-outline btn-sm reject-btn">Reject</button>
         <button type="button" class="btn btn-purple btn-sm approve-btn">Approve</button>
       </div>
@@ -1463,7 +1465,7 @@ function renderAdminUsers() {
   let list = adminUsersData;
   if (adminSearchQuery) {
     const q = adminSearchQuery.toLowerCase();
-    list = list.filter(u => 
+    list = list.filter(u =>
       (u.fullName || '').toLowerCase().includes(q) ||
       (u.studentId || '').toLowerCase().includes(q) ||
       (u.email || '').toLowerCase().includes(q) ||
@@ -1501,8 +1503,8 @@ function renderAdminUsers() {
       <td><span class="badge ${badgeClass}">${u.verificationStatus || 'Unknown'}</span></td>
       <td>
         ${u.certificateUrl && u.certificateUrl !== 'none'
-          ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID</button>`
-          : '<span class="text-muted text-xs">None</span>'}
+        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID</button>`
+        : '<span class="text-muted text-xs">None</span>'}
       </td>
       <td>
         <div class="flex items-center gap-1">
@@ -1534,7 +1536,7 @@ function renderAdminApplications() {
   let list = adminAppsData;
   if (adminSearchQuery) {
     const q = adminSearchQuery.toLowerCase();
-    list = list.filter(a => 
+    list = list.filter(a =>
       (a.helpRequest?.title || '').toLowerCase().includes(q) ||
       (a.applicant?.fullName || '').toLowerCase().includes(q) ||
       (a.applicant?.studentId || '').toLowerCase().includes(q) ||
