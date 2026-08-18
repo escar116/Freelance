@@ -1344,22 +1344,25 @@ async function loadProfile() {
   $('#profile-student-id').textContent = userData.studentId || '—';
 
   try {
-    const resApps = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
-    const apps = resApps.data.applications || [];
-    $('#stat-active-services').textContent = apps.length;
-
     const resUser = await getUserProfile(dc, { id: userData.id }, SERVER_ONLY);
-    const reviews = resUser.data.user?.reviews_on_targetUser || [];
-    
-    // For profile section, we used prefix 'ratings' for IDs, except for the progress bars which are global IDs pb-5, pc-5 etc.
-    // I need to adjust renderReviews or the IDs.
-    // Actually, in index.html, #ratings-avg-score is used.
-    
-    // Manual mapping for loadProfile:
+    const userProfile = resUser.data.user;
+    if (!userProfile) return;
+
+    // Set stats
+    const apps = userProfile.applications_on_applicant || [];
+    $('#stat-app-pending').textContent = apps.filter(a => a.status === 'PENDING').length;
+    $('#stat-app-completed').textContent = apps.filter(a => a.status === 'COMPLETED').length;
+    $('#stat-app-terminated').textContent = apps.filter(a => a.status === 'TERMINATED').length;
+
+    const reqs = userProfile.helpRequests_on_requester || [];
+    $('#stat-emp-pending').textContent = reqs.filter(r => r.status === 'OPEN').length;
+    $('#stat-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
+    $('#stat-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
+
+    const reviews = userProfile.reviews_on_targetUser || [];
     renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
-    $('#stat-active-services').textContent = '0';
   }
 }
 
@@ -1407,6 +1410,17 @@ window.openViewProfileDialog = async function(userId) {
     $('#vp-avatar').textContent = initials(user.fullName);
     $('#vp-name').textContent = user.fullName;
     $('#vp-program').textContent = user.facultyReference || 'Student';
+
+    // Set stats
+    const apps = user.applications_on_applicant || [];
+    $('#vp-app-pending').textContent = apps.filter(a => a.status === 'PENDING').length;
+    $('#vp-app-completed').textContent = apps.filter(a => a.status === 'COMPLETED').length;
+    $('#vp-app-terminated').textContent = apps.filter(a => a.status === 'TERMINATED').length;
+
+    const reqs = user.helpRequests_on_requester || [];
+    $('#vp-emp-pending').textContent = reqs.filter(r => r.status === 'OPEN').length;
+    $('#vp-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
+    $('#vp-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
     
     const reviews = user.reviews_on_targetUser || [];
     let sum = 0;

@@ -1403,6 +1403,12 @@ export interface GetUserProfileData {
         fullName: string;
       };
     } & Review_Key)[];
+    applications_on_applicant: ({
+      status: string;
+    })[];
+    helpRequests_on_requester: ({
+      status?: string | null;
+    })[];
   } & User_Key;
 }
 ```

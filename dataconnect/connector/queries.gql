@@ -214,6 +214,12 @@ query GetUserProfile($id: String!) @auth(level: PUBLIC) {
         fullName
       }
     }
+    applications_on_applicant {
+      status
+    }
+    helpRequests_on_requester {
+      status
+    }
   }
 }
 

@@ -657,13 +657,48 @@
                                     <span class="cred-label">Student ID</span>
                                     <span class="cred-value" id="profile-student-id">—</span>
                                 </div>
-                                <div class="cred-item">
-                                    <span class="cred-label">Program</span>
-                                    <span class="cred-value" id="profile-program-val">Computer Engineering</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="profile-section-block mt-6">
+                        <h3 class="profile-block-heading">Platform Statistics</h3>
+                        <div class="credentials-card mt-3" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <!-- Applicant Stats -->
+                            <div>
+                                <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Applicant</h4>
+                                <div class="cred-grid">
+                                    <div class="cred-item">
+                                        <span class="cred-label">Pending</span>
+                                        <span class="cred-value font-bold text-amber" id="stat-app-pending">0</span>
+                                    </div>
+                                    <div class="cred-item">
+                                        <span class="cred-label">Completed</span>
+                                        <span class="cred-value font-bold text-green" id="stat-app-completed">0</span>
+                                    </div>
+                                    <div class="cred-item">
+                                        <span class="cred-label">Terminated</span>
+                                        <span class="cred-value font-bold text-red" id="stat-app-terminated">0</span>
+                                    </div>
                                 </div>
-                                <div class="cred-item">
-                                    <span class="cred-label">Active Applications</span>
-                                    <span class="cred-value font-bold" id="stat-active-services">0</span>
+                            </div>
+                            <!-- Employer Stats -->
+                            <div>
+                                <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Employer</h4>
+                                <div class="cred-grid">
+                                    <div class="cred-item">
+                                        <span class="cred-label">Pending</span>
+                                        <span class="cred-value font-bold text-amber" id="stat-emp-pending">0</span>
+                                    </div>
+                                    <div class="cred-item">
+                                        <span class="cred-label">Completed</span>
+                                        <span class="cred-value font-bold text-green" id="stat-emp-completed">0</span>
+                                    </div>
+                                    <div class="cred-item">
+                                        <span class="cred-label">Terminated</span>
+                                        <span class="cred-value font-bold text-red" id="stat-emp-terminated">0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -988,7 +1023,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Certificate Preview Modal -->
     <dialog id="dialog-certificate" class="modal">
         <div class="modal-content text-center">
@@ -1019,6 +1053,28 @@
                     </div>
                     <p class="profile-user-program" id="vp-program">BS Computer Engineering · Cagayan State University</p>
                     <div class="profile-availability-pill" id="vp-availability">Available</div>
+                </div>
+            </div>
+
+            <div class="dash-card mt-4">
+                <h3 class="dash-card-title mb-2">Platform Statistics</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h4 class="font-bold text-xs text-muted mb-1 uppercase">As Applicant</h4>
+                        <div class="flex gap-2 text-sm">
+                            <span class="text-amber" title="Pending">Pending: <strong id="vp-app-pending">0</strong></span>
+                            <span class="text-green" title="Completed">Completed: <strong id="vp-app-completed">0</strong></span>
+                            <span class="text-red" title="Terminated">Terminated: <strong id="vp-app-terminated">0</strong></span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs text-muted mb-1 uppercase">As Employer</h4>
+                        <div class="flex gap-2 text-sm">
+                            <span class="text-amber" title="Pending">Pending: <strong id="vp-emp-pending">0</strong></span>
+                            <span class="text-green" title="Completed">Completed: <strong id="vp-emp-completed">0</strong></span>
+                            <span class="text-red" title="Terminated">Terminated: <strong id="vp-emp-terminated">0</strong></span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
