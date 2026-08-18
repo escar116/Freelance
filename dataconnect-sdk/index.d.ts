@@ -105,6 +105,22 @@ export interface CreateUserVariables {
   gender?: string | null;
 }
 
+export interface DeleteApplicationData {
+  application_delete?: Application_Key | null;
+}
+
+export interface DeleteApplicationVariables {
+  id: UUIDString;
+}
+
+export interface DeleteUserData {
+  user_delete?: User_Key | null;
+}
+
+export interface DeleteUserVariables {
+  id: string;
+}
+
 export interface GetUserData {
   user?: {
     id: string;
@@ -545,6 +561,30 @@ export const createReviewRef: CreateReviewRef;
 
 export function createReview(vars: CreateReviewVariables): MutationPromise<CreateReviewData, CreateReviewVariables>;
 export function createReview(dc: DataConnect, vars: CreateReviewVariables): MutationPromise<CreateReviewData, CreateReviewVariables>;
+
+interface DeleteUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteUserVariables): MutationRef<DeleteUserData, DeleteUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteUserVariables): MutationRef<DeleteUserData, DeleteUserVariables>;
+  operationName: string;
+}
+export const deleteUserRef: DeleteUserRef;
+
+export function deleteUser(vars: DeleteUserVariables): MutationPromise<DeleteUserData, DeleteUserVariables>;
+export function deleteUser(dc: DataConnect, vars: DeleteUserVariables): MutationPromise<DeleteUserData, DeleteUserVariables>;
+
+interface DeleteApplicationRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeleteApplicationVariables): MutationRef<DeleteApplicationData, DeleteApplicationVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeleteApplicationVariables): MutationRef<DeleteApplicationData, DeleteApplicationVariables>;
+  operationName: string;
+}
+export const deleteApplicationRef: DeleteApplicationRef;
+
+export function deleteApplication(vars: DeleteApplicationVariables): MutationPromise<DeleteApplicationData, DeleteApplicationVariables>;
+export function deleteApplication(dc: DataConnect, vars: DeleteApplicationVariables): MutationPromise<DeleteApplicationData, DeleteApplicationVariables>;
 
 interface ListPendingUsersRef {
   /* Allow users to create refs without passing in DataConnect */

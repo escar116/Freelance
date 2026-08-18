@@ -112,3 +112,11 @@ mutation CreateReview(
     targetUserId: $targetUserId
   })
 }
+
+mutation DeleteUser($id: String!) @auth(level: PUBLIC) {
+  user_delete(id: $id)
+}
+
+mutation DeleteApplication($id: UUID!) @auth(level: PUBLIC) {
+  application_delete(id: $id)
+}

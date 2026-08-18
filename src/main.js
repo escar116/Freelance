@@ -13,7 +13,8 @@ import {
   createConversation, createMessage, listConversations, listMessages,
   listMessagesRef, listConversationsRef,
   listPendingUsers, listAllUsers, listAllHelpRequestsAdmin, listAllApplicationsAdmin,
-  updateUserStatus, terminateJob, completeJob, createReview, getUserProfile
+  updateUserStatus, terminateJob, completeJob, createReview, getUserProfile,
+  deleteUser, deleteApplication
 } from '@work4abit/dataconnect';
 
 // ── Firebase Config ──────────────────────────────────────────────────────────
@@ -399,6 +400,13 @@ function setupRegister() {
       return;
     }
 
+    const certFile = certInput?.files?.[0];
+    if (!certFile) {
+      errorEl.textContent = 'Please upload your COE (Certificate of Enrollment).';
+      show(errorEl);
+      return;
+    }
+
     btn.disabled = true; btn.textContent = 'Creating Account...';
 
     try {
@@ -427,7 +435,6 @@ function setupRegister() {
       }
 
       let certUrl = 'none';
-      const certFile = certInput?.files?.[0];
       if (certFile) {
         certUrl = await compressImage(certFile);
       }
@@ -1425,6 +1432,7 @@ window.openViewProfileDialog = async function(userId) {
     
     $('#dialog-view-profile').showModal();
   } catch (err) {
+    console.error('Profile Dialog Error:', err);
     showToast('Failed to load profile', 'error');
   }
 };
@@ -1550,7 +1558,7 @@ function renderAdminPending() {
       <div class="flex items-center gap-2">
         <button type="button" class="btn btn-outline btn-sm view-profile-btn">Full Info</button>
         ${u.certificateUrl && u.certificateUrl !== 'none'
-        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID / Cert</button>`
+        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View COE</button>`
         : ''}
         <button type="button" class="btn btn-outline btn-sm reject-btn">Reject</button>
         <button type="button" class="btn btn-purple btn-sm approve-btn">Approve</button>
@@ -1639,13 +1647,14 @@ function renderAdminUsers() {
       <td><span class="badge ${badgeClass}">${u.verificationStatus || 'Unknown'}</span></td>
       <td>
         ${u.certificateUrl && u.certificateUrl !== 'none'
-        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View ID</button>`
-        : '<span class="text-muted text-xs">None</span>'}
+        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View COE</button>`
+        : `<span class="text-muted text-sm italic">No COE provided</span>`}
       </td>
       <td>
         <div class="flex items-center gap-1">
           <button type="button" class="btn btn-outline btn-sm view-info-btn">Details</button>
           ${!isVerified ? `<button type="button" class="btn btn-purple btn-sm quick-verify-btn">Verify</button>` : ''}
+          <button type="button" class="btn btn-outline btn-sm delete-user-btn" style="border-color: #ef4444; color: #ef4444;">Delete</button>
         </div>
       </td>
     `;
@@ -1659,6 +1668,17 @@ function renderAdminUsers() {
       await updateUserStatus(dc, { id: u.id, status: 'verified' });
       showToast(`${u.fullName} marked as verified.`);
       loadAdmin();
+    });
+    tr.querySelector('.delete-user-btn')?.addEventListener('click', async () => {
+      if (confirm(`Are you sure you want to permanently delete user ${u.fullName}?`)) {
+        try {
+          await deleteUser(dc, { id: u.id });
+          showToast(`User ${u.fullName} deleted.`);
+          loadAdmin();
+        } catch (err) {
+          showToast('Failed to delete user: ' + err.message, 'error');
+        }
+      }
     });
 
     tbody.appendChild(tr);
@@ -1707,7 +1727,23 @@ function renderAdminApplications() {
       <td><strong>${peso(a.priceOffer)}</strong></td>
       <td><div class="truncate" style="max-width: 220px;">"${a.message}"</div></td>
       <td><span class="badge ${badgeClass}">${a.status || 'Pending'}</span></td>
+      <td>
+        <button type="button" class="btn btn-outline btn-sm delete-app-btn" style="border-color: #ef4444; color: #ef4444;">Delete</button>
+      </td>
     `;
+    
+    tr.querySelector('.delete-app-btn')?.addEventListener('click', async () => {
+      if (confirm(`Are you sure you want to permanently delete application for "${a.helpRequest?.title}"?`)) {
+        try {
+          await deleteApplication(dc, { id: a.id });
+          showToast(`Application deleted.`);
+          loadAdmin();
+        } catch (err) {
+          showToast('Failed to delete application: ' + err.message, 'error');
+        }
+      }
+    });
+
     tbody.appendChild(tr);
   });
 }
