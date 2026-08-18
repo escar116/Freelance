@@ -34,7 +34,11 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const ADMIN_EMAIL = 'charlesjanparaggua@gmail.com';
+const ADMIN_EMAILS = [
+  'charlesjanparaggua@gmail.com'
+  // Add new admin emails here separated by commas:
+  // 'anotheradmin@email.com'
+];
 const SERVER_ONLY = { fetchPolicy: 'SERVER_ONLY' };
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -182,7 +186,7 @@ function showApp() {
   // Admin button visibility
   const adminNav = $('#nav-admin');
   if (adminNav) {
-    if (userData?.email === ADMIN_EMAIL) show(adminNav);
+    if (ADMIN_EMAILS.includes(userData?.email)) show(adminNav);
     else hide(adminNav);
   }
 
@@ -1309,7 +1313,7 @@ let adminRequestsData = [];
 let adminSearchQuery = '';
 
 async function loadAdmin() {
-  if (userData?.email !== ADMIN_EMAIL) {
+  if (!ADMIN_EMAILS.includes(userData?.email)) {
     navigateTo('dashboard');
     return;
   }
