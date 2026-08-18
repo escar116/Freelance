@@ -374,8 +374,12 @@ function setupRegister() {
       const url = URL.createObjectURL(file);
       certPreview.src = url;
       show(certPreview);
-      certDropzone.querySelector('p').textContent = `Selected: ${file.name}`;
+      hide(certDropzone);
     }
+  });
+
+  certPreview?.addEventListener('click', () => {
+    certInput?.click();
   });
 
   googleBtn?.addEventListener('click', async (e) => {

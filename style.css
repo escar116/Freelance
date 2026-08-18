@@ -379,6 +379,8 @@ button {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    cursor: pointer;
+    max-width: 100%;
 }
 
 .verification-status-pill {
