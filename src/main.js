@@ -349,7 +349,24 @@ function setupRegister() {
   const certPreview = $('#register-cert-preview');
   const certDropzone = $('#register-cert-dropzone');
 
-  certDropzone?.addEventListener('click', (e) => { e.preventDefault(); certInput?.click(); });
+  certDropzone?.addEventListener('click', () => { certInput?.click(); });
+
+  certDropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    certDropzone.style.borderColor = 'var(--primary-purple)';
+  });
+  certDropzone?.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    certDropzone.style.borderColor = '';
+  });
+  certDropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    certDropzone.style.borderColor = '';
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      certInput.files = e.dataTransfer.files;
+      certInput.dispatchEvent(new Event('change'));
+    }
+  });
 
   certInput?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -807,12 +824,12 @@ async function loadPostedJobs(isSilent = false) {
     const jobs = (res.data.helpRequests || []).filter(j => j.status === 'OPEN' || !j.status);
     container.innerHTML = '';
     if (jobs.length === 0) {
-      container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No posted jobs with pending candidates.</div>';
+      container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">You have not posted any open jobs.</div>';
       return;
     }
     jobs.forEach(job => {
       const pending = (job.applications_on_helpRequest || []).filter(a => a.status === 'PENDING');
-      if (pending.length === 0) return;
+      
       const jobEl = document.createElement('div');
       jobEl.className = 'job-card';
       jobEl.innerHTML = `
@@ -824,13 +841,17 @@ async function loadPostedJobs(isSilent = false) {
         <div class="candidates-list"></div>
       `;
       const candList = jobEl.querySelector('.candidates-list');
-      pending.forEach(app => {
-        const row = document.createElement('div');
-        row.className = 'candidate-row';
-        row.innerHTML = `
-          <div class="avatar avatar-sm cursor-pointer" onclick="openViewProfileDialog('${app.applicant?.id}')">${initials(app.applicant?.fullName || '')}</div>
-          <div class="candidate-info">
-            <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${app.applicant?.id}')">${app.applicant?.fullName || 'Applicant'}</strong>
+      
+      if (pending.length === 0) {
+        candList.innerHTML = `<div class="text-sm text-muted italic" style="padding: 1rem 0;">No applicants yet.</div>`;
+      } else {
+        pending.forEach(app => {
+          const row = document.createElement('div');
+          row.className = 'candidate-row';
+          row.innerHTML = `
+            <div class="avatar avatar-sm cursor-pointer" onclick="openViewProfileDialog('${app.applicant?.id}')">${initials(app.applicant?.fullName || '')}</div>
+            <div class="candidate-info">
+              <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${app.applicant?.id}')">${app.applicant?.fullName || 'Applicant'}</strong>
             <small class="text-muted">${app.applicant?.studentId || ''}</small>
             <div class="candidate-message">"${app.message}"</div>
           </div>
@@ -843,7 +864,8 @@ async function loadPostedJobs(isSilent = false) {
         row.querySelector('.approve-btn').addEventListener('click', (e) => { e.preventDefault(); handleApprove(app, job); });
         row.querySelector('.reject-btn').addEventListener('click', (e) => { e.preventDefault(); handleReject(app); });
         candList.appendChild(row);
-      });
+        });
+      }
       container.appendChild(jobEl);
     });
     if (container.children.length === 0) {
