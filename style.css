@@ -1780,5 +1780,27 @@ dialog::backdrop {
     .brand-title { font-size: 1.2rem; font-weight: 800; }
     .dashboard-stats-grid { grid-template-columns: 1fr; }
     .form-row { flex-direction: column; }
-    .messages-layout { grid-template-columns: 1fr; }
+    
+    /* Mobile Messenger-style layout */
+    .messages-layout { 
+        display: block;
+        height: calc(100vh - 120px);
+    }
+    .conversations-sidebar {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        border-right: none;
+    }
+    .chat-panel {
+        display: none;
+        width: 100%;
+        height: 100%;
+    }
+    .messages-layout.chat-open .conversations-sidebar {
+        display: none;
+    }
+    .messages-layout.chat-open .chat-panel {
+        display: flex;
+    }
 }

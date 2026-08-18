@@ -991,6 +991,9 @@ async function selectConversation(convId) {
   }
   activeConvId = convId;
   renderConversationList();
+  
+  // Add class for mobile messenger-style view
+  $('#messages-container')?.classList.add('chat-open');
 
   const conv = conversations.find(c => c.id === convId);
   if (!conv) return;
@@ -1035,6 +1038,7 @@ async function selectConversation(convId) {
       
       // Close the active chat
       activeConvId = null;
+      $('#messages-container')?.classList.remove('chat-open');
       loadMessages();
       
       $('#dialog-review').showModal();
