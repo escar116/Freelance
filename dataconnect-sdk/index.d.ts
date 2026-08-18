@@ -119,6 +119,29 @@ export interface GetUserData {
   } & User_Key;
 }
 
+export interface GetUserProfileData {
+  user?: {
+    id: string;
+    fullName: string;
+    studentId?: string | null;
+    facultyReference?: string | null;
+    preferredRole?: string | null;
+    gender?: string | null;
+    reviews_on_targetUser: ({
+      id: UUIDString;
+      rating: number;
+      comment: string;
+      reviewer: {
+        fullName: string;
+      };
+    } & Review_Key)[];
+  } & User_Key;
+}
+
+export interface GetUserProfileVariables {
+  id: string;
+}
+
 export interface GetUserVariables {
   id: string;
 }
@@ -654,4 +677,16 @@ export const listAllApplicationsAdminRef: ListAllApplicationsAdminRef;
 
 export function listAllApplicationsAdmin(options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
 export function listAllApplicationsAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
+
+interface GetUserProfileRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserProfileVariables): QueryRef<GetUserProfileData, GetUserProfileVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserProfileVariables): QueryRef<GetUserProfileData, GetUserProfileVariables>;
+  operationName: string;
+}
+export const getUserProfileRef: GetUserProfileRef;
+
+export function getUserProfile(vars: GetUserProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserProfileData, GetUserProfileVariables>;
+export function getUserProfile(dc: DataConnect, vars: GetUserProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserProfileData, GetUserProfileVariables>;
 

@@ -13,7 +13,7 @@ import {
   createConversation, createMessage, listConversations, listMessages,
   listMessagesRef, listConversationsRef,
   listPendingUsers, listAllUsers, listAllHelpRequestsAdmin, listAllApplicationsAdmin,
-  updateUserStatus, terminateJob, completeJob, createReview
+  updateUserStatus, terminateJob, completeJob, createReview, getUserProfile
 } from '@work4abit/dataconnect';
 
 // ── Firebase Config ──────────────────────────────────────────────────────────
@@ -647,8 +647,8 @@ function renderServices(requests, appliedIds = new Set()) {
 
     card.innerHTML = `
       <div class="request-card-header">
-        <div class="avatar avatar-sm">${initials(r.requester?.fullName || 'S')}</div>
-        <span class="request-card-name">${r.requester?.fullName || 'Student Client'}</span>
+        <div class="avatar avatar-sm cursor-pointer" onclick="openViewProfileDialog('${r.requester?.id}')">${initials(r.requester?.fullName || 'S')}</div>
+        <span class="request-card-name cursor-pointer hover:underline" onclick="openViewProfileDialog('${r.requester?.id}')">${r.requester?.fullName || 'Student Client'}</span>
         <span class="${urgencyClass}">${r.urgency === 'Urgent' ? '🔥 ' : ''}${r.urgency || 'Normal'}</span>
       </div>
       <h3 class="request-card-title">${r.title}</h3>
@@ -821,9 +821,9 @@ async function loadPostedJobs(isSilent = false) {
         const row = document.createElement('div');
         row.className = 'candidate-row';
         row.innerHTML = `
-          <div class="avatar avatar-sm">${initials(app.applicant?.fullName || '')}</div>
+          <div class="avatar avatar-sm cursor-pointer" onclick="openViewProfileDialog('${app.applicant?.id}')">${initials(app.applicant?.fullName || '')}</div>
           <div class="candidate-info">
-            <strong>${app.applicant?.fullName || 'Applicant'}</strong>
+            <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${app.applicant?.id}')">${app.applicant?.fullName || 'Applicant'}</strong>
             <small class="text-muted">${app.applicant?.studentId || ''}</small>
             <div class="candidate-message">"${app.message}"</div>
           </div>
@@ -1001,9 +1001,9 @@ async function selectConversation(convId) {
   const chatHeader = $('#chat-header-content');
   chatHeader.innerHTML = `
     <div class="flex items-center gap-3">
-      <div class="avatar avatar-sm">${initials(otherUser?.fullName || '')}</div>
+      <div class="avatar avatar-sm cursor-pointer" onclick="openViewProfileDialog('${otherUser?.id}')">${initials(otherUser?.fullName || '')}</div>
       <div>
-        <strong class="block">${otherUser?.fullName || 'User'}</strong>
+        <strong class="block cursor-pointer hover:underline" onclick="openViewProfileDialog('${otherUser?.id}')">${otherUser?.fullName || 'User'}</strong>
         <small class="text-muted">${conv.application?.helpRequest?.title || ''}</small>
       </div>
     </div>
@@ -1032,6 +1032,11 @@ async function selectConversation(convId) {
       await completeJob(dc, { applicationId: conv.application.id, helpRequestId: conv.application.helpRequest.id });
       showToast('Job marked completed!');
       reviewTarget = { convId, otherUser };
+      
+      // Close the active chat
+      activeConvId = null;
+      loadMessages();
+      
       $('#dialog-review').showModal();
     } catch (err) {
       showToast('Error: ' + err.message, 'error');
@@ -1280,6 +1285,46 @@ function setupReviewDialog() {
 }
 
 // ── Profile ──────────────────────────────────────────────────────────────────
+function renderReviews(reviews, prefix) {
+  if (!reviews || reviews.length === 0) {
+    $(`#${prefix}-avg`).textContent = '0.0';
+    $(`#${prefix}-count`).textContent = 'Based on 0 reviews';
+    $(`#${prefix}-list`).innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    [1,2,3,4,5].forEach(r => {
+      if ($(`#pb-${r}`)) $(`#pb-${r}`).style.width = '0%';
+      if ($(`#pc-${r}`)) $(`#pc-${r}`).textContent = '0';
+    });
+    return;
+  }
+  
+  let sum = 0;
+  const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+  reviews.forEach(r => {
+    sum += r.rating;
+    counts[r.rating] = (counts[r.rating] || 0) + 1;
+  });
+  
+  const avg = sum / reviews.length;
+  $(`#${prefix}-avg`).textContent = avg.toFixed(1);
+  $(`#${prefix}-count`).textContent = `Based on ${reviews.length} review${reviews.length > 1 ? 's' : ''}`;
+  
+  [1,2,3,4,5].forEach(r => {
+    const pct = (counts[r] / reviews.length) * 100;
+    if ($(`#pb-${r}`)) $(`#pb-${r}`).style.width = pct + '%';
+    if ($(`#pc-${r}`)) $(`#pc-${r}`).textContent = counts[r];
+  });
+  
+  $(`#${prefix}-list`).innerHTML = reviews.map(r => `
+    <div class="feedback-item">
+      <div class="flex justify-between items-start">
+        <strong class="text-white">${r.reviewer.fullName}</strong>
+        <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+      </div>
+      <p class="text-sm text-gray-300 mt-2">${r.comment || ''}</p>
+    </div>
+  `).join('');
+}
+
 async function loadProfile() {
   if (!userData) return;
   $('#profile-avatar').textContent = initials(userData.fullName);
@@ -1288,13 +1333,97 @@ async function loadProfile() {
   $('#profile-student-id').textContent = userData.studentId || '—';
 
   try {
-    const res = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
-    const apps = res.data.applications || [];
+    const resApps = await listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY);
+    const apps = resApps.data.applications || [];
     $('#stat-active-services').textContent = apps.length;
-  } catch {
+
+    const resUser = await getUserProfile(dc, { id: userData.id }, SERVER_ONLY);
+    const reviews = resUser.data.user?.reviews_on_targetUser || [];
+    
+    // For profile section, we used prefix 'ratings' for IDs, except for the progress bars which are global IDs pb-5, pc-5 etc.
+    // I need to adjust renderReviews or the IDs.
+    // Actually, in index.html, #ratings-avg-score is used.
+    
+    // Manual mapping for loadProfile:
+    renderReviewsProfile(reviews);
+  } catch (err) {
+    console.error('Error loading profile:', err);
     $('#stat-active-services').textContent = '0';
   }
 }
+
+function renderReviewsProfile(reviews) {
+  if (!reviews || reviews.length === 0) {
+    $('#ratings-avg-score').textContent = '0.0';
+    $('#ratings-total-count').textContent = 'Based on 0 reviews';
+    $('#ratings-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    [1,2,3,4,5].forEach(r => {
+      $(`#pb-${r}`).style.width = '0%';
+      $(`#pc-${r}`).textContent = '0';
+    });
+    return;
+  }
+  
+  let sum = 0;
+  const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+  reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
+  const avg = sum / reviews.length;
+  $('#ratings-avg-score').textContent = avg.toFixed(1);
+  $('#ratings-total-count').textContent = `Based on ${reviews.length} review${reviews.length > 1 ? 's' : ''}`;
+  
+  [1,2,3,4,5].forEach(r => {
+    $(`#pb-${r}`).style.width = ((counts[r] / reviews.length) * 100) + '%';
+    $(`#pc-${r}`).textContent = counts[r];
+  });
+  
+  $('#ratings-feedback-list').innerHTML = reviews.map(r => `
+    <div class="feedback-item mb-4 pb-4 border-b border-gray-700">
+      <div class="flex justify-between items-start">
+        <strong class="text-white">${r.reviewer.fullName}</strong>
+        <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+      </div>
+      <p class="text-sm text-gray-300 mt-2">${r.comment || ''}</p>
+    </div>
+  `).join('');
+}
+
+window.openViewProfileDialog = async function(userId) {
+  try {
+    const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
+    const user = res.data.user;
+    if (!user) return;
+    
+    $('#vp-avatar').textContent = initials(user.fullName);
+    $('#vp-name').textContent = user.fullName;
+    $('#vp-program').textContent = user.facultyReference || 'Student';
+    
+    const reviews = user.reviews_on_targetUser || [];
+    let sum = 0;
+    reviews.forEach(r => sum += r.rating);
+    const avg = reviews.length > 0 ? (sum / reviews.length).toFixed(1) : '0.0';
+    
+    $('#vp-ratings-avg').textContent = avg;
+    $('#vp-ratings-count').textContent = `Based on ${reviews.length} review${reviews.length > 1 ? 's' : ''}`;
+    
+    if (reviews.length === 0) {
+      $('#vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    } else {
+      $('#vp-ratings-list').innerHTML = reviews.map(r => `
+        <div class="feedback-item mb-3 pb-3 border-b border-gray-700">
+          <div class="flex justify-between items-start">
+            <strong class="text-white text-sm">${r.reviewer.fullName}</strong>
+            <span class="text-yellow-400 text-xs">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+          </div>
+          <p class="text-xs text-gray-300 mt-1">${r.comment || ''}</p>
+        </div>
+      `).join('');
+    }
+    
+    $('#dialog-view-profile').showModal();
+  } catch (err) {
+    showToast('Failed to load profile', 'error');
+  }
+};
 
 function setupEditProfile() {
   $('#btn-edit-profile')?.addEventListener('click', (e) => {
@@ -1404,8 +1533,9 @@ function renderAdminPending() {
     card.innerHTML = `
       <div class="admin-card-info">
         <div class="avatar">${initials(u.fullName)}</div>
+        <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
         <div>
-          <strong>${u.fullName}</strong>
+          <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</strong>
           <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'} • ${u.preferredRole || 'Student'}</div>
           <div class="admin-card-meta">
             <span class="badge badge-pending">Pending</span>

@@ -621,95 +621,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================================================
-                     9. SECTION: RATINGS & FEEDBACK (DYNAMIC DATA)
-                     ========================================================================== -->
-                <section id="section-ratings" class="content-section hidden">
-                    <div class="page-header">
-                        <h1 class="page-title">Rating & Feedback</h1>
-                        <p class="text-muted">Reviews and ratings from completed services.</p>
-                    </div>
 
-                    <div class="ratings-layout-grid mt-6">
-                        <!-- Left: Rate Your Experience Card -->
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2 class="dash-card-title">Rate Your Experience</h2>
-                            </div>
-                            <p class="text-muted text-sm">How was your experience working with peers?</p>
-                            
-                            <div class="star-rating-large mt-3">
-                                <span class="star filled" data-val="1">★</span>
-                                <span class="star filled" data-val="2">★</span>
-                                <span class="star filled" data-val="3">★</span>
-                                <span class="star filled" data-val="4">★</span>
-                                <span class="star filled" data-val="5">★</span>
-                            </div>
-                            <div class="rating-verdict-text text-green font-bold text-center mt-1" id="inline-rating-verdict">Excellent!</div>
-
-                            <form id="inline-rating-form" class="mt-4">
-                                <div class="form-group">
-                                    <label class="form-label" for="inline-feedback-text">Write your feedback (optional)</label>
-                                    <textarea id="inline-feedback-text" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-purple btn-block">Submit Rating</button>
-                            </form>
-                        </div>
-
-                        <!-- Right: Your Ratings Breakdown Card -->
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2 class="dash-card-title">Your Ratings</h2>
-                            </div>
-                            <div class="rating-score-row">
-                                <div class="rating-huge-num" id="ratings-avg-score">0.0</div>
-                                <div class="rating-score-meta">
-                                    <span>out of 5</span>
-                                    <small class="text-muted block" id="ratings-total-count">Based on 0 reviews</small>
-                                </div>
-                            </div>
-
-                            <!-- Star Breakdown Bars -->
-                            <div class="rating-bars-list mt-4">
-                                <div class="rating-bar-row">
-                                    <span>5 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
-                                    <span class="text-muted">0</span>
-                                </div>
-                                <div class="rating-bar-row">
-                                    <span>4 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
-                                    <span class="text-muted">0</span>
-                                </div>
-                                <div class="rating-bar-row">
-                                    <span>3 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
-                                    <span class="text-muted">0</span>
-                                </div>
-                                <div class="rating-bar-row">
-                                    <span>2 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
-                                    <span class="text-muted">0</span>
-                                </div>
-                                <div class="rating-bar-row">
-                                    <span>1 ★</span>
-                                    <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 0%"></div></div>
-                                    <span class="text-muted">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Feedback List -->
-                    <div class="dash-card mt-6">
-                        <div class="dash-card-header">
-                            <h2 class="dash-card-title">Recent Feedback</h2>
-                        </div>
-                        <div class="feedback-feed-list" id="ratings-feedback-list">
-                            <div class="empty-state text-center text-muted" style="padding: 1.5rem;">No reviews received yet.</div>
-                        </div>
-                    </div>
-                </section>
 
                 <!-- ==========================================================================
                      10. SECTION: PROFILE & PORTFOLIO
@@ -758,6 +670,59 @@
                                     <span class="cred-value font-bold" id="stat-active-services">0</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Your Ratings Breakdown Card -->
+                    <div class="dash-card mt-6">
+                        <div class="dash-card-header">
+                            <h2 class="dash-card-title">Ratings & Feedback</h2>
+                        </div>
+                        <div class="rating-score-row">
+                            <div class="rating-huge-num" id="ratings-avg-score">0.0</div>
+                            <div class="rating-score-meta">
+                                <span>out of 5</span>
+                                <small class="text-muted block" id="ratings-total-count">Based on 0 reviews</small>
+                            </div>
+                        </div>
+
+                        <!-- Star Breakdown Bars -->
+                        <div class="rating-bars-list mt-4">
+                            <div class="rating-bar-row">
+                                <span>5 ★</span>
+                                <div class="progress-bar-track"><div class="progress-bar-fill" id="pb-5" style="width: 0%"></div></div>
+                                <span class="text-muted" id="pc-5">0</span>
+                            </div>
+                            <div class="rating-bar-row">
+                                <span>4 ★</span>
+                                <div class="progress-bar-track"><div class="progress-bar-fill" id="pb-4" style="width: 0%"></div></div>
+                                <span class="text-muted" id="pc-4">0</span>
+                            </div>
+                            <div class="rating-bar-row">
+                                <span>3 ★</span>
+                                <div class="progress-bar-track"><div class="progress-bar-fill" id="pb-3" style="width: 0%"></div></div>
+                                <span class="text-muted" id="pc-3">0</span>
+                            </div>
+                            <div class="rating-bar-row">
+                                <span>2 ★</span>
+                                <div class="progress-bar-track"><div class="progress-bar-fill" id="pb-2" style="width: 0%"></div></div>
+                                <span class="text-muted" id="pc-2">0</span>
+                            </div>
+                            <div class="rating-bar-row">
+                                <span>1 ★</span>
+                                <div class="progress-bar-track"><div class="progress-bar-fill" id="pb-1" style="width: 0%"></div></div>
+                                <span class="text-muted" id="pc-1">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Feedback List -->
+                    <div class="dash-card mt-6">
+                        <div class="dash-card-header">
+                            <h2 class="dash-card-title">Recent Feedback</h2>
+                        </div>
+                        <div class="feedback-feed-list" id="ratings-feedback-list">
+                            <div class="empty-state text-center text-muted" style="padding: 1.5rem;">No reviews received yet.</div>
                         </div>
                     </div>
                 </section>
@@ -1037,6 +1002,43 @@
             <img id="cert-preview-img" class="cert-full-image mt-4" src="" alt="Certificate Full Size">
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline dialog-close-btn">Close</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="dialog-view-profile" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>User Profile</h2>
+                <button type="button" class="dialog-close-btn">✕</button>
+            </div>
+            
+            <div class="profile-hero mt-4">
+                <div class="profile-avatar-circle" id="vp-avatar">JD</div>
+                <div class="profile-hero-info">
+                    <div class="flex items-center gap-3">
+                        <h2 class="profile-user-name" id="vp-name">Name</h2>
+                        <span class="badge badge-approved" id="vp-verification">✓ Verified Student</span>
+                    </div>
+                    <p class="profile-user-program" id="vp-program">BS Computer Engineering · Cagayan State University</p>
+                    <div class="profile-availability-pill" id="vp-availability">Available</div>
+                </div>
+            </div>
+
+            <div class="dash-card mt-4">
+                <div class="dash-card-header">
+                    <h3 class="dash-card-title">Reviews</h3>
+                </div>
+                <div class="rating-score-row mt-2">
+                    <div class="rating-huge-num" id="vp-ratings-avg">0.0</div>
+                    <div class="rating-score-meta">
+                        <span>out of 5</span>
+                        <small class="text-muted block" id="vp-ratings-count">Based on 0 reviews</small>
+                    </div>
+                </div>
+                <div class="feedback-feed-list mt-4" id="vp-ratings-list" style="max-height: 200px; overflow-y: auto;">
+                    <div class="empty-state text-center text-muted">No reviews yet.</div>
+                </div>
             </div>
         </div>
     </dialog>

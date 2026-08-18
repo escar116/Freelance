@@ -198,3 +198,22 @@ query ListAllApplicationsAdmin @auth(level: PUBLIC) {
   }
 }
 
+query GetUserProfile($id: String!) @auth(level: PUBLIC) {
+  user(id: $id) {
+    id
+    fullName
+    studentId
+    facultyReference
+    preferredRole
+    gender
+    reviews_on_targetUser {
+      id
+      rating
+      comment
+      reviewer {
+        fullName
+      }
+    }
+  }
+}
+

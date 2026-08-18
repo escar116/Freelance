@@ -19,6 +19,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*ListAllUsers*](#listallusers)
   - [*ListAllHelpRequestsAdmin*](#listallhelprequestsadmin)
   - [*ListAllApplicationsAdmin*](#listallapplicationsadmin)
+  - [*GetUserProfile*](#getuserprofile)
 - [**Mutations**](#mutations)
   - [*CreateUser*](#createuser)
   - [*UpdateUserStatus*](#updateuserstatus)
@@ -1339,6 +1340,130 @@ console.log(data.applications);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.applications);
+});
+```
+
+## GetUserProfile
+You can execute the `GetUserProfile` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+getUserProfile(vars: GetUserProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserProfileData, GetUserProfileVariables>;
+
+interface GetUserProfileRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserProfileVariables): QueryRef<GetUserProfileData, GetUserProfileVariables>;
+}
+export const getUserProfileRef: GetUserProfileRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getUserProfile(dc: DataConnect, vars: GetUserProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserProfileData, GetUserProfileVariables>;
+
+interface GetUserProfileRef {
+  ...
+  (dc: DataConnect, vars: GetUserProfileVariables): QueryRef<GetUserProfileData, GetUserProfileVariables>;
+}
+export const getUserProfileRef: GetUserProfileRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getUserProfileRef:
+```typescript
+const name = getUserProfileRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetUserProfile` query requires an argument of type `GetUserProfileVariables`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetUserProfileVariables {
+  id: string;
+}
+```
+### Return Type
+Recall that executing the `GetUserProfile` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetUserProfileData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetUserProfileData {
+  user?: {
+    id: string;
+    fullName: string;
+    studentId?: string | null;
+    facultyReference?: string | null;
+    preferredRole?: string | null;
+    gender?: string | null;
+    reviews_on_targetUser: ({
+      id: UUIDString;
+      rating: number;
+      comment: string;
+      reviewer: {
+        fullName: string;
+      };
+    } & Review_Key)[];
+  } & User_Key;
+}
+```
+### Using `GetUserProfile`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getUserProfile, GetUserProfileVariables } from '@work4abit/dataconnect';
+
+// The `GetUserProfile` query requires an argument of type `GetUserProfileVariables`:
+const getUserProfileVars: GetUserProfileVariables = {
+  id: ..., 
+};
+
+// Call the `getUserProfile()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getUserProfile(getUserProfileVars);
+// Variables can be defined inline as well.
+const { data } = await getUserProfile({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getUserProfile(dataConnect, getUserProfileVars);
+
+console.log(data.user);
+
+// Or, you can use the `Promise` API.
+getUserProfile(getUserProfileVars).then((response) => {
+  const data = response.data;
+  console.log(data.user);
+});
+```
+
+### Using `GetUserProfile`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getUserProfileRef, GetUserProfileVariables } from '@work4abit/dataconnect';
+
+// The `GetUserProfile` query requires an argument of type `GetUserProfileVariables`:
+const getUserProfileVars: GetUserProfileVariables = {
+  id: ..., 
+};
+
+// Call the `getUserProfileRef()` function to get a reference to the query.
+const ref = getUserProfileRef(getUserProfileVars);
+// Variables can be defined inline as well.
+const ref = getUserProfileRef({ id: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getUserProfileRef(dataConnect, getUserProfileVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.user);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.user);
 });
 ```
 
