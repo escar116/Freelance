@@ -16,6 +16,9 @@ This README will guide you through the process of using the generated JavaScript
   - [*ListMyHelpRequestsWithApplications*](#listmyhelprequestswithapplications)
   - [*ListConversations*](#listconversations)
   - [*ListMessages*](#listmessages)
+  - [*ListAllUsers*](#listallusers)
+  - [*ListAllHelpRequestsAdmin*](#listallhelprequestsadmin)
+  - [*ListAllApplicationsAdmin*](#listallapplicationsadmin)
 - [**Mutations**](#mutations)
   - [*CreateUser*](#createuser)
   - [*UpdateUserStatus*](#updateuserstatus)
@@ -1016,6 +1019,326 @@ console.log(data.messages);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.messages);
+});
+```
+
+## ListAllUsers
+You can execute the `ListAllUsers` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+listAllUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+
+interface ListAllUsersRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllUsersData, undefined>;
+}
+export const listAllUsersRef: ListAllUsersRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listAllUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+
+interface ListAllUsersRef {
+  ...
+  (dc: DataConnect): QueryRef<ListAllUsersData, undefined>;
+}
+export const listAllUsersRef: ListAllUsersRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllUsersRef:
+```typescript
+const name = listAllUsersRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListAllUsers` query has no variables.
+### Return Type
+Recall that executing the `ListAllUsers` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListAllUsersData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListAllUsersData {
+  users: ({
+    id: string;
+    email: string;
+    fullName: string;
+    studentId?: string | null;
+    facultyReference?: string | null;
+    certificateUrl: string;
+    verificationStatus: string;
+    preferredRole?: string | null;
+    gender?: string | null;
+  } & User_Key)[];
+}
+```
+### Using `ListAllUsers`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listAllUsers } from '@work4abit/dataconnect';
+
+
+// Call the `listAllUsers()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listAllUsers();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listAllUsers(dataConnect);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+listAllUsers().then((response) => {
+  const data = response.data;
+  console.log(data.users);
+});
+```
+
+### Using `ListAllUsers`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listAllUsersRef } from '@work4abit/dataconnect';
+
+
+// Call the `listAllUsersRef()` function to get a reference to the query.
+const ref = listAllUsersRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listAllUsersRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.users);
+});
+```
+
+## ListAllHelpRequestsAdmin
+You can execute the `ListAllHelpRequestsAdmin` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+listAllHelpRequestsAdmin(options?: ExecuteQueryOptions): QueryPromise<ListAllHelpRequestsAdminData, undefined>;
+
+interface ListAllHelpRequestsAdminRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllHelpRequestsAdminData, undefined>;
+}
+export const listAllHelpRequestsAdminRef: ListAllHelpRequestsAdminRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listAllHelpRequestsAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllHelpRequestsAdminData, undefined>;
+
+interface ListAllHelpRequestsAdminRef {
+  ...
+  (dc: DataConnect): QueryRef<ListAllHelpRequestsAdminData, undefined>;
+}
+export const listAllHelpRequestsAdminRef: ListAllHelpRequestsAdminRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllHelpRequestsAdminRef:
+```typescript
+const name = listAllHelpRequestsAdminRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListAllHelpRequestsAdmin` query has no variables.
+### Return Type
+Recall that executing the `ListAllHelpRequestsAdmin` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListAllHelpRequestsAdminData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListAllHelpRequestsAdminData {
+  helpRequests: ({
+    id: UUIDString;
+    title: string;
+    budget: number;
+    status?: string | null;
+    category?: string | null;
+    urgency?: string | null;
+    deadline?: string | null;
+    requester: {
+      id: string;
+      fullName: string;
+      studentId?: string | null;
+      email: string;
+    } & User_Key;
+  } & HelpRequest_Key)[];
+}
+```
+### Using `ListAllHelpRequestsAdmin`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listAllHelpRequestsAdmin } from '@work4abit/dataconnect';
+
+
+// Call the `listAllHelpRequestsAdmin()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listAllHelpRequestsAdmin();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listAllHelpRequestsAdmin(dataConnect);
+
+console.log(data.helpRequests);
+
+// Or, you can use the `Promise` API.
+listAllHelpRequestsAdmin().then((response) => {
+  const data = response.data;
+  console.log(data.helpRequests);
+});
+```
+
+### Using `ListAllHelpRequestsAdmin`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listAllHelpRequestsAdminRef } from '@work4abit/dataconnect';
+
+
+// Call the `listAllHelpRequestsAdminRef()` function to get a reference to the query.
+const ref = listAllHelpRequestsAdminRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listAllHelpRequestsAdminRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.helpRequests);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.helpRequests);
+});
+```
+
+## ListAllApplicationsAdmin
+You can execute the `ListAllApplicationsAdmin` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-sdk/index.d.ts](./index.d.ts):
+```typescript
+listAllApplicationsAdmin(options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
+
+interface ListAllApplicationsAdminRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllApplicationsAdminData, undefined>;
+}
+export const listAllApplicationsAdminRef: ListAllApplicationsAdminRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listAllApplicationsAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
+
+interface ListAllApplicationsAdminRef {
+  ...
+  (dc: DataConnect): QueryRef<ListAllApplicationsAdminData, undefined>;
+}
+export const listAllApplicationsAdminRef: ListAllApplicationsAdminRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllApplicationsAdminRef:
+```typescript
+const name = listAllApplicationsAdminRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListAllApplicationsAdmin` query has no variables.
+### Return Type
+Recall that executing the `ListAllApplicationsAdmin` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListAllApplicationsAdminData`, which is defined in [dataconnect-sdk/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListAllApplicationsAdminData {
+  applications: ({
+    id: UUIDString;
+    priceOffer: number;
+    status: string;
+    message: string;
+    createdAt: DateString;
+    helpRequest: {
+      id: UUIDString;
+      title: string;
+      status?: string | null;
+      budget: number;
+    } & HelpRequest_Key;
+    applicant: {
+      id: string;
+      fullName: string;
+      studentId?: string | null;
+      email: string;
+      facultyReference?: string | null;
+      gender?: string | null;
+      preferredRole?: string | null;
+      certificateUrl: string;
+      verificationStatus: string;
+    } & User_Key;
+  } & Application_Key)[];
+}
+```
+### Using `ListAllApplicationsAdmin`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listAllApplicationsAdmin } from '@work4abit/dataconnect';
+
+
+// Call the `listAllApplicationsAdmin()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listAllApplicationsAdmin();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listAllApplicationsAdmin(dataConnect);
+
+console.log(data.applications);
+
+// Or, you can use the `Promise` API.
+listAllApplicationsAdmin().then((response) => {
+  const data = response.data;
+  console.log(data.applications);
+});
+```
+
+### Using `ListAllApplicationsAdmin`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listAllApplicationsAdminRef } from '@work4abit/dataconnect';
+
+
+// Call the `listAllApplicationsAdminRef()` function to get a reference to the query.
+const ref = listAllApplicationsAdminRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listAllApplicationsAdminRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.applications);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.applications);
 });
 ```
 

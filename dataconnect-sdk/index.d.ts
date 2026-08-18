@@ -128,6 +128,65 @@ export interface HelpRequest_Key {
   __typename?: 'HelpRequest_Key';
 }
 
+export interface ListAllApplicationsAdminData {
+  applications: ({
+    id: UUIDString;
+    priceOffer: number;
+    status: string;
+    message: string;
+    createdAt: DateString;
+    helpRequest: {
+      id: UUIDString;
+      title: string;
+      status?: string | null;
+      budget: number;
+    } & HelpRequest_Key;
+    applicant: {
+      id: string;
+      fullName: string;
+      studentId?: string | null;
+      email: string;
+      facultyReference?: string | null;
+      gender?: string | null;
+      preferredRole?: string | null;
+      certificateUrl: string;
+      verificationStatus: string;
+    } & User_Key;
+  } & Application_Key)[];
+}
+
+export interface ListAllHelpRequestsAdminData {
+  helpRequests: ({
+    id: UUIDString;
+    title: string;
+    budget: number;
+    status?: string | null;
+    category?: string | null;
+    urgency?: string | null;
+    deadline?: string | null;
+    requester: {
+      id: string;
+      fullName: string;
+      studentId?: string | null;
+      email: string;
+    } & User_Key;
+  } & HelpRequest_Key)[];
+}
+
+export interface ListAllUsersData {
+  users: ({
+    id: string;
+    email: string;
+    fullName: string;
+    studentId?: string | null;
+    facultyReference?: string | null;
+    certificateUrl: string;
+    verificationStatus: string;
+    preferredRole?: string | null;
+    gender?: string | null;
+  } & User_Key)[];
+}
+
 export interface ListApplicationsByApplicantData {
   applications: ({
     id: UUIDString;
@@ -559,4 +618,40 @@ export const listMessagesRef: ListMessagesRef;
 
 export function listMessages(vars: ListMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListMessagesData, ListMessagesVariables>;
 export function listMessages(dc: DataConnect, vars: ListMessagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListMessagesData, ListMessagesVariables>;
+
+interface ListAllUsersRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllUsersData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListAllUsersData, undefined>;
+  operationName: string;
+}
+export const listAllUsersRef: ListAllUsersRef;
+
+export function listAllUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+export function listAllUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+
+interface ListAllHelpRequestsAdminRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllHelpRequestsAdminData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListAllHelpRequestsAdminData, undefined>;
+  operationName: string;
+}
+export const listAllHelpRequestsAdminRef: ListAllHelpRequestsAdminRef;
+
+export function listAllHelpRequestsAdmin(options?: ExecuteQueryOptions): QueryPromise<ListAllHelpRequestsAdminData, undefined>;
+export function listAllHelpRequestsAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllHelpRequestsAdminData, undefined>;
+
+interface ListAllApplicationsAdminRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllApplicationsAdminData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListAllApplicationsAdminData, undefined>;
+  operationName: string;
+}
+export const listAllApplicationsAdminRef: ListAllApplicationsAdminRef;
+
+export function listAllApplicationsAdmin(options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
+export function listAllApplicationsAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllApplicationsAdminData, undefined>;
 
