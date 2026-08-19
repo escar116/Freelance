@@ -106,13 +106,15 @@ function startBackgroundSync() {
   if (chatPollTimer) clearInterval(chatPollTimer);
 
   // High-frequency Real-time Chat Sync with SERVER_ONLY cache bypass
+  // Increased interval to 15 seconds to prevent Firebase Data Connect quota exhaustion
   chatPollTimer = setInterval(() => {
     if (userData && activeSection === 'messages' && activeConvId) {
       pollMessages(false);
     }
-  }, 1200);
+  }, 15000);
 
   // Background view synchronization
+  // Increased interval to 60 seconds to prevent quota exhaustion
   autoRefreshTimer = setInterval(() => {
     if (!userData) return;
     if (activeSection === 'messages') {
@@ -124,7 +126,7 @@ function startBackgroundSync() {
     } else if (activeSection === 'services') {
       loadServices(true);
     }
-  }, 3500);
+  }, 60000);
 }
 
 // Instant sync when tab gains focus
