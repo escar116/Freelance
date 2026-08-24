@@ -13,7 +13,7 @@ This file serves as a permanent reference for exactly how data is structured and
 *   HelpRequest: Job postings created by users (Budget, Urgency, Deadline, Status).
 *   Application: The link between a User and a HelpRequest when they apply (Price Offer, Message, Status).
 *   Conversation: The metadata linking the Poster, the Applicant, and the Application.
-*   *Note: The Message and Review tables have been removed from the schema because they were migrated to other databases.*
+*   *Note: The Message and Review tables still exist as empty shells in the schema to bypass Firebase strictness, but they are fully disabled in the app.*
 
 ## 2. Firebase Realtime Database (RTDB)
 *Status: Active*
