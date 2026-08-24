@@ -1308,6 +1308,8 @@ function setupReviewDialog() {
   $('#review-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!selectedRating || !reviewTarget) return;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
     try {
       // 1. Complete the job
       await completeJob(dc, { applicationId: reviewTarget.conv.application.id, helpRequestId: reviewTarget.conv.application.helpRequest.id });
@@ -1332,6 +1334,8 @@ function setupReviewDialog() {
       loadDashboard(true);
     } catch (err) {
       showToast('Error: ' + err.message, 'error');
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Rating'; }
     }
   });
 }
