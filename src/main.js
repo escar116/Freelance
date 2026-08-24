@@ -15,7 +15,7 @@ import {
   createConversation, listConversations,
   listConversationsRef,
   listPendingUsers, listAllUsers, listAllHelpRequestsAdmin, listAllApplicationsAdmin,
-  updateUserStatus, terminateJob, completeJob, createReview, getUserProfile,
+  updateUserStatus, terminateJob, completeJob, getUserProfile,
   deleteUser, deleteApplication
 } from '@work4abit/dataconnect';
 
@@ -1292,7 +1292,7 @@ function setupReviewDialog() {
     try {
       const revData = {
         rating: selectedRating,
-        comment: #review-comment.value.trim(),
+        comment: $('#review-comment').value.trim(),
         reviewerId: userData.id,
         targetUserId: reviewTarget.otherUser.id,
         createdAt: firestoreTimestamp()
