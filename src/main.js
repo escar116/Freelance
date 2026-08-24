@@ -508,25 +508,52 @@ async function loadDashboard(isSilent = false) {
   }
 
   try {
-    const [reqRes, appRes, convRes] = await Promise.all([
+    const [reqRes, appRes, myPostRes, convRes] = await Promise.all([
       listHelpRequests(dc, SERVER_ONLY),
       userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY) : { data: { applications: [] } },
+      userData?.id ? listMyHelpRequestsWithApplications(dc, { userId: userData.id }, SERVER_ONLY) : { data: { helpRequests: [] } },
       userData?.id ? listConversations(dc, { userId: userData.id }, SERVER_ONLY) : { data: { conversations: [] } }
     ]);
     const requests = reqRes.data.helpRequests || [];
     const applications = appRes.data.applications || [];
+    const myPostedJobs = myPostRes.data.helpRequests || [];
     const conversations = convRes.data.conversations || [];
 
     const activeApps = applications.filter(a => a.status === 'PENDING' || a.status === 'APPROVED').length;
-    const completedJobs = applications.filter(a => a.status === 'COMPLETED').length;
+    const posterCompleted = myPostedJobs.filter(j => j.status === 'COMPLETED').length;
+    const completedJobs = applications.filter(a => a.status === 'COMPLETED').length + posterCompleted;
+    
+    // Total Transactions (Earnings from freelance + Spending from hiring)
     const totalEarnings = applications
       .filter(a => a.status === 'COMPLETED')
       .reduce((sum, a) => sum + (Number(a.priceOffer) || 0), 0);
+    const totalSpent = myPostedJobs
+      .filter(j => j.status === 'COMPLETED')
+      .reduce((sum, j) => {
+        const approvedApp = (j.applications_on_helpRequest || []).find(a => a.status === 'COMPLETED');
+        return sum + (approvedApp ? (Number(approvedApp.priceOffer) || 0) : 0);
+      }, 0);
 
     $('#stat-applied').textContent = activeApps;
     $('#stat-completed').textContent = completedJobs;
-    $('#stat-earnings').textContent = peso(totalEarnings);
-    $('#stat-rating').innerHTML = '5.0 <span class="text-amber">★</span>';
+    $('#stat-earnings').textContent = totalSpent > 0 ? `${peso(totalEarnings)} Earned / ${peso(totalSpent)} Spent` : peso(totalEarnings);
+    
+    // Fetch real rating from Firestore
+    let realRating = '0.0';
+    if (userData?.id) {
+      try {
+        const q = query(collection(firestore, "reviews"), where("targetUserId", "==", userData.id));
+        const revSnap = await getDocs(q);
+        if (!revSnap.empty) {
+          let sum = 0;
+          revSnap.forEach(doc => sum += doc.data().rating);
+          realRating = (sum / revSnap.size).toFixed(1);
+        }
+      } catch (e) {
+        console.warn("Could not fetch ratings for dashboard", e);
+      }
+    }
+    $('#stat-rating').innerHTML = `${realRating} <span class="text-amber">★</span>`;
 
     // Recommended Services Feed
     const listEl = $('#dashboard-listings');
@@ -1065,20 +1092,8 @@ async function selectConversation(convId) {
 
   $('#btn-complete')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    try {
-      await completeJob(dc, { applicationId: conv.application.id, helpRequestId: conv.application.helpRequest.id });
-      showToast('Job marked completed!');
-      reviewTarget = { convId, otherUser };
-      
-      // Close the active chat
-      activeConvId = null;
-      $('#messages-container')?.classList.remove('chat-open');
-      loadMessages();
-      
-      $('#dialog-review').showModal();
-    } catch (err) {
-      showToast('Error: ' + err.message, 'error');
-    }
+    reviewTarget = { conv, otherUser };
+    $('#dialog-review').showModal();
   });
 
   if (isNewSelection) {
@@ -1294,6 +1309,10 @@ function setupReviewDialog() {
     e.preventDefault();
     if (!selectedRating || !reviewTarget) return;
     try {
+      // 1. Complete the job
+      await completeJob(dc, { applicationId: reviewTarget.conv.application.id, helpRequestId: reviewTarget.conv.application.helpRequest.id });
+      
+      // 2. Submit the review
       const revData = {
         rating: selectedRating,
         comment: $('#review-comment').value.trim(),
@@ -1302,10 +1321,15 @@ function setupReviewDialog() {
         createdAt: firestoreTimestamp()
       };
       await addDoc(collection(firestore, "reviews"), revData);
-      showToast('Review submitted!');
+      
+      showToast('Job completed and review submitted!');
       $('#dialog-review').close();
+      
+      // 3. Clear chat UI
       activeConvId = null;
+      $('#messages-container')?.classList.remove('chat-open');
       loadMessages();
+      loadDashboard(true);
     } catch (err) {
       showToast('Error: ' + err.message, 'error');
     }
