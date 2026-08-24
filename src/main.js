@@ -923,7 +923,7 @@ async function handleApprove(application, job) {
         content: `📋 Application Offer Accepted\n\nProposed Rate: ${peso(application.priceOffer)}\nMessage: ${application.message}`,
         timestamp: serverTimestamp()
       });
-      activeConvId = convId;
+      selectConversation(convId);
     }
     showToast('Application approved! Chat created.');
     navigateTo('messages');
@@ -1020,7 +1020,7 @@ async function selectConversation(convId) {
     const msgArea = $('#chat-messages');
     if (msgArea) msgArea.innerHTML = '<div class="loader"></div>';
   }
-  activeConvId = convId;
+  selectConversation(convId);
   renderConversationList();
   
   // Add class for mobile messenger-style view
