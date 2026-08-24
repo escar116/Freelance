@@ -127,18 +127,6 @@ query ListConversations($userId: String!) @auth(level: PUBLIC) {
   }
 }
 
-query ListMessages($conversationId: UUID!) @auth(level: PUBLIC) {
-  messages(where: {conversationId: {eq: $conversationId}}, orderBy: [{createdAt: ASC}]) {
-    id
-    content
-    createdAt
-    sender {
-      id
-      fullName
-    }
-  }
-}
-
 query ListAllUsers @auth(level: PUBLIC) {
   users {
     id
@@ -159,14 +147,9 @@ query ListAllHelpRequestsAdmin @auth(level: PUBLIC) {
     title
     budget
     status
-    category
-    urgency
-    deadline
     requester {
       id
       fullName
-      studentId
-      email
     }
   }
 }
@@ -174,26 +157,15 @@ query ListAllHelpRequestsAdmin @auth(level: PUBLIC) {
 query ListAllApplicationsAdmin @auth(level: PUBLIC) {
   applications {
     id
-    priceOffer
     status
-    message
-    createdAt
-    helpRequest {
-      id
-      title
-      status
-      budget
-    }
+    priceOffer
     applicant {
       id
       fullName
-      studentId
-      email
-      facultyReference
-      gender
-      preferredRole
-      certificateUrl
-      verificationStatus
+    }
+    helpRequest {
+      id
+      title
     }
   }
 }
@@ -201,25 +173,18 @@ query ListAllApplicationsAdmin @auth(level: PUBLIC) {
 query GetUserProfile($id: String!) @auth(level: PUBLIC) {
   user(id: $id) {
     id
+    email
     fullName
     studentId
-    facultyReference
-    preferredRole
-    gender
-    reviews_on_targetUser {
-      id
-      rating
-      comment
-      reviewer {
-        fullName
-      }
-    }
+    certificateUrl
+    verificationStatus
     applications_on_applicant {
+      id
       status
     }
     helpRequests_on_requester {
+      id
       status
     }
   }
 }
-

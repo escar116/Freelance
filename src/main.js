@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
 import { getDatabase, ref, push, onChildAdded, serverTimestamp, off, get } from 'firebase/database';
+import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp as firestoreTimestamp } from 'firebase/firestore';
 import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
   listApplicationsByApplicant, listMyHelpRequestsWithApplications,
@@ -34,6 +35,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const dc = getDataConnect(app, connectorConfig);
 const db = getDatabase(app);
+const firestore = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
@@ -1288,12 +1290,14 @@ function setupReviewDialog() {
     e.preventDefault();
     if (!selectedRating || !reviewTarget) return;
     try {
-      await createReview(dc, {
+      const revData = {
         rating: selectedRating,
-        comment: $('#review-comment').value.trim(),
+        comment: #review-comment.value.trim(),
         reviewerId: userData.id,
-        targetUserId: reviewTarget.otherUser.id
-      });
+        targetUserId: reviewTarget.otherUser.id,
+        createdAt: firestoreTimestamp()
+      };
+      await addDoc(collection(firestore, "reviews"), revData);
       showToast('Review submitted!');
       $('#dialog-review').close();
       activeConvId = null;
@@ -1368,7 +1372,8 @@ async function loadProfile() {
     $('#stat-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
     $('#stat-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
 
-    const reviews = userProfile.reviews_on_targetUser || [];
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userData.id)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);

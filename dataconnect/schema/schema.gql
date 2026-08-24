@@ -34,12 +34,6 @@ type HelpRequest @table {
   status: String @default(expr: "'OPEN'")
 }
 
-type Review @table {
-  rating: Int!
-  comment: String!
-  reviewer: User!
-  targetUser: User!
-}
 
 type Application @table {
   helpRequest: HelpRequest!
@@ -57,9 +51,3 @@ type Conversation @table {
   createdAt: Date! @default(expr: "request.time")
 }
 
-type Message @table {
-  conversation: Conversation!
-  sender: User!
-  content: String!
-  createdAt: Date! @default(expr: "request.time")
-}
