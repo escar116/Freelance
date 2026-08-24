@@ -26,7 +26,8 @@ const firebaseConfig = {
   storageBucket: "work4abit.firebasestorage.app",
   messagingSenderId: "1019650332467",
   appId: "1:1019650332467:web:70a55093445cbf4689d046",
-  measurementId: "G-3CD953WGTS"
+  measurementId: "G-3CD953WGTS",
+  databaseURL: "https://work4abit-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 const app = initializeApp(firebaseConfig);
