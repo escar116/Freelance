@@ -923,7 +923,7 @@ async function handleApprove(application, job) {
         content: `📋 Application Offer Accepted\n\nProposed Rate: ${peso(application.priceOffer)}\nMessage: ${application.message}`,
         timestamp: serverTimestamp()
       });
-      selectConversation(convId);
+      activeConvId = convId;
     }
     showToast('Application approved! Chat created.');
     navigateTo('messages');
@@ -980,6 +980,8 @@ async function loadMessages(isSilent = false) {
       const exists = conversations.some(c => c.id === activeConvId);
       if (!exists && conversations.length > 0) {
         selectConversation(conversations[0].id);
+      } else if (exists) {
+        selectConversation(activeConvId);
       }
     } else {
       $('#chat-panel').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No conversations yet.</div>';
@@ -1014,13 +1016,14 @@ function renderConversationList() {
 }
 
 async function selectConversation(convId) {
-  if (activeConvId !== convId) {
+  const isNewSelection = (activeConvId !== convId) || !messageSubscription;
+  if (isNewSelection) {
     renderedMsgIds.clear();
     pendingTempMessages = [];
     const msgArea = $('#chat-messages');
     if (msgArea) msgArea.innerHTML = '<div class="loader"></div>';
   }
-  selectConversation(convId);
+  activeConvId = convId;
   renderConversationList();
   
   // Add class for mobile messenger-style view
@@ -1078,24 +1081,25 @@ async function selectConversation(convId) {
     }
   });
 
-  // Setup direct RTDB live subscription
-  if (messageSubscription) {
-    off(messageSubscription);
-    messageSubscription = null;
-  }
-  try {
-    const msgArea = $('#chat-messages');
-    if (msgArea) msgArea.innerHTML = '';
-    
-    const messagesRef = ref(db, `conversations/${convId}/messages`);
-    messageSubscription = messagesRef;
-    onChildAdded(messagesRef, (snapshot) => {
-      const msg = snapshot.val();
-      msg.id = snapshot.key;
-      renderIncomingMessages([msg]);
-    });
-  } catch (err) {
-    console.warn('Subscription fallback to SERVER_ONLY polling:', err);
+  if (isNewSelection) {
+    if (messageSubscription) {
+      off(messageSubscription);
+      messageSubscription = null;
+    }
+    try {
+      const msgArea = $('#chat-messages');
+      if (msgArea) msgArea.innerHTML = '';
+      
+      const messagesRef = ref(db, `conversations/${convId}/messages`);
+      messageSubscription = messagesRef;
+      onChildAdded(messagesRef, (snapshot) => {
+        const msg = snapshot.val();
+        msg.id = snapshot.key;
+        renderIncomingMessages([msg]);
+      });
+    } catch (err) {
+      console.warn('Subscription fallback to SERVER_ONLY polling:', err);
+    }
   }
 }
 
