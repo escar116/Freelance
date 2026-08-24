@@ -6,6 +6,7 @@ import {
   signOut, sendPasswordResetEmail
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
+import { getDatabase, ref, push, onChildAdded, serverTimestamp, off, get } from 'firebase/database';
 import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
   listApplicationsByApplicant, listMyHelpRequestsWithApplications,
@@ -31,6 +32,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const dc = getDataConnect(app, connectorConfig);
+const db = getDatabase(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
@@ -103,15 +105,6 @@ function compressImage(file) {
 // ── Realtime Multi-Client Synchronization Engine ─────────────────────────────
 function startBackgroundSync() {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-  if (chatPollTimer) clearInterval(chatPollTimer);
-
-  // High-frequency Real-time Chat Sync with SERVER_ONLY cache bypass
-  // Increased interval to 15 seconds to prevent Firebase Data Connect quota exhaustion
-  chatPollTimer = setInterval(() => {
-    if (userData && activeSection === 'messages' && activeConvId) {
-      pollMessages(false);
-    }
-  }, 15000);
 
   // Background view synchronization
   // Increased interval to 60 seconds to prevent quota exhaustion
@@ -1082,21 +1075,25 @@ async function selectConversation(convId) {
     }
   });
 
-  // Setup direct Data Connect live subscription
+  // Setup direct RTDB live subscription
   if (messageSubscription) {
-    messageSubscription();
+    off(messageSubscription);
     messageSubscription = null;
   }
   try {
-    const qRef = listMessagesRef(dc, { conversationId: convId });
-    messageSubscription = subscribe(qRef, (res) => {
-      renderIncomingMessages(res.data?.messages || []);
+    const msgArea = $('#chat-messages');
+    if (msgArea) msgArea.innerHTML = '';
+    
+    const messagesRef = ref(db, `conversations/${convId}/messages`);
+    messageSubscription = messagesRef;
+    onChildAdded(messagesRef, (snapshot) => {
+      const msg = snapshot.val();
+      msg.id = snapshot.key;
+      renderIncomingMessages([msg]);
     });
   } catch (err) {
     console.warn('Subscription fallback to SERVER_ONLY polling:', err);
   }
-
-  await pollMessages(true);
 }
 
 function renderIncomingMessages(messages) {
@@ -1125,7 +1122,8 @@ function renderIncomingMessages(messages) {
         }
       }
 
-      const isMe = msg.sender?.id === userData?.id;
+      const senderId = msg.sender?.id || msg.senderId;
+      const isMe = senderId === userData?.id;
       const div = document.createElement('div');
       div.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
       div.dataset.msgId = msg.id;
@@ -1136,27 +1134,6 @@ function renderIncomingMessages(messages) {
 
   if (hasNew) {
     msgArea.scrollTop = msgArea.scrollHeight;
-  }
-}
-
-// High-speed realtime message polling bypassing client cache
-async function pollMessages(isFullReset = false) {
-  if (!activeConvId) return;
-  const msgArea = $('#chat-messages');
-  if (!msgArea) return;
-
-  try {
-    const res = await listMessages(dc, { conversationId: activeConvId }, SERVER_ONLY);
-    const messages = res.data.messages || [];
-
-    if (isFullReset) {
-      renderedMsgIds.clear();
-      msgArea.innerHTML = '';
-    }
-
-    renderIncomingMessages(messages);
-  } catch (err) {
-    console.error('Chat sync error:', err);
   }
 }
 
@@ -1186,8 +1163,11 @@ function setupChat() {
 
     sendBtn.disabled = true;
     try {
-      await createMessage(dc, { conversationId: activeConvId, senderId: userData.id, content });
-      await pollMessages(false);
+      await push(ref(db, `conversations/${activeConvId}/messages`), {
+        senderId: userData.id,
+        content: content,
+        timestamp: serverTimestamp()
+      });
     } catch (err) {
       showToast('Error sending message: ' + err.message, 'error');
       tempDiv.remove();
