@@ -12,8 +12,8 @@ import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
   listApplicationsByApplicant, listMyHelpRequestsWithApplications,
   createApplication, updateApplicationStatus, updateHelpRequestStatus,
-  createConversation, createMessage, listConversations, listMessages,
-  listMessagesRef, listConversationsRef,
+  createConversation, listConversations,
+  listConversationsRef,
   listPendingUsers, listAllUsers, listAllHelpRequestsAdmin, listAllApplicationsAdmin,
   updateUserStatus, terminateJob, completeJob, createReview, getUserProfile,
   deleteUser, deleteApplication
@@ -130,7 +130,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && userData) {
     if (activeSection === 'messages') {
       loadMessages(true);
-      if (activeConvId) pollMessages(false);
+      
     } else if (activeSection === 'dashboard') {
       loadDashboard(true);
     } else if (activeSection === 'applications') {
@@ -918,10 +918,10 @@ async function handleApprove(application, job) {
     });
     const convId = convRes.data.conversation_insert?.id;
     if (convId) {
-      await createMessage(dc, {
-        conversationId: convId,
+      await push(ref(db, `conversations/${convId}/messages`), {
         senderId: application.applicant.id,
-        content: `📋 Application Offer Accepted\n\nProposed Rate: ${peso(application.priceOffer)}\nMessage: ${application.message}`
+        content: `📋 Application Offer Accepted\n\nProposed Rate: ${peso(application.priceOffer)}\nMessage: ${application.message}`,
+        timestamp: serverTimestamp()
       });
       activeConvId = convId;
     }
