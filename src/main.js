@@ -353,20 +353,40 @@ function setupRegister() {
 
   certDropzone?.addEventListener('click', () => { certInput?.click(); });
 
-  certDropzone?.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    certDropzone.style.borderColor = 'var(--primary-purple)';
+  // Global drag, drop and paste for the register page
+  document.addEventListener('dragover', (e) => {
+    const regSec = document.querySelector('#section-register');
+    if (regSec && !regSec.classList.contains('hidden')) {
+      e.preventDefault();
+      if (certDropzone) certDropzone.style.borderColor = 'var(--primary-purple)';
+    }
   });
-  certDropzone?.addEventListener('dragleave', (e) => {
-    e.preventDefault();
-    certDropzone.style.borderColor = '';
+  document.addEventListener('dragleave', (e) => {
+    const regSec = document.querySelector('#section-register');
+    if (regSec && !regSec.classList.contains('hidden')) {
+      e.preventDefault();
+      if (certDropzone) certDropzone.style.borderColor = '';
+    }
   });
-  certDropzone?.addEventListener('drop', (e) => {
-    e.preventDefault();
-    certDropzone.style.borderColor = '';
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      certInput.files = e.dataTransfer.files;
-      certInput.dispatchEvent(new Event('change'));
+  document.addEventListener('drop', (e) => {
+    const regSec = document.querySelector('#section-register');
+    if (regSec && !regSec.classList.contains('hidden')) {
+      e.preventDefault();
+      if (certDropzone) certDropzone.style.borderColor = '';
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && certInput) {
+        certInput.files = e.dataTransfer.files;
+        certInput.dispatchEvent(new Event('change'));
+      }
+    }
+  });
+  
+  document.addEventListener('paste', (e) => {
+    const regSec = document.querySelector('#section-register');
+    if (regSec && !regSec.classList.contains('hidden')) {
+      if (e.clipboardData.files && e.clipboardData.files.length > 0 && certInput) {
+        certInput.files = e.clipboardData.files;
+        certInput.dispatchEvent(new Event('change'));
+      }
     }
   });
 
