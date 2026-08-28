@@ -169,7 +169,11 @@ function navigateTo(section) {
 function showAuth(section = 'landing') {
   if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
   if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
-  if (messageSubscription) { messageSubscription(); messageSubscription = null; }
+  if (messageSubscription) { 
+    if (typeof messageSubscription === 'function') messageSubscription();
+    else off(messageSubscription);
+    messageSubscription = null; 
+  }
   if (conversationsSubscription) { conversationsSubscription(); conversationsSubscription = null; }
   hide($('#app-views'));
   hide($('#loading-screen'));
@@ -256,7 +260,7 @@ function setupLanding() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      errorEl.textContent = err.message || 'Invalid email or password.';
+      errorEl.textContent = err.code === 'auth/invalid-credential' ? 'Invalid email or password.' : (err.message || 'Login failed.');
       show(errorEl);
     } finally {
       btn.disabled = false;
@@ -308,7 +312,7 @@ function setupLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      errorEl.textContent = err.message || 'Invalid email or password.';
+      errorEl.textContent = err.code === 'auth/invalid-credential' ? 'Invalid email or password.' : (err.message || 'Login failed.');
       show(errorEl);
     } finally {
       btn.disabled = false;
@@ -1900,7 +1904,11 @@ function setupLogout() {
     e.preventDefault();
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
-    if (messageSubscription) { messageSubscription(); messageSubscription = null; }
+    if (messageSubscription) { 
+    if (typeof messageSubscription === 'function') messageSubscription();
+    else off(messageSubscription);
+    messageSubscription = null; 
+  }
     if (conversationsSubscription) { conversationsSubscription(); conversationsSubscription = null; }
     sessionStorage.removeItem('active_section');
     await signOut(auth);
