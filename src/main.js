@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
+  createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider,
   signOut, sendPasswordResetEmail
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
@@ -51,6 +51,7 @@ const SERVER_ONLY = { fetchPolicy: 'SERVER_ONLY' };
 
 // ── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;
+let googleUser = null;
 let userData = null;
 let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
 let autoRefreshTimer = null;
@@ -272,7 +273,8 @@ function setupLanding() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result =       sessionStorage.setItem('redirect_started', 'true');
+      await signInWithRedirect(auth, googleProvider);;
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (!res.data.user) {
         await signOut(auth);
@@ -324,7 +326,8 @@ function setupLogin() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result =       sessionStorage.setItem('redirect_started', 'true');
+      await signInWithRedirect(auth, googleProvider);;
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (!res.data.user) {
         await signOut(auth);
@@ -346,7 +349,6 @@ function setupRegister() {
   const form = $('#register-form');
   const googleBtn = $('#register-google-btn');
   const errorEl = $('#register-error');
-  let googleUser = null;
   const certInput = $('#register-certificate');
   const certPreview = $('#register-cert-preview');
   const certDropzone = $('#register-cert-dropzone');
@@ -408,7 +410,8 @@ function setupRegister() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result =       sessionStorage.setItem('redirect_started', 'true');
+      await signInWithRedirect(auth, googleProvider);;
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (res.data.user) {
         return;
@@ -1986,3 +1989,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navigateTo('profile');
   });
 });
+
+
+
