@@ -1805,3 +1805,100 @@ dialog::backdrop {
         display: flex;
     }
 }
+/* ==========================================================================
+   APP SHELL SKELETON LOADER
+   ========================================================================== */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-main);
+    z-index: 99999;
+    display: flex;
+    transition: opacity 0.5s ease;
+}
+
+.skeleton-sidebar {
+    width: var(--sidebar-width, 240px);
+    background-color: var(--sidebar-bg);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.skeleton-brand {
+    height: 30px;
+    width: 70%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    filter: blur(2px);
+    animation: shimmerPulse 1.5s infinite alternate;
+}
+
+.skeleton-nav-item {
+    height: 20px;
+    width: 85%;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    filter: blur(2px);
+    animation: shimmerPulse 1.5s infinite alternate;
+}
+
+.skeleton-main {
+    flex: 1;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.skeleton-header-line {
+    height: 40px;
+    width: 30%;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    filter: blur(2px);
+    animation: shimmerPulse 1.5s infinite alternate;
+}
+
+.skeleton-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.skeleton-card {
+    height: 120px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    filter: blur(3px);
+    opacity: 0.6;
+    animation: shimmerPulse 1.5s infinite alternate;
+}
+
+.skeleton-large-block {
+    height: 300px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-card);
+    filter: blur(3px);
+    opacity: 0.6;
+    animation: shimmerPulse 1.5s infinite alternate;
+}
+
+@media (max-width: 1024px) {
+    .skeleton-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .skeleton-sidebar { display: none; }
+    .skeleton-main { padding: 1.5rem; }
+    .skeleton-cards-grid { grid-template-columns: 1fr; }
+    .skeleton-header-line { width: 60%; }
+}
+
+@keyframes shimmerPulse {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
