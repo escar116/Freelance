@@ -1547,9 +1547,10 @@ async function loadProfile() {
       }
     }
     renderReviewsProfile(reviews);
+    document.getElementById('dialog-view-profile').showModal();
   } catch (err) {
     console.error('Error loading profile:', err);
-}
+  }
 }
 
 function renderReviewsProfile(reviews) {
