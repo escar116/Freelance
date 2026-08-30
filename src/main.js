@@ -1549,10 +1549,7 @@ async function loadProfile() {
     renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
-  } finally {
-    const overlay = document.getElementById('vp-loading-overlay');
-    if (overlay) overlay.classList.add('hidden');
-  }
+}
 }
 
 function renderReviewsProfile(reviews) {
@@ -1595,10 +1592,6 @@ function renderReviewsProfile(reviews) {
 }
   
 window.openViewProfileDialog = async function(userId) {
-  const dialog = document.getElementById('dialog-view-profile');
-  const overlay = document.getElementById('vp-loading-overlay');
-  if (dialog) dialog.showModal();
-  if (overlay) overlay.classList.remove('hidden');
 
   try {
     const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
