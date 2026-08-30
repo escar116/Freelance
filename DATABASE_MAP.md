@@ -1,4 +1,4 @@
-# Database Architecture Map
+# Database & Architecture Map
 
 This file serves as a permanent reference for exactly how data is structured and stored across Firebase in this project. We will update this file every time the database architecture changes.
 
@@ -27,4 +27,10 @@ This file serves as a permanent reference for exactly how data is structured and
 **Purpose:** Flexible document storage for unstructured data and real-time listeners.
 
 **Currently Stored Here:**
-*   eviews (Collection): Ratings and comments left by users after a job is completed. Migrated here for independent NoSQL querying.
+*   reviews (Collection): Ratings and comments left by users after a job is completed. Migrated here for independent NoSQL querying.
+
+## 4. Authentication (Firebase Auth)
+*Status: Active*
+**Purpose:** Manages user sessions, identity, and OAuth flows.
+*   **Google OAuth:** Implemented using a same-origin reverse proxy via Vercel (ercel.json rewrites /__/auth) to bypass strict third-party cookie blocking (e.g., Opera GX, Safari).
+*   **Session State:** Controlled by Firebase Auth, but full user registration is contingent on the corresponding Data Connect User record existing.
