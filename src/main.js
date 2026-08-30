@@ -22,7 +22,7 @@ import {
 // ── Firebase Config ──────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyAu53ZLxN_6p_BKZUWSE6R8aMbn_iKP91s",
-  authDomain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "work4abit.firebaseapp.com" : window.location.hostname,
+  authDomain: "work4abit.firebaseapp.com",
   projectId: "work4abit",
   storageBucket: "work4abit.firebasestorage.app",
   messagingSenderId: "1019650332467",
