@@ -32,11 +32,11 @@
     --text-on-dark-muted: #94a3b8;
     
     /* Status & Highlight Colors */
-    --color-green: #16a34a;
+    --color-green: var(--status-completed);
     --color-green-bg: #ecfdf5;
-    --color-amber: #f59e0b;
+    --color-amber: var(--status-pending);
     --color-amber-bg: #fffbeb;
-    --color-red: #ef4444;
+    --color-red: var(--status-terminated);
     --color-red-bg: #fee2e2;
     --color-cyan: #0ea5e9;
     
@@ -1568,7 +1568,7 @@ button {
 }
 
 .text-red { color: var(--color-red); }
-.badge-rejected { background: var(--color-red-bg); color: var(--color-red); }
+.badge-rejected { background: color-mix(in srgb, var(--status-terminated) 15%, transparent); color: var(--status-terminated); }
 
 /* ==========================================================================
    13. BUTTONS, BADGES, AVATARS & INPUTS
@@ -1626,8 +1626,8 @@ button {
 .badge-urgent { background: #fee2e2; color: #ef4444; }
 .badge-normal { background: #e0f2fe; color: #0284c7; }
 .badge-low { background: #f3f4f6; color: #6b7280; }
-.badge-pending { background: #fffbeb; color: #d97706; }
-.badge-approved { background: var(--color-green-bg); color: var(--color-green); }
+.badge-pending { background: color-mix(in srgb, var(--status-pending) 15%, transparent); color: var(--status-pending); }
+.badge-approved { background: color-mix(in srgb, var(--status-completed) 15%, transparent); color: var(--status-completed); }
 
 /* Avatars */
 .avatar {
