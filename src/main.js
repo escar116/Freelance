@@ -1549,6 +1549,9 @@ async function loadProfile() {
     renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
+  } finally {
+    const overlay = document.getElementById('vp-loading-overlay');
+    if (overlay) overlay.style.display = 'none';
   }
 }
 
@@ -1592,6 +1595,11 @@ function renderReviewsProfile(reviews) {
 }
   
 window.openViewProfileDialog = async function(userId) {
+  const dialog = document.getElementById('dialog-view-profile');
+  const overlay = document.getElementById('vp-loading-overlay');
+  if (dialog) dialog.showModal();
+  if (overlay) overlay.style.display = 'flex';
+  
   try {
     const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
     const user = res.data.user;
@@ -1599,7 +1607,7 @@ window.openViewProfileDialog = async function(userId) {
     
     document.getElementById('vp-avatar').textContent = initials(user.fullName);
     document.getElementById('vp-name').textContent = user.fullName;
-    document.getElementById('vp-program').textContent = user.facultyReference || 'Student';
+    
     document.getElementById('vp-faculty').textContent = user.facultyReference || 'Not provided';
     document.getElementById('vp-student-id').textContent = user.studentId || 'N/A';
 
@@ -1667,7 +1675,7 @@ window.openViewProfileDialog = async function(userId) {
       }).join('');
     }
     
-    document.getElementById('dialog-view-profile').showModal();
+    
   } catch (err) {
     console.error('Profile Dialog Error:', err);
     showToast('Failed to load profile', 'error');

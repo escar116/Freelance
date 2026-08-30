@@ -4,6 +4,9 @@
    0. DESIGN SYSTEM & CSS VARIABLES
    ========================================================================== */
 :root {
+    --status-pending: #f59e0b;
+    --status-completed: #10b981;
+    --status-terminated: #ef4444;
     /* Solid Deep Navy Sidebar */
     --sidebar-bg: #151b2d;
     --sidebar-hover: rgba(255, 255, 255, 0.07);
@@ -1685,10 +1688,7 @@ dialog::backdrop {
     margin-top: 1.5rem;
 }
 
-.dialog-close-btn {
-    font-size: 1.25rem;
-    color: var(--text-subtle);
-}
+.dialog-close-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; font-size: 2rem; font-weight: bold; transition: 0.2s; }
 
 .star-rating {
     display: flex;
@@ -1734,6 +1734,7 @@ dialog::backdrop {
 .mt-6 { margin-top: 1.5rem; }
 .mt-8 { margin-top: 2rem; }
 .mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
 .text-center { text-align: center; }
 .text-muted { color: var(--text-muted); }
 .font-bold { font-weight: 700; }
