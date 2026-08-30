@@ -1367,12 +1367,13 @@ function setupReviewDialog() {
       
       // 2. Submit the review
       const revData = {
-        rating: selectedRating,
-        comment: $('#review-comment').value.trim(),
-        reviewerId: userData.id,
-        targetUserId: reviewTarget.otherUser.id,
-        createdAt: firestoreTimestamp()
-      };
+          rating: selectedRating,
+          comment: #review-comment.value.trim(),
+          reviewerId: userData.id,
+          reviewerName: userData.fullName,
+          targetUserId: reviewTarget.otherUser.id,
+          createdAt: firestoreTimestamp()
+        };
       await addDoc(collection(firestore, "reviews"), revData);
       
       showToast('Job completed and review submitted!');
@@ -1424,7 +1425,7 @@ function renderReviews(reviews, prefix) {
   $(`#${prefix}-list`).innerHTML = reviews.map(r => `
     <div class="feedback-item">
       <div class="flex justify-between items-start">
-        <strong class="text-white">${r.reviewer.fullName}</strong>
+        <strong class="text-white">${r.reviewerName || 'Anonymous'}</strong>
         <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
       </div>
       <p class="text-sm text-gray-300 mt-2">${r.comment || ''}</p>
@@ -1465,15 +1466,42 @@ async function loadProfile() {
 
 function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
-    $('#ratings-avg-score').textContent = '0.0';
-    $('#ratings-total-count').textContent = 'Based on 0 reviews';
-    $('#ratings-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
+    if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = 'Based on 0 reviews';
+    if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
     [1,2,3,4,5].forEach(r => {
-      $(`#pb-${r}`).style.width = '0%';
-      $(`#pc-${r}`).textContent = '0';
+      const pb = document.getElementById('pb-' + r);
+      if (pb) pb.style.width = '0%';
+      const pc = document.getElementById('pc-' + r);
+      if (pc) pc.textContent = '0';
     });
     return;
   }
+  
+  let sum = 0;
+  const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+  reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
+  const avg = sum / reviews.length;
+  if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = avg.toFixed(1);
+  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = 'Based on ' + reviews.length + ' reviews';
+  
+  [1,2,3,4,5].forEach(r => {
+    const pb = document.getElementById('pb-' + r);
+    if (pb) pb.style.width = ((counts[r] / reviews.length) * 100) + '%';
+    const pc = document.getElementById('pc-' + r);
+    if (pc) pc.textContent = counts[r];
+  });
+  
+  const html = reviews.map(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Anonymous');
+    return '<div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong style="color: var(--text-heading);">' + name + '</strong><span class="font-bold" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-sm mt-2 text-muted">' + (r.comment || '') + '</p></div>';
+  }).join('');
+  
+  if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
+  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = html;
+}
   
   let sum = 0;
   const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
@@ -1504,443 +1532,50 @@ window.openViewProfileDialog = async function(userId) {
     const user = res.data.user;
     if (!user) return;
     
-    $('#vp-avatar').textContent = initials(user.fullName);
-    $('#vp-name').textContent = user.fullName;
-    $('#vp-program').textContent = user.facultyReference || 'Student';
+    document.getElementById('vp-avatar').textContent = initials(user.fullName);
+    document.getElementById('vp-name').textContent = user.fullName;
+    document.getElementById('vp-program').textContent = user.facultyReference || 'Student';
+    document.getElementById('vp-faculty').textContent = user.facultyReference || 'Not provided';
+    document.getElementById('vp-student-id').textContent = user.studentId || '?';
 
     // Set stats
     const apps = user.applications_on_applicant || [];
-    $('#vp-app-pending').textContent = apps.filter(a => a.status === 'PENDING').length;
-    $('#vp-app-completed').textContent = apps.filter(a => a.status === 'COMPLETED').length;
-    $('#vp-app-terminated').textContent = apps.filter(a => a.status === 'TERMINATED').length;
+    document.getElementById('vp-app-pending').textContent = apps.filter(a => a.status === 'PENDING').length;
+    document.getElementById('vp-app-completed').textContent = apps.filter(a => a.status === 'COMPLETED').length;
+    document.getElementById('vp-app-terminated').textContent = apps.filter(a => a.status === 'TERMINATED').length;
 
     const reqs = user.helpRequests_on_requester || [];
-    $('#vp-emp-pending').textContent = reqs.filter(r => r.status === 'OPEN').length;
-    $('#vp-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
-    $('#vp-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
+    document.getElementById('vp-emp-pending').textContent = reqs.filter(r => r.status === 'OPEN').length;
+    document.getElementById('vp-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
+    document.getElementById('vp-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
     
-    const reviews = user.reviews_on_targetUser || [];
+    // Fetch reviews from Firestore
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
     let sum = 0;
     reviews.forEach(r => sum += r.rating);
     const avg = reviews.length > 0 ? (sum / reviews.length).toFixed(1) : '0.0';
     
-    $('#vp-ratings-avg').textContent = avg;
-    $('#vp-ratings-count').textContent = `Based on ${reviews.length} review${reviews.length > 1 ? 's' : ''}`;
+    document.getElementById('vp-ratings-avg').textContent = avg;
+    document.getElementById('vp-ratings-count').textContent = 'Based on ' + reviews.length + ' reviews';
     
     if (reviews.length === 0) {
-      $('#vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+      document.getElementById('vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
     } else {
-      $('#vp-ratings-list').innerHTML = reviews.map(r => `
-        <div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);">
-          <div class="flex justify-between items-start">
-            <strong class="text-sm" style="color: var(--text-heading);">${r.reviewer.fullName}</strong>
-            <span class="text-xs" style="color: var(--color-amber);">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-          </div>
-          <p class="text-xs mt-1 text-muted">${r.comment || ''}</p>
-        </div>
-      `).join('');
+      document.getElementById('vp-ratings-list').innerHTML = reviews.map(r => {
+        const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+        const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Anonymous');
+        return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
+      }).join('');
     }
     
-    $('#dialog-view-profile').showModal();
+    document.getElementById('dialog-view-profile').showModal();
   } catch (err) {
     console.error('Profile Dialog Error:', err);
     showToast('Failed to load profile', 'error');
   }
 };
-
-function setupEditProfile() {
-  $('#btn-edit-profile')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    $('#dialog-edit-profile').showModal();
-  });
-  $('#edit-profile-form')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    showToast('Profile updated.');
-    $('#dialog-edit-profile').close();
-  });
-}
-
-// ── Admin Dashboard & Platform Intelligence ─────────────────────────────────
-let adminActiveTab = 'pending';
-let adminUsersData = [];
-let adminPendingData = [];
-let adminAppsData = [];
-let adminRequestsData = [];
-let adminSearchQuery = '';
-
-async function loadAdmin() {
-  if (!ADMIN_EMAILS.includes(userData?.email)) {
-    navigateTo('dashboard');
-    return;
-  }
-
-  try {
-    const [usersRes, reqsRes, appsRes] = await Promise.all([
-      listAllUsers(dc, SERVER_ONLY),
-      listAllHelpRequestsAdmin(dc, SERVER_ONLY),
-      listAllApplicationsAdmin(dc, SERVER_ONLY)
-    ]);
-
-    adminUsersData = usersRes.data?.users || [];
-    adminRequestsData = reqsRes.data?.helpRequests || [];
-    adminAppsData = appsRes.data?.applications || [];
-    adminPendingData = adminUsersData.filter(u => u.verificationStatus === 'pending');
-
-    // 1. Registered Students Count
-    const totalStudents = adminUsersData.filter(u => u.verificationStatus !== 'pending').length;
-    $('#admin-stat-registered').textContent = totalStudents;
-
-    // 2. Pending Verification Count
-    const pendingCount = adminPendingData.length;
-    $('#admin-stat-pending').textContent = pendingCount;
-    const tabBadge = $('#admin-pending-tab-badge');
-    if (tabBadge) tabBadge.textContent = pendingCount;
-
-    // 3. Active Jobs Count
-    const activeJobs = adminRequestsData.filter(r => r.status === 'OPEN' || !r.status).length;
-    $('#admin-stat-active-jobs').textContent = activeJobs;
-
-    // 4. Completed Jobs Count
-    const completedJobs = adminRequestsData.filter(r => r.status === 'COMPLETED').length;
-    $('#admin-stat-completed-jobs').textContent = completedJobs;
-
-    // 5. Terminated Jobs Count
-    const terminatedJobs = adminAppsData.filter(a => a.status === 'TERMINATED').length;
-    $('#admin-stat-terminated-jobs').textContent = terminatedJobs;
-
-    // 6. Total Transactions Across Whole Website (Sum of completed earnings)
-    const totalTrans = adminAppsData
-      .filter(a => a.status === 'COMPLETED')
-      .reduce((sum, a) => sum + (Number(a.priceOffer) || 0), 0);
-    $('#admin-stat-total-transactions').textContent = peso(totalTrans);
-
-    // Render active tab view
-    renderCurrentAdminTab();
-
-  } catch (err) {
-    console.error('Admin data load error:', err);
-    showToast('Error loading platform metrics: ' + err.message, 'error');
-  }
-}
-
-function renderCurrentAdminTab() {
-  if (adminActiveTab === 'pending') renderAdminPending();
-  else if (adminActiveTab === 'users') renderAdminUsers();
-  else if (adminActiveTab === 'applications') renderAdminApplications();
-}
-
-function renderAdminPending() {
-  const container = $('#admin-list');
-  if (!container) return;
-
-  let list = adminPendingData;
-  if (adminSearchQuery) {
-    const q = adminSearchQuery.toLowerCase();
-    list = list.filter(u =>
-      (u.fullName || '').toLowerCase().includes(q) ||
-      (u.studentId || '').toLowerCase().includes(q) ||
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.facultyReference || '').toLowerCase().includes(q)
-    );
-  }
-
-  container.innerHTML = '';
-  if (list.length === 0) {
-    container.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">✅ No pending student verifications.</div>';
-    return;
-  }
-
-  list.forEach(u => {
-    const card = document.createElement('div');
-    card.className = 'admin-card';
-    card.innerHTML = `
-      <div class="admin-card-info">
-        <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
-        <div>
-          <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</strong>
-          <div class="text-muted text-sm">${u.email} • ID: ${u.studentId || 'N/A'} • ${u.preferredRole || 'Student'}</div>
-          <div class="admin-card-meta">
-            <span class="badge badge-pending">Pending</span>
-            <small class="text-muted">Faculty: ${u.facultyReference || 'None'}</small>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" class="btn btn-outline btn-sm view-profile-btn">Full Info</button>
-        ${u.certificateUrl && u.certificateUrl !== 'none'
-        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View COE</button>`
-        : ''}
-        <button type="button" class="btn btn-outline btn-sm reject-btn">Reject</button>
-        <button type="button" class="btn btn-purple btn-sm approve-btn">Approve</button>
-      </div>
-    `;
-
-    card.querySelector('.view-profile-btn')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      openApplicantDetails(u);
-    });
-
-    card.querySelector('.approve-btn')?.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        await updateUserStatus(dc, { id: u.id, status: 'verified' });
-        showToast(`${u.fullName} approved and verified!`);
-        loadAdmin();
-      } catch (err) {
-        showToast('Error: ' + err.message, 'error');
-      }
-    });
-
-    card.querySelector('.reject-btn')?.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        await updateUserStatus(dc, { id: u.id, status: 'rejected' });
-        showToast(`${u.fullName} rejected.`);
-        loadAdmin();
-      } catch (err) {
-        showToast('Error: ' + err.message, 'error');
-      }
-    });
-
-    card.querySelector('.view-cert-btn')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      $('#cert-preview-img').src = u.certificateUrl;
-      $('#dialog-certificate').showModal();
-    });
-
-    container.appendChild(card);
-  });
-}
-
-function renderAdminUsers() {
-  const tbody = $('#admin-all-users-tbody');
-  if (!tbody) return;
-
-  let list = adminUsersData.filter(u => u.verificationStatus !== 'pending');
-  if (adminSearchQuery) {
-    const q = adminSearchQuery.toLowerCase();
-    list = list.filter(u =>
-      (u.fullName || '').toLowerCase().includes(q) ||
-      (u.studentId || '').toLowerCase().includes(q) ||
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.facultyReference || '').toLowerCase().includes(q)
-    );
-  }
-
-  tbody.innerHTML = '';
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">No registered students found.</td></tr>';
-    return;
-  }
-
-  list.forEach(u => {
-    const tr = document.createElement('tr');
-    const isVerified = u.verificationStatus === 'verified';
-    const isPending = u.verificationStatus === 'pending';
-    const badgeClass = isVerified ? 'badge-approved' : isPending ? 'badge-pending' : 'badge-rejected';
-
-    tr.innerHTML = `
-      <td>
-        <div class="flex items-center gap-2">
-          <div class="avatar avatar-sm">${initials(u.fullName)}</div>
-          <div>
-            <strong>${u.fullName}</strong>
-            <div class="text-xs text-muted">${u.email}</div>
-          </div>
-        </div>
-      </td>
-      <td><strong>${u.studentId || '—'}</strong></td>
-      <td>
-        <div>${u.preferredRole || 'Student'}</div>
-        <small class="text-muted">${u.facultyReference || 'No Faculty'}</small>
-      </td>
-      <td><span class="badge ${badgeClass}">${u.verificationStatus || 'Unknown'}</span></td>
-      <td>
-        ${u.certificateUrl && u.certificateUrl !== 'none'
-        ? `<button type="button" class="btn btn-outline btn-sm view-cert-btn">View COE</button>`
-        : `<span class="text-muted text-sm italic">No COE provided</span>`}
-      </td>
-      <td>
-        <div class="flex items-center gap-1">
-          <button type="button" class="btn btn-outline btn-sm view-info-btn">Details</button>
-          ${!isVerified ? `<button type="button" class="btn btn-purple btn-sm quick-verify-btn">Verify</button>` : ''}
-          <button type="button" class="btn btn-outline btn-sm delete-user-btn" style="border-color: #ef4444; color: #ef4444;">Delete</button>
-        </div>
-      </td>
-    `;
-
-    tr.querySelector('.view-info-btn')?.addEventListener('click', () => openApplicantDetails(u));
-    tr.querySelector('.view-cert-btn')?.addEventListener('click', () => {
-      $('#cert-preview-img').src = u.certificateUrl;
-      $('#dialog-certificate').showModal();
-    });
-    tr.querySelector('.quick-verify-btn')?.addEventListener('click', async () => {
-      await updateUserStatus(dc, { id: u.id, status: 'verified' });
-      showToast(`${u.fullName} marked as verified.`);
-      loadAdmin();
-    });
-    tr.querySelector('.delete-user-btn')?.addEventListener('click', async () => {
-      if (confirm(`Are you sure you want to permanently delete user ${u.fullName}?`)) {
-        try {
-          await deleteUser(dc, { id: u.id });
-          showToast(`User ${u.fullName} deleted.`);
-          loadAdmin();
-        } catch (err) {
-          showToast('Failed to delete user: ' + err.message, 'error');
-        }
-      }
-    });
-
-    tbody.appendChild(tr);
-  });
-}
-
-function renderAdminApplications() {
-  const tbody = $('#admin-all-apps-tbody');
-  if (!tbody) return;
-
-  let list = adminAppsData;
-  if (adminSearchQuery) {
-    const q = adminSearchQuery.toLowerCase();
-    list = list.filter(a =>
-      (a.helpRequest?.title || '').toLowerCase().includes(q) ||
-      (a.applicant?.fullName || '').toLowerCase().includes(q) ||
-      (a.applicant?.studentId || '').toLowerCase().includes(q) ||
-      (a.message || '').toLowerCase().includes(q)
-    );
-  }
-
-  tbody.innerHTML = '';
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 2rem;">No applications submitted yet.</td></tr>';
-    return;
-  }
-
-  list.forEach(a => {
-    const tr = document.createElement('tr');
-    const isCompleted = a.status === 'COMPLETED';
-    const isApproved = a.status === 'APPROVED';
-    const badgeClass = isCompleted ? 'badge-approved' : isApproved ? 'badge-normal' : a.status === 'TERMINATED' ? 'badge-rejected' : 'badge-pending';
-
-    tr.innerHTML = `
-      <td><strong>${a.helpRequest?.title || 'Service Request'}</strong></td>
-      <td>
-        <div class="flex items-center gap-2">
-          <div class="avatar avatar-sm">${initials(a.applicant?.fullName || '')}</div>
-          <div>
-            <strong>${a.applicant?.fullName || 'Applicant'}</strong>
-            <div class="text-xs text-muted">${a.applicant?.email || ''}</div>
-          </div>
-        </div>
-      </td>
-      <td>${a.applicant?.studentId || '—'}</td>
-      <td><strong>${peso(a.priceOffer)}</strong></td>
-      <td><div class="truncate" style="max-width: 220px;">"${a.message}"</div></td>
-      <td><span class="badge ${badgeClass}">${a.status || 'Pending'}</span></td>
-      <td>
-        <button type="button" class="btn btn-outline btn-sm delete-app-btn" style="border-color: #ef4444; color: #ef4444;">Delete</button>
-      </td>
-    `;
-    
-    tr.querySelector('.delete-app-btn')?.addEventListener('click', async () => {
-      if (confirm(`Are you sure you want to permanently delete application for "${a.helpRequest?.title}"?`)) {
-        try {
-          await deleteApplication(dc, { id: a.id });
-          showToast(`Application deleted.`);
-          loadAdmin();
-        } catch (err) {
-          showToast('Failed to delete application: ' + err.message, 'error');
-        }
-      }
-    });
-
-    tbody.appendChild(tr);
-  });
-}
-
-function openApplicantDetails(user) {
-  const body = $('#applicant-modal-body');
-  if (!body) return;
-
-  const isVerified = user.verificationStatus === 'verified';
-  const isPending = user.verificationStatus === 'pending';
-  const badgeClass = isVerified ? 'badge-approved' : isPending ? 'badge-pending' : 'badge-rejected';
-
-  body.innerHTML = `
-    <div class="flex items-center gap-3 mb-4">
-      <div class="avatar avatar-md">${initials(user.fullName)}</div>
-      <div>
-        <h3 class="font-bold text-lg">${user.fullName}</h3>
-        <p class="text-muted text-sm">${user.email}</p>
-        <span class="badge ${badgeClass} mt-1">${user.verificationStatus || 'Pending'}</span>
-      </div>
-    </div>
-
-    <div class="applicant-detail-grid">
-      <div class="applicant-detail-item">
-        <span class="text-xs text-muted font-bold">STUDENT ID</span>
-        <strong>${user.studentId || 'Not provided'}</strong>
-      </div>
-      <div class="applicant-detail-item">
-        <span class="text-xs text-muted font-bold">GENDER</span>
-        <strong>${user.gender || 'Not specified'}</strong>
-      </div>
-      <div class="applicant-detail-item">
-        <span class="text-xs text-muted font-bold">PREFERRED ROLE</span>
-        <strong>${user.preferredRole || 'Student Freelancer'}</strong>
-      </div>
-      <div class="applicant-detail-item">
-        <span class="text-xs text-muted font-bold">FACULTY REFERENCE</span>
-        <strong>${user.facultyReference || 'None'}</strong>
-      </div>
-    </div>
-
-    ${user.certificateUrl && user.certificateUrl !== 'none' ? `
-      <div class="mt-4">
-        <span class="text-xs text-muted font-bold block mb-1">STUDENT ID / CERTIFICATE PREVIEW</span>
-        <img src="${user.certificateUrl}" class="admin-cert-thumb" style="width: 100%; max-height: 240px; object-fit: contain; background: #000; border-radius: 8px;" alt="Student Document">
-      </div>
-    ` : '<p class="text-muted text-sm mt-3">No certificate document uploaded.</p>'}
-  `;
-
-  $('#dialog-applicant-details')?.showModal();
-}
-
-function setupAdminTabs() {
-  $$('.admin-tab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      adminActiveTab = btn.dataset.admintab;
-      $$('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      $$('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-      $(`#admin-tab-${adminActiveTab}`)?.classList.remove('hidden');
-
-      renderCurrentAdminTab();
-    });
-  });
-}
-
-function setupAdminSearch() {
-  $('#admin-search-input')?.addEventListener('input', (e) => {
-    adminSearchQuery = e.target.value.trim();
-    renderCurrentAdminTab();
-  });
-}
-
-// ── Mobile Sidebar ───────────────────────────────────────────────────────────
-function setupMobileSidebar() {
-  $('#mobile-menu-btn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    $('#sidebar')?.classList.add('sidebar-open');
-    show($('#sidebar-overlay'));
-  });
-  const closeMobileSidebar = (e) => {
-    e?.preventDefault();
-    $('#sidebar')?.classList.remove('sidebar-open');
-    hide($('#sidebar-overlay'));
-  };
   $('#sidebar-overlay')?.addEventListener('click', closeMobileSidebar);
   $('#sidebar-close-btn')?.addEventListener('click', closeMobileSidebar);
 }
