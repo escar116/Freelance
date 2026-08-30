@@ -1599,7 +1599,7 @@ window.openViewProfileDialog = async function(userId) {
   const overlay = document.getElementById('vp-loading-overlay');
   if (dialog) dialog.showModal();
   if (overlay) overlay.classList.remove('hidden');
-  
+
   try {
     const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
     const user = res.data.user;
@@ -1610,14 +1610,13 @@ window.openViewProfileDialog = async function(userId) {
       const fullUser = allRes.data.users.find(u => u.id === userId);
       if (fullUser) {
         user.facultyReference = fullUser.facultyReference;
-        user.preferredRole = fullUser.preferredRole;
       }
     } catch(e) {}
     
     document.getElementById('vp-avatar').textContent = initials(user.fullName);
     document.getElementById('vp-name').textContent = user.fullName;
-    
-    document.getElementById('vp-faculty').textContent = user.facultyReference || 'Not provided';
+    if (document.getElementById('vp-program')) document.getElementById('vp-program').textContent = user.program || 'N/A';
+    if (document.getElementById('vp-faculty')) document.getElementById('vp-faculty').textContent = user.facultyReference || 'Not provided';
     document.getElementById('vp-student-id').textContent = user.studentId || 'N/A';
 
     // Set stats
@@ -1683,7 +1682,6 @@ window.openViewProfileDialog = async function(userId) {
         return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
       }).join('');
     }
-    
     
   } catch (err) {
     console.error('Profile Dialog Error:', err);
@@ -1755,16 +1753,21 @@ window.openViewProfileDialog = async function(userId) {
       card.innerHTML = `
         <div class="flex items-center gap-3 mb-3">
           <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
-          <div>
-            <h3 class="job-title cursor-pointer hover:underline" style="margin:0;" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</h3>
-            <p class="text-sm text-muted">${u.preferredRole || 'Student'}</p>
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <h3 class="job-title cursor-pointer hover:underline" style="margin:0;" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</h3>
+              <span class="flex items-center gap-1 text-sm font-bold" style="color: var(--color-amber);">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                ${u.rating || 'New'}
+              </span>
+            </div>
           </div>
         </div>
         <p class="text-sm text-muted mb-2 line-clamp-2">${u.bio || 'No bio provided.'}</p>
         ${skillsHtml}
         <div class="flex justify-between items-center mt-auto" style="padding-top: 1rem; border-top: 1px solid var(--border-card);">
           <button type="button" class="btn btn-outline btn-sm view-profile-btn">View Profile</button>
-          <button type="button" class="btn btn-purple btn-sm apply-mentor-btn">Apply for Mentoring</button>
+          <button type="button" class="btn btn-purple btn-sm apply-mentor-btn">Apply</button>
         </div>
       `;
       
