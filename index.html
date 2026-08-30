@@ -1289,10 +1289,38 @@
 
 ﻿    <dialog id="dialog-view-profile" class="modal">
         <div class="modal-content" style="max-width: 800px; padding: 2.5rem; border-radius: 12px; position: relative;">
-            <div id="vp-loading-overlay" class="hidden" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 12px;">
-                <div class="loader mb-2"></div>
-                <p class="text-sm font-bold" style="color: var(--primary);">Loading profile...</p>
+            
+            <div id="vp-skeleton" class="hidden" style="padding: 0.5rem 0;">
+                <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-light);">
+                  <div class="skeleton-loader skeleton-avatar"></div>
+                  <div style="flex:1;">
+                    <div class="skeleton-loader skeleton-title"></div>
+                    <div class="skeleton-loader skeleton-badge"></div>
+                  </div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                  <div class="skeleton-loader skeleton-line-xs" style="width:30%; margin-bottom:12px;"></div>
+                  <div class="skeleton-loader skeleton-line"></div>
+                  <div class="skeleton-loader skeleton-line-short"></div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                  <div class="skeleton-loader skeleton-line-xs" style="width:45%; margin-bottom:12px;"></div>
+                  <div style="display:flex; gap:8px;">
+                    <div class="skeleton-loader skeleton-badge"></div>
+                    <div class="skeleton-loader skeleton-badge"></div>
+                    <div class="skeleton-loader skeleton-badge"></div>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+                  <div><div class="skeleton-loader skeleton-line-xs" style="width:60%;"></div><div class="skeleton-loader skeleton-line" style="width:80%;"></div></div>
+                  <div><div class="skeleton-loader skeleton-line-xs" style="width:60%;"></div><div class="skeleton-loader skeleton-line" style="width:80%;"></div></div>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                  <div class="skeleton-loader skeleton-line-xs" style="width:35%; margin-bottom:12px;"></div>
+                  <div class="skeleton-loader skeleton-block"></div>
+                </div>
             </div>
+            <div id="vp-body">
             <div class="modal-header border-b pb-4 mb-4" style="border-color: var(--border-light);">
                 <h2 style="font-size: 1.5rem;">User Profile</h2>
                 <button type="button" class="dialog-close-btn">&times;</button>
@@ -1379,7 +1407,8 @@
                 </div>
             </div>
         </div>
-              </div></dialog>
+              </div>
+            </div></dialog>
 
     <!-- ==========================================================================
          13. TOAST NOTIFICATIONS & SCRIPTS
