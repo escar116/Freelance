@@ -1547,9 +1547,12 @@ async function loadProfile() {
       }
     }
     renderReviewsProfile(reviews);
-    document.getElementById('dialog-view-profile').showModal();
+    if (vpBody) { vpBody.style.opacity = '1'; }
+    if (vpLoader) vpLoader.classList.add('hidden');
   } catch (err) {
     console.error('Error loading profile:', err);
+    if (vpBody) { vpBody.style.opacity = '1'; }
+    if (vpLoader) vpLoader.classList.add('hidden');
   }
 }
 
@@ -1593,6 +1596,13 @@ function renderReviewsProfile(reviews) {
 }
   
 window.openViewProfileDialog = async function(userId) {
+  const vpDialog = document.getElementById('dialog-view-profile');
+  vpDialog.showModal();
+  // Show a simple loader while data loads
+  const vpBody = document.getElementById('vp-body');
+  if (vpBody) { vpBody.style.opacity = '0.3'; }
+  const vpLoader = document.getElementById('vp-simple-loader');
+  if (vpLoader) vpLoader.classList.remove('hidden');
 
   try {
     const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
