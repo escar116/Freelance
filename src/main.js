@@ -1038,7 +1038,7 @@ async function loadMessages(isSilent = false) {
         selectConversation(activeConvId);
       }
     } else {
-      $('#chat-panel').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No conversations yet.</div>';
+      $('#chat-panel').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem;">No conversations yet.<br><br><a href="#" onclick="navigateTo(\'dashboard\')" class="btn btn-purple">Find Jobs</a></div>';
     }
   } catch (err) {
     if (!isSilent) convList.innerHTML = '<div class="empty-state">Error loading conversations.</div>';
@@ -1052,6 +1052,10 @@ function renderConversationList() {
   lastConversationsDigest = digest;
 
   convList.innerHTML = '';
+  if (conversations.length === 0) {
+    convList.innerHTML = '<div style="padding:2rem; text-align:center; color:var(--text-muted);">No conversations yet.<br><br><button onclick="navigateTo(\'dashboard\')" class="btn btn-outline-purple btn-sm">Browse Jobs</button></div>';
+    return;
+  }
   conversations.forEach(conv => {
     const isPoster = conv.poster?.id === userData?.id;
     const otherName = isPoster ? conv.applicant?.fullName : conv.poster?.fullName;
@@ -1277,7 +1281,7 @@ function renderTransactionsTable(filter = 'all') {
 
   tbody.innerHTML = '';
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding: 2rem;">No transaction records found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding: 2rem;">No transaction records found.<br><br><button class="btn btn-purple btn-sm" onclick="navigateTo(\'dashboard\')">Find Work</button></td></tr>';
     return;
   }
 
@@ -1925,6 +1929,8 @@ function setupMobileSidebar() {
 function setupLogout() {
   $('#btn-logout')?.addEventListener('click', async (e) => {
     e.preventDefault();
+    const forms = ['#landing-quick-login-form', '#login-form', '#register-form'];
+    forms.forEach(sel => { const f = document.querySelector(sel); if (f) f.reset(); });
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
     if (messageSubscription) { 
