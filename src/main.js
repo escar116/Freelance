@@ -1549,9 +1549,6 @@ async function loadProfile() {
             renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
-  } finally {
-    if (vpBody) vpBody.classList.remove('hidden');
-    if (vpSkeleton) vpSkeleton.classList.add('hidden');
   }
 }
 
@@ -1613,6 +1610,12 @@ window.openViewProfileDialog = async function(userId) {
   vpDialog.showModal();
   if (vpBody) vpBody.classList.add('hidden');
   if (vpSkeleton) vpSkeleton.classList.remove('hidden');
+
+  // User requested: Always hide skeleton after 1 second
+  setTimeout(() => {
+    if (vpBody) vpBody.classList.remove('hidden');
+    if (vpSkeleton) vpSkeleton.classList.add('hidden');
+  }, 1000);
 
   try {
     const res = await getUserProfile(dc, { id: userId }, SERVER_ONLY);
