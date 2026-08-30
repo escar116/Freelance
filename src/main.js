@@ -1599,6 +1599,18 @@ window.openViewProfileDialog = async function(userId) {
   const vpDialog = document.getElementById('dialog-view-profile');
   const vpBody = document.getElementById('vp-body');
   const vpSkeleton = document.getElementById('vp-skeleton');
+  // Clear old data so it never flashes
+  document.getElementById('vp-avatar').textContent = '';
+  document.getElementById('vp-name').textContent = '';
+  document.getElementById('vp-student-id').textContent = '';
+  if (document.getElementById('vp-faculty')) document.getElementById('vp-faculty').textContent = '';
+  if (document.getElementById('vp-bio')) document.getElementById('vp-bio').textContent = '';
+  if (document.getElementById('vp-skills')) document.getElementById('vp-skills').innerHTML = '';
+  ['vp-app-pending','vp-app-completed','vp-app-terminated','vp-emp-pending','vp-emp-completed','vp-emp-terminated'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
+  if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '';
+  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '';
+  if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
+  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '';
   vpDialog.showModal();
   if (vpBody) vpBody.classList.add('hidden');
   if (vpSkeleton) vpSkeleton.classList.remove('hidden');

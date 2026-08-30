@@ -1971,3 +1971,13 @@ dialog::backdrop {
 @keyframes skeleton-sweep {
   to { background-position: 400px 0; }
 }
+
+/* Mentoring grid - tighter spacing */
+#mentoring-users-grid.requests-grid {
+    gap: 0.75rem;
+}
+#mentoring-users-grid .job-card {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
