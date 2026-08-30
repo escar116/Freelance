@@ -353,6 +353,17 @@ function setupRegister() {
   const certInput = $('#register-certificate');
   const certPreview = $('#register-cert-preview');
   const certDropzone = $('#register-cert-dropzone');
+  
+  const facultySelect = $('#register-faculty');
+  const facultyOtherGroup = $('#register-faculty-other-group');
+
+  facultySelect?.addEventListener('change', (e) => {
+    if (e.target.value === 'Others') {
+      show(facultyOtherGroup);
+    } else {
+      hide(facultyOtherGroup);
+    }
+  });
 
   certDropzone?.addEventListener('click', () => { certInput?.click(); });
 
@@ -437,8 +448,17 @@ function setupRegister() {
     const studentId = $('#register-studentid').value.trim();
     const gender = $('#register-gender').value;
     const role = $('#register-role').value;
-    const faculty = $('#register-faculty').value;
+    let faculty = $('#register-faculty').value;
     const btn = $('#register-submit-btn');
+
+    if (faculty === 'Others') {
+      faculty = $('#register-faculty-other').value.trim();
+      if (!faculty) {
+        errorEl.textContent = 'Please specify your faculty reference.';
+        show(errorEl);
+        return;
+      }
+    }
 
     if (!fullName || !studentId) {
       errorEl.textContent = 'Please complete all required fields.';
@@ -1931,6 +1951,7 @@ function setupLogout() {
     e.preventDefault();
     const forms = ['#landing-quick-login-form', '#login-form', '#register-form'];
     forms.forEach(sel => { const f = document.querySelector(sel); if (f) f.reset(); });
+    hide($('#register-faculty-other-group'));
     if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
     if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
     if (messageSubscription) { 
