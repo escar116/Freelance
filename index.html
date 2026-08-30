@@ -56,8 +56,34 @@
          1. LOADING OVERLAY
          ========================================================================== -->
     <div id="loading-screen" class="loading-overlay">
-        <div class="spinner"></div>
-        <p class="loading-brand">WORK <span class="text-accent">4</span> BIT</p>
+        <div class="skeleton-wrapper">
+            <div class="skeleton-header-box">
+                <div class="skeleton-line w-1"></div>
+                <div class="skeleton-line w-2"></div>
+            </div>
+            <div class="skeleton-pill-box"></div>
+            <svg class="skeleton-svg-map" viewBox="0 0 200 400" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4">
+                <!-- Winding Path -->
+                <path d="M 100 20 C 100 80, 140 100, 140 150 C 140 200, 60 220, 60 270 C 60 320, 100 340, 100 380" />
+                <!-- Dotted connection -->
+                <line x1="100" y1="120" x2="60" y2="120" stroke-dasharray="4 4" />
+                <line x1="100" y1="310" x2="100" y2="340" stroke-dasharray="4 4" />
+                
+                <!-- Hexagons (x, y shifted to align with path) -->
+                <!-- Top -->
+                <polygon points="100,20 115,30 115,45 100,55 85,45 85,30" fill="rgba(255,255,255,0.15)"/>
+                <!-- Middle Right -->
+                <polygon points="140,110 155,120 155,135 140,145 125,135 125,120" fill="rgba(255,255,255,0.15)"/>
+                <!-- Middle Left branch -->
+                <polygon points="60,110 75,120 75,135 60,145 45,135 45,120" fill="rgba(255,255,255,0.15)"/>
+                <!-- Mid-lower Left -->
+                <polygon points="60,200 75,210 75,225 60,235 45,225 45,210" fill="rgba(255,255,255,0.15)"/>
+                <!-- Bottom Center (dotted above it) -->
+                <polygon points="100,240 115,250 115,265 100,275 85,265 85,250" fill="rgba(255,255,255,0.15)"/>
+                <!-- Bottom Most -->
+                <polygon points="100,340 115,350 115,365 100,375 85,365 85,350" fill="rgba(255,255,255,0.15)"/>
+            </svg>
+        </div>
     </div>
 
     <!-- ==========================================================================
