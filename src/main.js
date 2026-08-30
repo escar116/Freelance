@@ -1438,7 +1438,7 @@ async function loadProfile() {
   $('#profile-avatar').textContent = initials(userData.fullName);
   $('#profile-name').textContent = userData.fullName || 'Student User';
   $('#profile-faculty').textContent = userData.facultyReference || 'Not provided';
-  $('#profile-student-id').textContent = userData.studentId || '—';
+  $('#profile-student-id').textContent = userData.studentId || 'N/A';
 
   try {
     const resUser = await getUserProfile(dc, { id: userData.id }, SERVER_ONLY);
@@ -1458,6 +1458,14 @@ async function loadProfile() {
 
     const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userData.id)));
     const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
     renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
@@ -1495,7 +1503,7 @@ function renderReviewsProfile(reviews) {
   
   const html = reviews.map(r => {
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Anonymous');
+    const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
     return '<div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong style="color: var(--text-heading);">' + name + '</strong><span class="font-bold" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-sm mt-2 text-muted">' + (r.comment || '') + '</p></div>';
   }).join('');
   
@@ -1513,7 +1521,7 @@ window.openViewProfileDialog = async function(userId) {
     document.getElementById('vp-name').textContent = user.fullName;
     document.getElementById('vp-program').textContent = user.facultyReference || 'Student';
     document.getElementById('vp-faculty').textContent = user.facultyReference || 'Not provided';
-    document.getElementById('vp-student-id').textContent = user.studentId || '?';
+    document.getElementById('vp-student-id').textContent = user.studentId || 'N/A';
 
     // Set stats
     const apps = user.applications_on_applicant || [];
@@ -1530,6 +1538,15 @@ window.openViewProfileDialog = async function(userId) {
     const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
     const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
+    
     let sum = 0;
     reviews.forEach(r => sum += r.rating);
     const avg = reviews.length > 0 ? (sum / reviews.length).toFixed(1) : '0.0';
@@ -1542,7 +1559,7 @@ window.openViewProfileDialog = async function(userId) {
     } else {
       document.getElementById('vp-ratings-list').innerHTML = reviews.map(r => {
         const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-        const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Anonymous');
+        const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
         return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
       }).join('');
     }
@@ -1719,7 +1736,7 @@ function renderAdminPending() {
         <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
         <div>
           <strong class="cursor-pointer hover:underline" onclick="openViewProfileDialog('${u.id}')">${u.fullName}</strong>
-          <div class="text-muted text-sm">${u.email} ΓÇó ID: ${u.studentId || 'N/A'} ΓÇó ${u.preferredRole || 'Student'}</div>
+          <div class="text-muted text-sm">${u.email} &bull; ID: ${u.studentId || 'N/A'} &bull; ${u.preferredRole || 'Student'}</div>
           <div class="admin-card-meta">
             <span class="badge badge-pending">Pending</span>
             <small class="text-muted">Faculty: ${u.facultyReference || 'None'}</small>
@@ -1810,7 +1827,7 @@ function renderAdminUsers() {
           </div>
         </div>
       </td>
-      <td><strong>${u.studentId || 'ΓÇö'}</strong></td>
+      <td><strong>${u.studentId || 'N/A'}</strong></td>
       <td>
         <div>${u.preferredRole || 'Student'}</div>
         <small class="text-muted">${u.facultyReference || 'No Faculty'}</small>
@@ -1894,7 +1911,7 @@ function renderAdminApplications() {
           </div>
         </div>
       </td>
-      <td>${a.applicant?.studentId || 'ΓÇö'}</td>
+      <td>${a.applicant?.studentId || 'N/A'}</td>
       <td><strong>${peso(a.priceOffer)}</strong></td>
       <td><div class="truncate" style="max-width: 220px;">"${a.message}"</div></td>
       <td><span class="badge ${badgeClass}">${a.status || 'Pending'}</span></td>
@@ -1940,7 +1957,7 @@ function openApplicantDetails(user) {
     <div class="applicant-detail-grid">
       <div class="applicant-detail-item">
         <span class="text-xs text-muted font-bold">STUDENT ID</span>
-        <strong>${user.studentId || 'Not provided'}</strong>
+        <strong>${user.studentId || 'N/A'}</strong>
       </div>
       <div class="applicant-detail-item">
         <span class="text-xs text-muted font-bold">GENDER</span>
