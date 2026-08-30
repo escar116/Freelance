@@ -1290,41 +1290,90 @@
 ﻿    <dialog id="dialog-view-profile" class="modal">
         <div class="modal-content" style="max-width: 800px; padding: 2.5rem; border-radius: 12px; position: relative;">
             
-            <div id="vp-skeleton" class="hidden" style="padding: 0.5rem 0;">
-                <div style="display:flex; align-items:center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-light);">
-                  <div class="skeleton-loader skeleton-avatar"></div>
-                  <div style="flex:1;">
-                    <div class="skeleton-loader skeleton-title"></div>
-                    <div class="skeleton-loader skeleton-badge"></div>
-                  </div>
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                  <div class="skeleton-loader skeleton-line-xs" style="width:30%; margin-bottom:12px;"></div>
-                  <div class="skeleton-loader skeleton-line"></div>
-                  <div class="skeleton-loader skeleton-line-short"></div>
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                  <div class="skeleton-loader skeleton-line-xs" style="width:45%; margin-bottom:12px;"></div>
-                  <div style="display:flex; gap:8px;">
-                    <div class="skeleton-loader skeleton-badge"></div>
-                    <div class="skeleton-loader skeleton-badge"></div>
-                    <div class="skeleton-loader skeleton-badge"></div>
-                  </div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
-                  <div><div class="skeleton-loader skeleton-line-xs" style="width:60%;"></div><div class="skeleton-loader skeleton-line" style="width:80%;"></div></div>
-                  <div><div class="skeleton-loader skeleton-line-xs" style="width:60%;"></div><div class="skeleton-loader skeleton-line" style="width:80%;"></div></div>
-                </div>
-                <div style="margin-bottom: 1.5rem;">
-                  <div class="skeleton-loader skeleton-line-xs" style="width:35%; margin-bottom:12px;"></div>
-                  <div class="skeleton-loader skeleton-block"></div>
-                </div>
-            </div>
-            <div id="vp-body">
             <div class="modal-header border-b pb-4 mb-4" style="border-color: var(--border-light);">
                 <h2 style="font-size: 1.5rem;">User Profile</h2>
                 <button type="button" class="dialog-close-btn">&times;</button>
             </div>
+        <div id="vp-skeleton" class="hidden">
+            <div class="profile-hero mb-6">
+                <div class="skeleton-loader skeleton-avatar" style="width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;"></div>
+                <div class="profile-hero-info" style="flex:1;">
+                    <div class="flex items-center gap-3">
+                        <div class="skeleton-loader skeleton-title" style="width: 150px;"></div>
+                        <div class="skeleton-loader skeleton-badge" style="width: 70px;"></div>
+                    </div>
+                    <div class="skeleton-loader skeleton-badge mt-2" style="width: 80px;"></div>
+                </div>
+            </div>
+
+            <div class="credentials-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-card);">
+                <!-- About Me -->
+                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                    <div class="skeleton-loader skeleton-line-short" style="width: 120px; margin-bottom: 1rem;"></div>
+                    <div class="skeleton-loader skeleton-line"></div>
+                    <div class="skeleton-loader skeleton-line" style="width: 80%;"></div>
+                </div>
+
+                <!-- Skills -->
+                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                    <div class="skeleton-loader skeleton-line-short" style="width: 180px; margin-bottom: 1rem;"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton-loader skeleton-badge" style="width: 60px;"></div>
+                        <div class="skeleton-loader skeleton-badge" style="width: 80px;"></div>
+                        <div class="skeleton-loader skeleton-badge" style="width: 70px;"></div>
+                    </div>
+                </div>
+
+                <!-- Credentials -->
+                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                    <div class="skeleton-loader skeleton-line-short" style="width: 200px; margin-bottom: 1rem;"></div>
+                    <div class="flex gap-4">
+                        <div style="flex: 1;">
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 140px;"></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                    <div class="skeleton-loader skeleton-line-short" style="width: 150px; margin-bottom: 1rem;"></div>
+                    <div class="flex justify-between">
+                        <div style="flex: 1;">
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div>
+                    <div class="skeleton-loader skeleton-line-short" style="width: 160px; margin-bottom: 1rem;"></div>
+                    <div class="flex items-center gap-4">
+                        <div class="skeleton-loader skeleton-title" style="width: 60px; height: 40px; margin: 0;"></div>
+                        <div class="skeleton-loader skeleton-line-xs" style="width: 150px;"></div>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <div class="skeleton-loader skeleton-line-xs" style="width: 120px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="vp-body">
+
 
             <div class="profile-hero mb-6">
                 <div class="profile-avatar-circle" id="vp-avatar">JD</div>
