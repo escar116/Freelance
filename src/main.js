@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
 import { getDatabase, ref, push, onChildAdded, serverTimestamp, off, get } from 'firebase/database';
-import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp as firestoreTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp as firestoreTimestamp, setDoc, doc, getDoc } from 'firebase/firestore';
 import {
   connectorConfig, getUser, createUser, listHelpRequests, createHelpRequest,
   listApplicationsByApplicant, listMyHelpRequestsWithApplications,
@@ -1517,6 +1517,25 @@ async function loadProfile() {
     $('#stat-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
     $('#stat-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
 
+    try {
+      const profileDoc = await getDoc(doc(firestore, "user_profiles", userData.id));
+      if (profileDoc.exists()) {
+        const data = profileDoc.data();
+        userData.bio = data.bio || '';
+        userData.skills = data.skills || [];
+        
+        const bioDisplay = document.getElementById('profile-bio-display');
+        if (bioDisplay) bioDisplay.textContent = userData.bio || 'No bio provided yet.';
+        
+        const skillsDisplay = document.getElementById('profile-skills-display');
+        if (skillsDisplay && userData.skills.length > 0) {
+          skillsDisplay.innerHTML = userData.skills.map(s => `<span class="skill-pill" style="display:inline-block; margin:2px; background:var(--bg-card); color:var(--text-heading); border:1px solid var(--border-card); padding:4px 10px; border-radius:999px; font-size:12px;">${s}</span>`).join('');
+        }
+      }
+    } catch(e) {
+      console.error('Failed to fetch user_profile', e);
+    }
+
     const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userData.id)));
     const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     for (let r of reviews) {
@@ -1594,6 +1613,29 @@ window.openViewProfileDialog = async function(userId) {
     document.getElementById('vp-emp-pending').textContent = reqs.filter(r => r.status === 'OPEN').length;
     document.getElementById('vp-emp-completed').textContent = reqs.filter(r => r.status === 'COMPLETED').length;
     document.getElementById('vp-emp-terminated').textContent = reqs.filter(r => r.status === 'TERMINATED').length;
+
+    try {
+      const profileDoc = await getDoc(doc(firestore, "user_profiles", userId));
+      if (profileDoc.exists()) {
+        const data = profileDoc.data();
+        const vpBio = document.getElementById('vp-bio');
+        if (vpBio) vpBio.textContent = data.bio || 'No bio provided.';
+        
+        const vpSkills = document.getElementById('vp-skills');
+        if (vpSkills) {
+          if (data.skills && data.skills.length > 0) {
+            vpSkills.innerHTML = '<div class="flex flex-wrap gap-2">' + data.skills.map(s => `<span class="badge" style="background: rgba(255,255,255,0.05);">${s}</span>`).join('') + '</div>';
+          } else {
+            vpSkills.innerHTML = '<span class="text-sm text-muted">No skills listed.</span>';
+          }
+        }
+      } else {
+        document.getElementById('vp-bio').textContent = 'No bio provided.';
+        document.getElementById('vp-skills').innerHTML = '<span class="text-sm text-muted">No skills listed.</span>';
+      }
+    } catch(e) {
+      console.error(e);
+    }
     
     // Fetch reviews from Firestore
     const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
@@ -1643,6 +1685,17 @@ window.openViewProfileDialog = async function(userId) {
       const res = await listAllUsers(dc);
       let users = res.data.users || [];
       users = users.filter(u => u.id !== userData.id);
+      
+      try {
+        const profilesSnap = await getDocs(collection(firestore, "user_profiles"));
+        const profilesMap = {};
+        profilesSnap.forEach(d => { profilesMap[d.id] = d.data(); });
+        users.forEach(u => {
+          u.bio = profilesMap[u.id]?.bio || '';
+          u.skills = profilesMap[u.id]?.skills || [];
+        });
+      } catch(e) {}
+      
       allUsersData = users;
       renderMentoringGrid(users);
     } catch(e) {
