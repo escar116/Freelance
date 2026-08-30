@@ -1768,7 +1768,7 @@ window.openViewProfileDialog = async function(userId) {
       }
 
       card.innerHTML = `
-        <div class="flex items-center gap-3 mb-3">
+        <div class="flex items-center gap-2 mb-3">
           <div class="avatar cursor-pointer" onclick="openViewProfileDialog('${u.id}')">${initials(u.fullName)}</div>
           <div class="flex-1">
             <div class="flex justify-between items-center">
