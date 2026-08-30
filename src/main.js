@@ -1546,11 +1546,10 @@ async function loadProfile() {
         } catch(e) {}
       }
     }
-    renderReviewsProfile(reviews);
-    if (vpBody) vpBody.classList.remove('hidden');
-    if (vpSkeleton) vpSkeleton.classList.add('hidden');
+            renderReviewsProfile(reviews);
   } catch (err) {
     console.error('Error loading profile:', err);
+  } finally {
     if (vpBody) vpBody.classList.remove('hidden');
     if (vpSkeleton) vpSkeleton.classList.add('hidden');
   }
