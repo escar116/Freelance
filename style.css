@@ -1902,3 +1902,48 @@ dialog::backdrop {
     0% { opacity: 0.5; }
     100% { opacity: 1; }
 }
+/* ==========================================================================
+   SKILLS PILL SELECTOR
+   ========================================================================== */
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    background: var(--bg-main);
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+}
+
+.skill-pill {
+    cursor: pointer;
+    user-select: none;
+}
+
+.skill-pill input[type="checkbox"] {
+    display: none;
+}
+
+.skill-pill span {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-body);
+    transition: all 0.2s;
+}
+
+.skill-pill input[type="checkbox"]:checked + span {
+    background: var(--primary-purple);
+    color: white;
+    border-color: var(--primary-purple);
+}
+
+.skill-pill:hover span {
+    border-color: var(--primary-purple);
+}
