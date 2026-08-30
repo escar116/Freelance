@@ -1,16 +1,8 @@
-function dbg(msg) {
-  console.log(msg);
-  const el = document.getElementById('debug-log');
-  if (el) {
-    el.innerHTML += '<div>' + new Date().toISOString().split('T')[1].slice(0,-1) + ' - ' + msg + '</div>';
-    el.scrollTop = el.scrollHeight;
-  }
-}
 // ── Imports ──────────────────────────────────────────────────────────────────
 import { initializeApp } from 'firebase/app';
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider,
+  createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,
   signOut, sendPasswordResetEmail
 } from 'firebase/auth';
 import { getDataConnect, subscribe } from 'firebase/data-connect';
@@ -30,7 +22,7 @@ import {
 // ── Firebase Config ──────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyAu53ZLxN_6p_BKZUWSE6R8aMbn_iKP91s",
-  authDomain: "work4abit.firebaseapp.com",
+  authDomain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "work4abit.firebaseapp.com" : window.location.hostname,
   projectId: "work4abit",
   storageBucket: "work4abit.firebasestorage.app",
   messagingSenderId: "1019650332467",
@@ -60,6 +52,8 @@ const SERVER_ONLY = { fetchPolicy: 'SERVER_ONLY' };
 // ── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;
 let googleUser = null;
+
+
 let userData = null;
 let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
 let autoRefreshTimer = null;
@@ -221,7 +215,7 @@ function showApp() {
 }
 
 // ── Auth Listener ────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, async (user) => { dbg("Auth changed: " + (user ? user.uid : "null"));
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     try {
@@ -281,8 +275,7 @@ function setupLanding() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result =       sessionStorage.setItem('redirect_started', 'true'); dbg("Starting redirect...");
-      await signInWithRedirect(auth, googleProvider);;
+      const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (!res.data.user) {
         await signOut(auth);
@@ -334,8 +327,7 @@ function setupLogin() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result =       sessionStorage.setItem('redirect_started', 'true'); dbg("Starting redirect...");
-      await signInWithRedirect(auth, googleProvider);;
+      const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (!res.data.user) {
         await signOut(auth);
@@ -357,6 +349,7 @@ function setupRegister() {
   const form = $('#register-form');
   const googleBtn = $('#register-google-btn');
   const errorEl = $('#register-error');
+  
   const certInput = $('#register-certificate');
   const certPreview = $('#register-cert-preview');
   const certDropzone = $('#register-cert-dropzone');
@@ -418,8 +411,7 @@ function setupRegister() {
     e.preventDefault();
     hide(errorEl);
     try {
-      const result =       sessionStorage.setItem('redirect_started', 'true'); dbg("Starting redirect...");
-      await signInWithRedirect(auth, googleProvider);;
+      const result = await signInWithPopup(auth, googleProvider);
       const res = await getUser(dc, { id: result.user.uid }, SERVER_ONLY);
       if (res.data.user) {
         return;
@@ -1997,6 +1989,9 @@ document.addEventListener('DOMContentLoaded', () => {
     navigateTo('profile');
   });
 });
+
+
+
 
 
 
