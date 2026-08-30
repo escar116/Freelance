@@ -1,9 +1,5 @@
-{
+﻿{
   "rewrites": [
-    {
-      "source": "/__/auth(.*)",
-      "destination": "https://work4abit.firebaseapp.com/__/auth$1"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

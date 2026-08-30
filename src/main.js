@@ -55,7 +55,12 @@ let googleUser = null;
 
 
 let userData = null;
-let activeSection = sessionStorage.getItem('active_section') || 'dashboard';
+const VALID_SECTIONS = ['dashboard', 'services', 'mentoring', 'applications', 'messages', 'transactions', 'ratings', 'profile', 'admin'];
+const initialPath = window.location.pathname.replace(/^\/|\/$/g, '');
+let activeSection = VALID_SECTIONS.includes(initialPath) ? initialPath : (sessionStorage.getItem('active_section') || 'dashboard');
+if (VALID_SECTIONS.includes(initialPath)) {
+  sessionStorage.setItem('active_section', initialPath);
+}
 let autoRefreshTimer = null;
 let chatPollTimer = null;
 let activeConvId = null;
@@ -145,7 +150,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ── Navigation ───────────────────────────────────────────────────────────────
-function navigateTo(section) {
+function navigateTo(section, pushState = true) {
   activeSection = section;
   sessionStorage.setItem('active_section', section);
 
@@ -158,6 +163,10 @@ function navigateTo(section) {
   $$('.nav-btn[data-target]').forEach(b => {
     b.classList.toggle('active', b.dataset.target === section);
   });
+
+  if (pushState && window.location.pathname !== '/' + section) {
+    history.pushState({ section }, '', '/' + section);
+  }
 
   if (section === 'dashboard') loadDashboard();
   else if (section === 'services') loadServices();
@@ -2354,6 +2363,7 @@ function setupLogout() {
   }
     if (conversationsSubscription) { conversationsSubscription(); conversationsSubscription = null; }
     sessionStorage.removeItem('active_section');
+    history.pushState(null, '', '/');
     await signOut(auth);
   });
 }
@@ -2375,6 +2385,16 @@ function setupDialogCloseButtons() {
 
 // ── Initialization ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.section) {
+      navigateTo(e.state.section, false);
+    } else {
+      const path = window.location.pathname.replace(/^\/|\/$/g, '');
+      if (VALID_SECTIONS.includes(path)) navigateTo(path, false);
+      else navigateTo('dashboard', false);
+    }
+  });
+
   setupLanding();
   setupLogin();
   setupRegister();
