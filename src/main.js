@@ -1690,9 +1690,20 @@ window.openViewProfileDialog = async function(userId) {
         const profilesSnap = await getDocs(collection(firestore, "user_profiles"));
         const profilesMap = {};
         profilesSnap.forEach(d => { profilesMap[d.id] = d.data(); });
+        
+        const revSnap = await getDocs(collection(firestore, "reviews"));
+        const revMap = {};
+        revSnap.forEach(d => {
+          const data = d.data();
+          if(!revMap[data.targetUserId]) revMap[data.targetUserId] = { sum: 0, count: 0 };
+          revMap[data.targetUserId].sum += Number(data.rating) || 5;
+          revMap[data.targetUserId].count++;
+        });
+
         users.forEach(u => {
           u.bio = profilesMap[u.id]?.bio || '';
           u.skills = profilesMap[u.id]?.skills || [];
+          u.rating = revMap[u.id] ? (revMap[u.id].sum / revMap[u.id].count).toFixed(1) : 'New';
         });
       } catch(e) {}
       
