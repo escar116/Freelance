@@ -794,92 +794,272 @@
 
                     <div class="profile-section-block mt-6">
                         <!-- Middle Block: About & Skills -->
-            <div class="credentials-card mb-6" style="padding: 1.5rem;">
-                <!-- About Me -->
-                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
-                    <h3 class="profile-block-heading mb-2">About Me</h3>
-                    <p class="text-muted text-sm" id="vp-bio">No bio provided yet.</p>
-                </div>
-                <!-- Skills -->
-                <div>
-                    <h3 class="profile-block-heading mb-2">Skills, Languages & Software</h3>
-                    <div class="flex flex-wrap gap-2" id="vp-skills">
-                        <span class="text-muted text-sm">No skills listed.</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Block 3: Ratings Breakdown & Stats -->
-            <div class="credentials-card mb-6" style="padding: 1.5rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                    <!-- Ratings Breakdown (Left) -->
-                    <div>
-                        <h3 class="profile-block-heading mb-3">Ratings</h3>
-                        <div style="display: flex; align-items: center; gap: 1.5rem;">
-                            <div style="text-align: center;">
-                                <h2 class="font-bold" style="font-size: 3.5rem; line-height: 1; margin: 0; color: var(--text-heading);" id="vp-ratings-avg">0.0</h2>
-                                <div style="color: var(--color-amber); font-size: 1.25rem; margin-top: 0.25rem;" id="vp-ratings-avg-stars">★★★★★</div>
-                                <div class="text-xs text-muted mt-1" id="vp-ratings-count">0</div>
+                        <div class="credentials-card mb-6">
+                            <!-- About Me -->
+                            <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                                <h3 class="profile-block-heading mb-2">About Me</h3>
+                                <p class="text-muted text-sm" id="profile-bio-display">No bio provided yet.</p>
                             </div>
-                            <div style="flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
-                                    <span style="width: 10px;">5</span>
-                                    <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-5" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
-                                    <span style="width: 10px;">4</span>
-                                    <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-4" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
-                                    <span style="width: 10px;">3</span>
-                                    <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-3" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
-                                    <span style="width: 10px;">2</span>
-                                    <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-2" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
-                                    <span style="width: 10px;">1</span>
-                                    <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-1" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            <!-- Skills -->
+                            <div>
+                                <h3 class="profile-block-heading mb-2">Skills, Languages & Software</h3>
+                                <div class="flex flex-wrap gap-2" id="profile-skills-display">
+                                    <span class="text-muted text-sm">No skills listed.</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Stats (Right) -->
-                    <div>
-                        <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
-                        <div style="display: flex; gap: 2.5rem; flex-wrap: wrap;">
-                            <!-- Applicant Stats -->
-                            <div style="flex: 1; min-width: 120px;">
-                                <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Applicant</h4>
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
-                                    <div style="color: var(--color-amber); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-app-pending">0</span></div>
-                                    <div style="color: var(--color-emerald); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-app-completed">0</span></div>
-                                    <div style="color: var(--color-red); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-app-terminated">0</span></div>
+
+                        <!-- Block 3: Ratings Breakdown & Stats (Grid of 2 Cards) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <!-- Ratings Breakdown (Left Card) -->
+                            <div class="credentials-card" style="margin-bottom: 0;">
+                                <h3 class="profile-block-heading mb-3">Ratings</h3>
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <div style="text-align: center;">
+                                        <h2 class="font-bold" style="font-size: 3.5rem; line-height: 1; margin: 0; color: var(--text-heading);" id="ratings-avg-score">0.0</h2>
+                                        <div style="color: var(--color-amber); font-size: 1.25rem; margin-top: 0.25rem;" id="ratings-avg-stars">★★★★★</div>
+                                        <div class="text-xs text-muted mt-1" id="ratings-total-count">0</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                            <span style="width: 10px;">5</span>
+                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-5" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                            <span style="width: 10px;">4</span>
+                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-4" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                            <span style="width: 10px;">3</span>
+                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-3" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                            <span style="width: 10px;">2</span>
+                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-2" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                            <span style="width: 10px;">1</span>
+                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-1" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Employer Stats -->
-                            <div style="flex: 1; min-width: 120px;">
-                                <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Employer</h4>
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
-                                    <div style="color: var(--color-amber); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-emp-pending">0</span></div>
-                                    <div style="color: var(--color-emerald); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-emp-completed">0</span></div>
-                                    <div style="color: var(--color-red); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-emp-terminated">0</span></div>
+                            
+                            <!-- Stats (Right Card) -->
+                            <div class="credentials-card" style="margin-bottom: 0;">
+                                <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
+                                <div style="display: flex; gap: 2.5rem; flex-wrap: wrap;">
+                                    <!-- Applicant Stats -->
+                                    <div style="flex: 1; min-width: 120px;">
+                                        <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Applicant</h4>
+                                        <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+                                            <div style="color: var(--status-pending); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="stat-app-pending">0</span></div>
+                                            <div style="color: var(--status-completed); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="stat-app-completed">0</span></div>
+                                            <div style="color: var(--status-terminated); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="stat-app-terminated">0</span></div>
+                                        </div>
+                                    </div>
+                                    <!-- Employer Stats -->
+                                    <div style="flex: 1; min-width: 120px;">
+                                        <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Employer</h4>
+                                        <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+                                            <div style="color: var(--status-pending); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="stat-emp-pending">0</span></div>
+                                            <div style="color: var(--status-completed); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="stat-emp-completed">0</span></div>
+                                            <div style="color: var(--status-terminated); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="stat-emp-terminated">0</span></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Block 4: Feedback List -->
+                        <div class="credentials-card">
+                            <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
+                            <div id="profile-feedback-list" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
+                                <p class="text-muted text-sm text-center">No reviews yet.</p>
+                            </div>
+                        </div>
+                    </div>
+</section>
+
+                <!-- ==========================================================================
+                     11. SECTION: ADMINISTRATOR DASHBOARD
+                     ========================================================================== -->
+                <section id="section-admin" class="content-section hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Administrator Dashboard</h1>
+                        <p class="text-muted">Comprehensive platform analytics, user directory, and verification
+                            management</p>
+                    </div>
+
+                    <!-- 6 Platform-wide Metrics Counters -->
+                    <div class="admin-stats-grid mt-6">
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Registered Students</span>
+                            <div class="stat-card-number" id="admin-stat-registered">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Pending Verification</span>
+                            <div class="stat-card-number text-amber" id="admin-stat-pending">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Active Jobs</span>
+                            <div class="stat-card-number" id="admin-stat-active-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Completed Jobs</span>
+                            <div class="stat-card-number text-green" id="admin-stat-completed-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Terminated Jobs</span>
+                            <div class="stat-card-number text-red" id="admin-stat-terminated-jobs">0</div>
+                        </div>
+                        <div class="dash-stat-card">
+                            <span class="stat-card-label">Total Transactions</span>
+                            <div class="stat-card-number" id="admin-stat-total-transactions">₱0</div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Management Tabs -->
+                    <div class="tabs mt-6">
+                        <button type="button" class="tab-btn active admin-tab-btn" data-admintab="pending">Pending
+                            Verifications (<span id="admin-pending-tab-badge">0</span>)</button>
+                        <button type="button" class="tab-btn admin-tab-btn" data-admintab="users">All Registered
+                            Students</button>
+                        <button type="button" class="tab-btn admin-tab-btn" data-admintab="applications">All
+                            Applications & Bids</button>
+                    </div>
+
+                    <!-- Search Filter for Admin -->
+                    <div class="admin-search-bar mt-4 mb-4">
+                        <input type="text" id="admin-search-input" class="form-control"
+                            placeholder="Search by name, student ID, email, faculty...">
+                    </div>
+
+                    <!-- Tab 1: Pending Verifications -->
+                    <div id="admin-tab-pending" class="admin-tab-content">
+                        <div id="admin-list" class="admin-list">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: All Users Directory -->
+                    <div id="admin-tab-users" class="admin-tab-content hidden">
+                        <div class="transactions-table-wrapper dash-card">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Student ID</th>
+                                        <th>Role / Faculty</th>
+                                        <th>Status</th>
+                                        <th>Certificate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-all-users-tbody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="loader"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: All Applications -->
+                    <div id="admin-tab-applications" class="admin-tab-content hidden">
+                        <div class="transactions-table-wrapper dash-card">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Job Title</th>
+                                        <th>Applicant</th>
+                                        <th>Student ID</th>
+                                        <th>Offer</th>
+                                        <th>Message</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-all-apps-tbody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="loader"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         12. MODALS & DIALOGS
+         ========================================================================== -->
+
+    <!-- New Request / Job Modal -->
+    <dialog id="dialog-new-request" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post a Service</h2>
+                <button type="button" class="dialog-close-btn">✕</button>
+            </div>
+            <form id="new-request-form">
+                <div class="form-group">
+                    <label class="form-label" for="nr-title">Job Title *</label>
+                    <input type="text" id="nr-title" class="form-control" placeholder="e.g. Logo Design for Student Org"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="nr-description">Job Description *</label>
+                    <textarea id="nr-description" class="form-control" rows="4"
+                        placeholder="Describe the job, tasks, and expectations..." required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="nr-category">Category</label>
+                        <select id="nr-category" class="form-control">
+                            <option value="Software Development">Software Development</option>
+                            <option value="Programming">Programming</option>
+                            <option value="Embedded Systems">Embedded Systems</option>
+                            <option value="PCB & Hardware Design">PCB & Hardware Design</option>
+                            <option value="IoT">IoT</option>
+                            <option value="AI & Data">AI & Data</option>
+                            <option value="UI/UX">UI/UX</option>
+                            <option value="Graphic Design">Graphic Design</option>
+                            <option value="Technical Documentation">Technical Documentation</option>
+                            <option value="CAD & 3D Modeling">CAD & 3D Modeling</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="nr-urgency">Urgency</label>
+                        <select id="nr-urgency" class="form-control">
+                            <option value="Normal">Normal</option>
+                            <option value="Low">Low</option>
+                            <option value="Urgent">Urgent 🔥</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-
-            <!-- Block 4: Feedback List -->
-            <div class="credentials-card" style="padding: 1.5rem;">
-                <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
-                <div id="vp-ratings-list" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
-                    <p class="text-muted text-sm text-center">No reviews yet.</p>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="nr-budget">Budget / Payment (₱) *</label>
+                        <input type="number" id="nr-budget" class="form-control" placeholder="500" min="50" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="nr-deadline">Deadline</label>
+                        <input type="date" id="nr-deadline" class="form-control">
+                    </div>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
+                    <button type="submit" id="new-request-submit" class="btn btn-purple">Publish Job</button>
+                </div>
+            </form>
         </div>
     </dialog>
 
@@ -1160,49 +1340,77 @@
                 </div>
             </div>
 
-            <!-- Bottom Blocks: Ratings & Stats (Separated) -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <!-- Block 1: Ratings -->
-                <div class="credentials-card" style="padding: 1.5rem;">
-                    <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
-                    <div class="flex items-center gap-4 mb-4">
-                        <h2 class="text-4xl font-bold" style="margin:0;" id="vp-ratings-avg">0.0</h2>
-                        <div>
-                            <div class="text-sm text-muted">out of 5 <span id="vp-ratings-count">Based on 0 reviews</span></div>
+            <!-- Block 3: Ratings Breakdown & Stats (Grid of 2 Cards) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                <!-- Ratings Breakdown (Left Card) -->
+                <div class="credentials-card" style="margin-bottom: 0; padding: 1.5rem;">
+                    <h3 class="profile-block-heading mb-3">Ratings</h3>
+                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div style="text-align: center;">
+                            <h2 class="font-bold" style="font-size: 3.5rem; line-height: 1; margin: 0; color: var(--text-heading);" id="vp-ratings-avg">0.0</h2>
+                            <div style="color: var(--color-amber); font-size: 1.25rem; margin-top: 0.25rem;" id="vp-ratings-avg-stars">★★★★★</div>
+                            <div class="text-xs text-muted mt-1" id="vp-ratings-count">0</div>
                         </div>
-                    </div>
-                    <div id="vp-ratings-list" style="max-height: 200px; overflow-y: auto; padding-right: 0.5rem;">
-                        <p class="text-muted text-sm text-center">No reviews yet.</p>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                <span style="width: 10px;">5</span>
+                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-5" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                <span style="width: 10px;">4</span>
+                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-4" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                <span style="width: 10px;">3</span>
+                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-3" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                <span style="width: 10px;">2</span>
+                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-2" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
+                                <span style="width: 10px;">1</span>
+                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-1" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Block 2: Statistics -->
-                <div class="credentials-card" style="padding: 1.5rem;">
+                <!-- Stats (Right Card) -->
+                <div class="credentials-card" style="margin-bottom: 0; padding: 1.5rem;">
                     <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
                     <div style="display: flex; gap: 2.5rem; flex-wrap: wrap;">
                         <!-- Applicant Stats -->
                         <div style="flex: 1; min-width: 120px;">
                             <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Applicant</h4>
                             <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
-                                <div style="color: var(--color-amber); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-app-pending">0</span></div>
-                                <div style="color: var(--color-emerald); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-app-completed">0</span></div>
-                                <div style="color: var(--color-red); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-app-terminated">0</span></div>
+                                <div style="color: var(--status-pending); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-app-pending">0</span></div>
+                                <div style="color: var(--status-completed); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-app-completed">0</span></div>
+                                <div style="color: var(--status-terminated); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-app-terminated">0</span></div>
                             </div>
                         </div>
                         <!-- Employer Stats -->
                         <div style="flex: 1; min-width: 120px;">
                             <h4 class="font-bold text-xs text-muted mb-3 uppercase border-b pb-2" style="border-color: var(--border-light);">As Employer</h4>
                             <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
-                                <div style="color: var(--color-amber); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-emp-pending">0</span></div>
-                                <div style="color: var(--color-emerald); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-emp-completed">0</span></div>
-                                <div style="color: var(--color-red); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-emp-terminated">0</span></div>
+                                <div style="color: var(--status-pending); display: flex; justify-content: space-between;"><span class="font-bold">Pending</span> <span class="font-bold" id="vp-emp-pending">0</span></div>
+                                <div style="color: var(--status-completed); display: flex; justify-content: space-between;"><span class="font-bold">Completed</span> <span class="font-bold" id="vp-emp-completed">0</span></div>
+                                <div style="color: var(--status-terminated); display: flex; justify-content: space-between;"><span class="font-bold">Terminated</span> <span class="font-bold" id="vp-emp-terminated">0</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Block 4: Feedback List -->
+            <div class="credentials-card" style="padding: 1.5rem;">
+                <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
+                <div id="vp-ratings-list" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
+                    <p class="text-muted text-sm text-center">No reviews yet.</p>
+                </div>
+            </div>
         </div>
-    </dialog>
+</dialog>
 
     <!-- ==========================================================================
          13. TOAST NOTIFICATIONS & SCRIPTS
