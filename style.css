@@ -2024,7 +2024,7 @@ dialog::backdrop {
 
 /* Mentoring Page Mobile Fixes */
 .job-card .flex-1 {
-    min-width: 0;
+    min-width: 1px;
 }
 .job-title {
     word-wrap: break-word;
@@ -2044,7 +2044,7 @@ dialog::backdrop {
         border-radius: 22px;
         cursor: pointer;
     }
-    .mentoring-search:focus-within {
+    .mentoring-search:focus-within, .mentoring-search.expanded {
         width: 100%;
         max-width: 300px;
         justify-content: flex-start;
@@ -2053,11 +2053,15 @@ dialog::backdrop {
         cursor: text;
     }
     .mentoring-search .search-input {
-        display: none;
+        width: 1px;
+        opacity: 0;
+        padding: 0;
+        pointer-events: none;
     }
-    .mentoring-search:focus-within .search-input {
-        display: block;
+    .mentoring-search:focus-within .search-input, .mentoring-search.expanded .search-input {
         width: 100%;
+        opacity: 1;
+        pointer-events: auto;
     }
 }
 @media (min-width: 769px) {
