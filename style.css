@@ -1358,9 +1358,7 @@ button {
     gap: 1rem;
 }
 
-.feedback-item {
-    display: flex;
-    gap: 1rem;
+.feedback-item { display: block;
     padding: 0.85rem 0;
     border-bottom: 1px solid var(--border-light);
 }
