@@ -721,7 +721,7 @@ async function loadServices(isSilent = false) {
     const appliedIds = new Set((appRes.data.applications || []).map(a => a.helpRequest?.id));
     renderServices(allRequests, appliedIds);
   } catch (err) {
-    if (!isSilent) grid.innerHTML = '<div class="empty-state">Error loading services.</div>';
+    if (!isSilent) console.error("loadServices error:", err); grid.innerHTML = '<div class="empty-state">Error loading services.</div>';
   }
 }
 
@@ -740,7 +740,7 @@ function renderServices(requests, appliedIds = new Set()) {
   if (requestFilters.sort === 'price_asc') filtered.sort((a, b) => a.budget - b.budget);
   else if (requestFilters.sort === 'price_desc') filtered.sort((a, b) => b.budget - a.budget);
 
-  $('#requests-count').textContent = `${filtered.length} service(s) found`;
+  if ($('#requests-count')) $('#requests-count').textContent = `${filtered.length} service(s) found`;
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
@@ -817,8 +817,8 @@ function setupServiceFilters() {
     $('#filter-search').value = '';
     $('#filter-category').value = '';
     $('#filter-sort').value = 'newest';
-    $('#filter-budget').value = 20000;
-    $('#filter-budget-value').textContent = '₱20,000';
+    if ($('#filter-budget')) $('#filter-budget').value = 20000;
+    if ($('#filter-budget-value')) $('#filter-budget-value').textContent = '₱20,000';
     renderServices(allRequests);
   });
 }
