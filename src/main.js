@@ -1592,21 +1592,14 @@ function renderReviewsProfile(reviews) {
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
     const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
     const initial = name.charAt(0).toUpperCase();
-    const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Just now';
     return `
     <div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center;">
-                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #1a73e8; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 1.1rem;">${initial}</div>
-                <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
-            </div>
-            <div style="color: var(--text-muted); cursor: pointer; padding: 4px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-            </div>
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--color-purple); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 0.95rem;">${initial}</div>
+            <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-            <span style="color: #1a73e8; font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
-            <span class="text-xs text-muted">${dateStr}</span>
+        <div style="margin-bottom: 8px;">
+            <span style="color: var(--color-amber); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
         </div>
         <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
     </div>`;
@@ -1733,21 +1726,14 @@ window.openViewProfileDialog = async function(userId) {
         const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
         const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
         const initial = name.charAt(0).toUpperCase();
-        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Just now';
-        return `
+            return `
         <div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #1a73e8; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 1.1rem;">${initial}</div>
-                    <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
-                </div>
-                <div style="color: var(--text-muted); cursor: pointer; padding: 4px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-                </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--color-purple); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 0.95rem;">${initial}</div>
+                <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                <span style="color: #1a73e8; font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
-                <span class="text-xs text-muted">${dateStr}</span>
+            <div style="margin-bottom: 8px;">
+                <span style="color: var(--color-amber); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
             </div>
             <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
         </div>`;
