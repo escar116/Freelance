@@ -621,7 +621,7 @@
                             <p class="text-muted">Find experts and propose 1-on-1 mentoring sessions</p>
                         </div>
                     </div>
-                    <div class="search-filter-panel mb-4" style="display: flex; justify-content: flex-start;">
+                    <div class="search-filter-panel mb-4" style="display: flex; justify-content: flex-end;">
                         <div class="search-bar mentoring-search">
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
                                   <circle cx="11" cy="11" r="8"></circle>
@@ -773,167 +773,92 @@
                     </div>
 
                     <!-- Hero Profile Card -->
-                    <div class="profile-hero">
-                        <div class="profile-avatar-circle" id="profile-avatar">JD</div>
-                        <div class="profile-hero-info">
-                            <div class="flex items-center gap-3">
+                    <div class="profile-hero" style="display: flex; flex-wrap: wrap; gap: 2rem; position: relative;">
+                        <div class="profile-avatar-circle" id="profile-avatar" style="flex-shrink: 0;">JD</div>
+                        <div class="profile-hero-info" style="flex: 1; min-width: 250px;">
+                            <div class="flex items-center gap-3 flex-wrap">
                                 <h2 class="profile-user-name" id="profile-name">Juan Dela Cruz</h2>
-                                <span class="badge badge-approved" id="profile-verification">✓ Verified Student</span>
+                                <span class="badge badge-approved" id="profile-verification"> Verified Student</span>
                             </div>
-                            <p class="profile-user-program" id="profile-program-sub">BS Computer Engineering · Cagayan
-                                State University</p>
-                            <div class="profile-availability-pill" id="profile-availability-badge">Available</div>
+                            <p class="profile-user-program text-muted" id="profile-program-sub">BS Computer Engineering  Cagayan State University</p>
+                            <div class="profile-availability-pill mt-2" id="profile-availability-badge">Available</div>
+                            
+                            <!-- Credentials in Top Block -->
+                            <div class="mt-4 pt-4 border-t" style="border-color: var(--border-light); display: flex; gap: 2rem; flex-wrap: wrap;">
+                                <div>
+                                    <span class="text-xs text-muted font-bold block uppercase mb-1">Faculty reference</span>
+                                    <strong id="profile-faculty" style="font-size: 0.9rem;">Not provided</strong>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-muted font-bold block uppercase mb-1">Student ID</span>
+                                    <strong id="profile-student-id" style="font-size: 0.9rem;">N/A</strong>
+                                </div>
+                            </div>
                         </div>
-                        <button type="button" id="btn-edit-profile" class="edit-profile-pill-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 20h9"></path>
-                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                            </svg>
-                            Edit Profile
+                        <button type="button" id="btn-edit-profile" class="edit-profile-pill-btn" style="align-self: flex-start;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg> Edit Profile
                         </button>
                     </div>
 
-                    <!-- About Me -->
                     <div class="profile-section-block mt-6">
-                        <h3 class="profile-block-heading">About Me</h3>
-                        <div class="credentials-card mt-3">
-                            <p id="profile-bio-display" class="text-muted text-sm">No bio provided yet.</p>
-                        </div>
-                    </div>
-
-                    <!-- Skills -->
-                    <div class="profile-section-block mt-6">
-                        <h3 class="profile-block-heading">Skills, Languages & Software</h3>
-                        <div class="credentials-card mt-3">
-                            <div class="skills-grid" id="profile-skills-display" style="border: none; padding: 0; background: transparent; max-height: none;">
-                                <p class="text-muted text-sm">No skills added yet.</p>
+                        <div class="credentials-card">
+                            <!-- About Me -->
+                            <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                                <h3 class="profile-block-heading mb-2">About Me</h3>
+                                <p class="text-muted text-sm" id="profile-bio">No bio provided yet.</p>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Credentials & References -->
-                    <div class="profile-section-block mt-6">
-                        <h3 class="profile-block-heading">Credentials & references</h3>
-                        <div class="credentials-card mt-3">
-                            <div class="cred-grid">
-                                <div class="cred-item">
-                                    <span class="cred-label">Faculty reference</span>
-                                    <span class="cred-value" id="profile-faculty">Not provided</span>
-                                </div>
-                                <div class="cred-item">
-                                    <span class="cred-label">Student ID</span>
-                                    <span class="cred-value" id="profile-student-id">—</span>
+                            <!-- Skills -->
+                            <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
+                                <h3 class="profile-block-heading mb-2">Skills, Languages & Software</h3>
+                                <div class="flex flex-wrap gap-2" id="profile-skills-list">
+                                    <span class="text-muted text-sm">No skills listed.</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Statistics -->
-                    <div class="profile-section-block mt-6">
-                        <h3 class="profile-block-heading">Platform Statistics</h3>
-                        <div class="credentials-card mt-3"
-                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                            <!-- Applicant Stats -->
-                            <div>
-                                <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Applicant</h4>
-                                <div class="cred-grid">
-                                    <div class="cred-item">
-                                        <span class="cred-label">Pending</span>
-                                        <span class="cred-value font-bold text-amber" id="stat-app-pending">0</span>
+                            <!-- Compact Stats & Ratings -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                                <!-- Ratings (Left) -->
+                                <div>
+                                    <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
+                                    <div class="flex items-center gap-4 mb-4">
+                                        <h2 class="text-4xl font-bold" style="margin:0;" id="profile-rating-average">0.0</h2>
+                                        <div>
+                                            <div class="text-sm text-muted">out of 5 <span id="profile-rating-count">Based on 0 reviews</span></div>
+                                        </div>
                                     </div>
-                                    <div class="cred-item">
-                                        <span class="cred-label">Completed</span>
-                                        <span class="cred-value font-bold text-green" id="stat-app-completed">0</span>
-                                    </div>
-                                    <div class="cred-item">
-                                        <span class="cred-label">Terminated</span>
-                                        <span class="cred-value font-bold text-red" id="stat-app-terminated">0</span>
+                                    <div id="profile-ratings-list" style="max-height: 200px; overflow-y: auto;">
+                                        <p class="text-muted text-sm text-center">No reviews yet.</p>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Employer Stats -->
-                            <div>
-                                <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Employer</h4>
-                                <div class="cred-grid">
-                                    <div class="cred-item">
-                                        <span class="cred-label">Pending</span>
-                                        <span class="cred-value font-bold text-amber" id="stat-emp-pending">0</span>
-                                    </div>
-                                    <div class="cred-item">
-                                        <span class="cred-label">Completed</span>
-                                        <span class="cred-value font-bold text-green" id="stat-emp-completed">0</span>
-                                    </div>
-                                    <div class="cred-item">
-                                        <span class="cred-label">Terminated</span>
-                                        <span class="cred-value font-bold text-red" id="stat-emp-terminated">0</span>
+                                
+                                <!-- Stats (Right) -->
+                                <div>
+                                    <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
+                                    <div style="display: flex; gap: 2rem;">
+                                        <!-- Applicant Stats -->
+                                        <div>
+                                            <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Applicant</h4>
+                                            <div style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem;">
+                                                <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="stat-app-pending">0</span></div>
+                                                <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="stat-app-completed">0</span></div>
+                                                <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="stat-app-terminated">0</span></div>
+                                            </div>
+                                        </div>
+                                        <!-- Employer Stats -->
+                                        <div>
+                                            <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Employer</h4>
+                                            <div style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem;">
+                                                <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="stat-emp-pending">0</span></div>
+                                                <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="stat-emp-completed">0</span></div>
+                                                <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="stat-emp-terminated">0</span></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Your Ratings Breakdown Card -->
-                    <div class="dash-card mt-6">
-                        <div class="dash-card-header">
-                            <h2 class="dash-card-title">Ratings & Feedback</h2>
-                        </div>
-                        <div class="rating-score-row">
-                            <div class="rating-huge-num" id="ratings-avg-score">0.0</div>
-                            <div class="rating-score-meta">
-                                <span>out of 5</span>
-                                <small class="text-muted block" id="ratings-total-count">Based on 0 reviews</small>
-                            </div>
-                        </div>
-
-                        <!-- Star Breakdown Bars -->
-                        <div class="rating-bars-list mt-4">
-                            <div class="rating-bar-row">
-                                <span>5 ★</span>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill" id="pb-5" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted" id="pc-5">0</span>
-                            </div>
-                            <div class="rating-bar-row">
-                                <span>4 ★</span>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill" id="pb-4" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted" id="pc-4">0</span>
-                            </div>
-                            <div class="rating-bar-row">
-                                <span>3 ★</span>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill" id="pb-3" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted" id="pc-3">0</span>
-                            </div>
-                            <div class="rating-bar-row">
-                                <span>2 ★</span>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill" id="pb-2" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted" id="pc-2">0</span>
-                            </div>
-                            <div class="rating-bar-row">
-                                <span>1 ★</span>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill" id="pb-1" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted" id="pc-1">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Feedback List -->
-                    <div class="dash-card mt-6">
-                        <div class="dash-card-header">
-                            <h2 class="dash-card-title">Feedback</h2>
-                        </div>
-                        <div class="feedback-feed-list" id="ratings-feedback-list">
-                            <div class="empty-state text-center text-muted" style="padding: 1.5rem;">No reviews received
-                                yet.</div>
                         </div>
                     </div>
                 </section>
@@ -1296,14 +1221,26 @@
                 <button type="button" class="dialog-close-btn">&times;</button>
             </div>
         <div id="vp-skeleton" class="hidden">
-            <div class="profile-hero mb-6">
+            <div class="profile-hero mb-6" style="display: flex; flex-wrap: wrap; gap: 2rem; position: relative;">
                 <div class="skeleton-loader skeleton-avatar" style="width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;"></div>
-                <div class="profile-hero-info" style="flex:1;">
-                    <div class="flex items-center gap-3">
+                <div class="profile-hero-info" style="flex:1; min-width: 250px;">
+                    <div class="flex items-center gap-3 flex-wrap">
                         <div class="skeleton-loader skeleton-title" style="width: 150px;"></div>
                         <div class="skeleton-loader skeleton-badge" style="width: 70px;"></div>
                     </div>
+                    <div class="skeleton-loader skeleton-line-short mt-2" style="width: 200px;"></div>
                     <div class="skeleton-loader skeleton-badge mt-2" style="width: 80px;"></div>
+                    
+                    <div class="mt-4 pt-4 border-t" style="border-color: var(--border-light); display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div>
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 100px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 120px;"></div>
+                        </div>
+                        <div>
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1325,66 +1262,56 @@
                     </div>
                 </div>
 
-                <!-- Credentials -->
-                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
-                    <div class="skeleton-loader skeleton-line-short" style="width: 200px; margin-bottom: 1rem;"></div>
-                    <div class="flex gap-4">
-                        <div style="flex: 1;">
-                            <div class="skeleton-loader skeleton-line-xs" style="width: 100px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 140px;"></div>
-                        </div>
-                        <div style="flex: 1;">
-                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                <!-- Stats & Feedback Compact -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div class="skeleton-loader skeleton-line-short" style="width: 150px; margin-bottom: 1rem;"></div>
+                        <div class="flex items-center gap-4">
+                            <div class="skeleton-loader skeleton-title" style="width: 60px; height: 40px; margin: 0;"></div>
+                            <div class="skeleton-loader skeleton-line-xs" style="width: 100px;"></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
-                    <div class="skeleton-loader skeleton-line-short" style="width: 150px; margin-bottom: 1rem;"></div>
-                    <div class="flex justify-between">
-                        <div style="flex: 1;">
-                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
+                    <div>
+                        <div class="skeleton-loader skeleton-line-short" style="width: 150px; margin-bottom: 1rem;"></div>
+                        <div class="flex gap-4">
+                            <div>
+                                <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px;"></div>
+                            </div>
+                            <div>
+                                <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px; margin-bottom: 0.5rem;"></div>
+                                <div class="skeleton-loader skeleton-line-short" style="width: 80px;"></div>
+                            </div>
                         </div>
-                        <div style="flex: 1;">
-                            <div class="skeleton-loader skeleton-line-xs" style="width: 80px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px; margin-bottom: 0.5rem;"></div>
-                            <div class="skeleton-loader skeleton-line-short" style="width: 100px;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feedback -->
-                <div>
-                    <div class="skeleton-loader skeleton-line-short" style="width: 160px; margin-bottom: 1rem;"></div>
-                    <div class="flex items-center gap-4">
-                        <div class="skeleton-loader skeleton-title" style="width: 60px; height: 40px; margin: 0;"></div>
-                        <div class="skeleton-loader skeleton-line-xs" style="width: 150px;"></div>
-                    </div>
-                    <div class="mt-4 flex justify-center">
-                        <div class="skeleton-loader skeleton-line-xs" style="width: 120px;"></div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div id="vp-body">
-
-
-            <div class="profile-hero mb-6">
-                <div class="profile-avatar-circle" id="vp-avatar">JD</div>
-                <div class="profile-hero-info">
-                    <div class="flex items-center gap-3">
+<div id="vp-body">
+            <div class="profile-hero mb-6" style="display: flex; flex-wrap: wrap; gap: 2rem; position: relative;">
+                <div class="profile-avatar-circle" id="vp-avatar" style="flex-shrink: 0;">JD</div>
+                <div class="profile-hero-info" style="flex: 1; min-width: 250px;">
+                    <div class="flex items-center gap-3 flex-wrap">
                         <h2 class="profile-user-name" id="vp-name">Name</h2>
                         <span class="badge badge-approved" id="vp-verification">Verified</span>
                     </div>
+                    <div class="profile-availability-pill mt-2" id="vp-availability">Available</div>
                     
-                    <div class="profile-availability-pill" id="vp-availability">Available</div>
+                    <!-- Credentials in Top Block -->
+                    <div class="mt-4 pt-4 border-t" style="border-color: var(--border-light); display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div>
+                            <span class="text-xs text-muted font-bold block uppercase mb-1">Faculty reference</span>
+                            <strong id="vp-faculty" style="font-size: 0.9rem;">Not provided</strong>
+                        </div>
+                        <div>
+                            <span class="text-xs text-muted font-bold block uppercase mb-1">Student ID</span>
+                            <strong id="vp-student-id" style="font-size: 0.9rem;">N/A</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1398,67 +1325,55 @@
                 <!-- Skills -->
                 <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
                     <h3 class="profile-block-heading mb-2">Skills, Languages & Software</h3>
-                    <div class="skills-grid" id="vp-skills" style="border: none; padding: 0; background: transparent; max-height: none;">
-                        <p class="text-muted text-sm">No skills added yet.</p>
+                    <div class="flex flex-wrap gap-2" id="vp-skills-list">
+                        <span class="text-muted text-sm">No skills listed.</span>
                     </div>
                 </div>
 
-                <!-- Credentials & References -->
-                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
-                    <h3 class="profile-block-heading mb-3">Credentials & references</h3>
-                    <div class="cred-grid">
-                        <div class="cred-item">
-                            <span class="cred-label">Faculty reference</span>
-                            <span class="cred-value" id="vp-faculty">Not provided</span>
-                        </div>
-                        <div class="cred-item">
-                            <span class="cred-label">Student ID</span>
-                            <span class="cred-value" id="vp-student-id">?"</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Statistics -->
-                <div class="mb-5 pb-5 border-b" style="border-color: var(--border-card);">
-                    <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                        <div>
-                            <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Applicant</h4>
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                                <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="vp-app-pending">0</span></div>
-                                <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="vp-app-completed">0</span></div>
-                                <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="vp-app-terminated">0</span></div>
+                <!-- Compact Stats & Ratings -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <!-- Ratings (Left) -->
+                    <div>
+                        <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
+                        <div class="flex items-center gap-4 mb-4">
+                            <h2 class="text-4xl font-bold" style="margin:0;" id="vp-rating-average">0.0</h2>
+                            <div>
+                                <div class="text-sm text-muted">out of 5 <span id="vp-rating-count">Based on 0 reviews</span></div>
                             </div>
                         </div>
-                        <div>
-                            <h4 class="font-bold text-sm text-muted mb-2 uppercase">As Employer</h4>
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
-                                <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="vp-emp-pending">0</span></div>
-                                <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="vp-emp-completed">0</span></div>
-                                <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="vp-emp-terminated">0</span></div>
+                        <div id="ratings-feedback-list" style="max-height: 200px; overflow-y: auto;">
+                            <p class="text-muted text-sm text-center">No reviews yet.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats (Right) -->
+                    <div>
+                        <h3 class="profile-block-heading mb-3">Platform Statistics</h3>
+                        <div style="display: flex; gap: 2rem;">
+                            <!-- Applicant Stats -->
+                            <div>
+                                <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Applicant</h4>
+                                <div style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem;">
+                                    <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="vp-app-pending">0</span></div>
+                                    <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="vp-app-completed">0</span></div>
+                                    <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="vp-app-terminated">0</span></div>
+                                </div>
+                            </div>
+                            <!-- Employer Stats -->
+                            <div>
+                                <h4 class="font-bold text-xs text-muted mb-2 uppercase">As Employer</h4>
+                                <div style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem;">
+                                    <div style="color: var(--status-pending);"><span class="font-bold">Pending:</span> <span class="font-bold" id="vp-emp-pending">0</span></div>
+                                    <div style="color: var(--status-completed);"><span class="font-bold">Completed:</span> <span class="font-bold" id="vp-emp-completed">0</span></div>
+                                    <div style="color: var(--status-terminated);"><span class="font-bold">Terminated:</span> <span class="font-bold" id="vp-emp-terminated">0</span></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Feedback -->
-                <div>
-                    <h3 class="profile-block-heading mb-3">Feedback & Reviews</h3>
-                    <div class="rating-score-row mb-4">
-                        <div class="rating-huge-num" id="vp-ratings-avg">0.0</div>
-                        <div class="rating-score-meta">
-                            <span>out of 5</span>
-                            <small class="text-muted block" id="vp-ratings-count">Based on 0 reviews</small>
-                        </div>
-                    </div>
-                    <div class="feedback-feed-list" id="vp-ratings-list" style="max-height: 250px; overflow-y: auto; padding-right: 8px;">
-                        <div class="empty-state text-center text-muted">No reviews yet.</div>
                     </div>
                 </div>
             </div>
         </div>
-              </div>
-            </div></dialog>
+    </dialog>
 
     <!-- ==========================================================================
          13. TOAST NOTIFICATIONS & SCRIPTS
