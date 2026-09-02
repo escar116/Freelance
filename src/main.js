@@ -1478,8 +1478,8 @@ function renderReviews(reviews, prefix) {
   let sum = 0;
   const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
   reviews.forEach(r => {
-    sum += r.rating;
-    counts[r.rating] = (counts[r.rating] || 0) + 1;
+    sum += Number(r.rating);
+    counts[Number(r.rating)] = (counts[Number(r.rating)] || 0) + 1;
   });
   
   const avg = sum / reviews.length;
@@ -1496,7 +1496,7 @@ function renderReviews(reviews, prefix) {
     <div class="feedback-item">
       <div class="flex justify-between items-start">
         <strong class="text-white">${r.reviewerName || 'Anonymous'}</strong>
-        <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+        <span class="text-yellow-400 font-bold">${'★'.repeat(Number(r.rating))}${'☆'.repeat(5 - Number(r.rating))}</span>
       </div>
       <p class="text-sm text-gray-300 mt-2">${r.comment || ''}</p>
     </div>
@@ -1576,7 +1576,7 @@ function renderReviewsProfile(reviews) {
   
   let sum = 0;
   const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
-  reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
+  reviews.forEach(r => { sum += Number(r.rating); counts[Number(r.rating)] = (counts[Number(r.rating)] || 0) + 1; });
   const avg = sum / reviews.length;
   
   if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = avg.toFixed(1);
@@ -1589,7 +1589,7 @@ function renderReviewsProfile(reviews) {
   });
   
   const html = reviews.map(r => {
-    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const stars = '★'.repeat(Number(r.rating)) + '☆'.repeat(5 - Number(r.rating));
     const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
     const initial = name.charAt(0).toUpperCase();
     return `
@@ -1599,7 +1599,7 @@ function renderReviewsProfile(reviews) {
             <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
         </div>
         <div style="margin-bottom: 8px;">
-            <span style="color: var(--color-amber); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
+            <span style="color: var(--color-rating); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
         </div>
         <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
     </div>`;
@@ -1710,7 +1710,7 @@ window.openViewProfileDialog = async function(userId) {
     } else {
       let sum = 0;
       const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
-      reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
+      reviews.forEach(r => { sum += Number(r.rating); counts[Number(r.rating)] = (counts[Number(r.rating)] || 0) + 1; });
       const avg = sum / reviews.length;
       
       document.getElementById('vp-ratings-avg').textContent = avg.toFixed(1);
@@ -1723,7 +1723,7 @@ window.openViewProfileDialog = async function(userId) {
       });
       
       document.getElementById('vp-ratings-list').innerHTML = reviews.map(r => {
-        const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+        const stars = '★'.repeat(Number(r.rating)) + '☆'.repeat(5 - Number(r.rating));
         const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
         const initial = name.charAt(0).toUpperCase();
             return `
@@ -1733,7 +1733,7 @@ window.openViewProfileDialog = async function(userId) {
                 <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
             </div>
             <div style="margin-bottom: 8px;">
-                <span style="color: var(--color-amber); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
+                <span style="color: var(--color-rating); font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
             </div>
             <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
         </div>`;
