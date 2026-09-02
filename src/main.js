@@ -1563,7 +1563,7 @@ async function loadProfile() {
 
 function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
-    if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
+    if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
     if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = 'Based on 0 reviews';
     if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
     if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
@@ -1612,10 +1612,10 @@ window.openViewProfileDialog = async function(userId) {
   if (document.getElementById('vp-bio')) document.getElementById('vp-bio').textContent = '';
   if (document.getElementById('vp-skills')) document.getElementById('vp-skills').innerHTML = '';
   ['vp-app-pending','vp-app-completed','vp-app-terminated','vp-emp-pending','vp-emp-completed','vp-emp-terminated'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
-  if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '';
-  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '';
-  if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
-  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '';
+  
+  if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';
+  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
+  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '';
   vpDialog.showModal();
   if (vpBody) vpBody.classList.add('hidden');
   if (vpSkeleton) vpSkeleton.classList.remove('hidden');
