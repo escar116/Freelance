@@ -1,13 +1,10 @@
-﻿import re
-
-with open('src/main.js', 'r', encoding='utf-8') as f:
+﻿with open('src/main.js', 'r', encoding='utf-8') as f:
     js = f.read()
 
-# 1. Replace renderReviewsProfile safely
+# 1. Safely replace renderReviewsProfile
 start1 = js.find('function renderReviewsProfile(reviews) {')
-end1 = js.find('window.openViewProfileDialog = async function(userId)')
-
-new_render = """function renderReviewsProfile(reviews) {
+end1 = js.find('}', js.find('ratings-feedback-list', start1)) + 1
+js = js[:start1] + """function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
     if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
     if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★★★★★';
@@ -40,23 +37,35 @@ new_render = """function renderReviewsProfile(reviews) {
   }).join('');
   
   if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
-}
-  
-"""
+}""" + js[end1:]
 
-js = js[:start1] + new_render + js[end1:]
-
-# 2. Replace vp clear logic
+# 2. Fix the clear logic
 js = js.replace(
-    "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '';",
+    "if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '';\n  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '';\n  if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';\n  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '';",
     "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '0';\n  [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });"
 )
 
-# 3. Carefully replace just the block after `for (let r of reviews) { ... }` in View Profile
-start2 = js.find('let sum = 0;\n    reviews.forEach(r => sum += r.rating);')
-end2 = js.find('} catch(e) {\n    console.error("Error loading user profile", e);\n  }', start2)
+# 3. Safely replace view profile reviews fetch block
+start2 = js.find('// Fetch reviews from Firestore')
+end2 = js.find('}', js.find('vp-ratings-list', start2)) + 1
+# the original `if (reviews.length === 0)` block has an `else` branch in JS that ends right before `} catch(e) { console.error("Error loading user profile", e); }`
+# I will find that exact catch block and replace from start2 to there
+end2 = js.find('} catch(e) {', start2)
 
-new_vp = """if (reviews.length === 0) {
+js = js[:start2] + """// Fetch reviews from Firestore
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
+    
+    if (reviews.length === 0) {
       document.getElementById('vp-ratings-avg').textContent = '0.0';
       document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
       document.getElementById('vp-ratings-count').textContent = '0';
@@ -83,9 +92,7 @@ new_vp = """if (reviews.length === 0) {
         return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
       }).join('');
     }
-  """
-
-js = js[:start2] + new_vp + js[end2:]
+  """ + js[end2:]
 
 with open('src/main.js', 'w', encoding='utf-8') as f:
     f.write(js)

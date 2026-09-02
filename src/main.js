@@ -1564,14 +1564,14 @@ async function loadProfile() {
 function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
     if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
-    if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = 'Based on 0 reviews';
+    if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
+    if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '0';
     if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
-    if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+    
     [1,2,3,4,5].forEach(r => {
       const pb = document.getElementById('pb-' + r);
       if (pb) pb.style.width = '0%';
-      const pc = document.getElementById('pc-' + r);
-      if (pc) pc.textContent = '0';
+      
     });
     return;
   }
@@ -1581,13 +1581,13 @@ function renderReviewsProfile(reviews) {
   reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
   const avg = sum / reviews.length;
   if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = avg.toFixed(1);
-  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = 'Based on ' + reviews.length + ' reviews';
+  if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = reviews.length.toLocaleString();
   
   [1,2,3,4,5].forEach(r => {
     const pb = document.getElementById('pb-' + r);
     if (pb) pb.style.width = ((counts[r] / reviews.length) * 100) + '%';
-    const pc = document.getElementById('pc-' + r);
-    if (pc) pc.textContent = counts[r];
+    
   });
   
   const html = reviews.map(r => {
@@ -1597,7 +1597,7 @@ function renderReviewsProfile(reviews) {
   }).join('');
   
   if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
-  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = html;
+  
 }
   
 window.openViewProfileDialog = async function(userId) {
@@ -1615,6 +1615,7 @@ window.openViewProfileDialog = async function(userId) {
   
   if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';
   if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
+    if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
   if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '';
   vpDialog.showModal();
   if (vpBody) vpBody.classList.add('hidden');

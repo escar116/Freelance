@@ -1,13 +1,13 @@
-﻿import re
-
-with open('src/main.js', 'r', encoding='utf-8') as f:
+﻿with open('src/main.js', 'r', encoding='utf-8') as f:
     js = f.read()
 
-# 1. Replace renderReviewsProfile safely
-start1 = js.find('function renderReviewsProfile(reviews) {')
-end1 = js.find('window.openViewProfileDialog = async function(userId)')
+import re
 
-new_render = """function renderReviewsProfile(reviews) {
+# 1. Update renderReviewsProfile
+m_render = re.search(r'function renderReviewsProfile\(reviews\).*?if \(document\.getElementById\(\'ratings-feedback-list\'\)\).*?\}', js, re.DOTALL)
+if m_render:
+    render_old = m_render.group(0)
+    render_new = """function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
     if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
     if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★★★★★';
@@ -40,23 +40,27 @@ new_render = """function renderReviewsProfile(reviews) {
   }).join('');
   
   if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
-}
-  
-"""
+}"""
+    js = js.replace(render_old, render_new)
 
-js = js[:start1] + new_render + js[end1:]
-
-# 2. Replace vp clear logic
-js = js.replace(
-    "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '';",
-    "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '0';\n  [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });"
-)
-
-# 3. Carefully replace just the block after `for (let r of reviews) { ... }` in View Profile
-start2 = js.find('let sum = 0;\n    reviews.forEach(r => sum += r.rating);')
-end2 = js.find('} catch(e) {\n    console.error("Error loading user profile", e);\n  }', start2)
-
-new_vp = """if (reviews.length === 0) {
+# 2. Update vp-ratings logic in openViewProfileDialog
+m_vp_reviews = re.search(r'// Fetch reviews from Firestore.*?vp-ratings-list.*?\}', js, re.DOTALL)
+if m_vp_reviews:
+    vp_reviews_old = m_vp_reviews.group(0)
+    vp_reviews_new = """// Fetch reviews from Firestore
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
+    
+    if (reviews.length === 0) {
       document.getElementById('vp-ratings-avg').textContent = '0.0';
       document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
       document.getElementById('vp-ratings-count').textContent = '0';
@@ -82,10 +86,23 @@ new_vp = """if (reviews.length === 0) {
         const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
         return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
       }).join('');
-    }
-  """
+    }"""
+    js = js.replace(vp_reviews_old, vp_reviews_new)
 
-js = js[:start2] + new_vp + js[end2:]
+# 3. Update clearing logic in openViewProfileDialog
+m_clear = re.search(r'\[\'vp-app-pending\'.*?vpDialog\.showModal\(\);', js, re.DOTALL)
+if m_clear:
+    clear_old = m_clear.group(0)
+    clear_new = """['vp-app-pending','vp-app-completed','vp-app-terminated','vp-emp-pending','vp-emp-completed','vp-emp-terminated'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
+  
+  if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';
+  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
+  if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
+  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '0';
+  [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });
+  vpDialog.showModal();"""
+    js = js.replace(clear_old, clear_new)
+
 
 with open('src/main.js', 'w', encoding='utf-8') as f:
     f.write(js)

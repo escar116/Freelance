@@ -3,11 +3,9 @@
 with open('src/main.js', 'r', encoding='utf-8') as f:
     js = f.read()
 
-# 1. Replace renderReviewsProfile safely
-start1 = js.find('function renderReviewsProfile(reviews) {')
-end1 = js.find('window.openViewProfileDialog = async function(userId)')
-
-new_render = """function renderReviewsProfile(reviews) {
+# Replace renderReviewsProfile
+def repl_render(m):
+    return """function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
     if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
     if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★★★★★';
@@ -40,23 +38,32 @@ new_render = """function renderReviewsProfile(reviews) {
   }).join('');
   
   if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
-}
-  
-"""
+}"""
 
-js = js[:start1] + new_render + js[end1:]
+js = re.sub(r'function renderReviewsProfile\(reviews\)\s*\{.*?^\}', repl_render, js, flags=re.DOTALL|re.MULTILINE)
 
-# 2. Replace vp clear logic
+# Fix openViewProfileDialog clearing logic
 js = js.replace(
-    "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '';",
+    "if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '';\n  if (document.getElementById('ratings-feedback-list')) document.getElementById('ratings-feedback-list').innerHTML = '';\n  if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';\n  if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '';",
     "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '0';\n  [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });"
 )
 
-# 3. Carefully replace just the block after `for (let r of reviews) { ... }` in View Profile
-start2 = js.find('let sum = 0;\n    reviews.forEach(r => sum += r.rating);')
-end2 = js.find('} catch(e) {\n    console.error("Error loading user profile", e);\n  }', start2)
-
-new_vp = """if (reviews.length === 0) {
+# Update fetch reviews logic in openViewProfileDialog
+def repl_fetch(m):
+    return """// Fetch reviews from Firestore
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
+    
+    if (reviews.length === 0) {
       document.getElementById('vp-ratings-avg').textContent = '0.0';
       document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
       document.getElementById('vp-ratings-count').textContent = '0';
@@ -82,10 +89,10 @@ new_vp = """if (reviews.length === 0) {
         const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
         return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
       }).join('');
-    }
-  """
+    }"""
 
-js = js[:start2] + new_vp + js[end2:]
+js = re.sub(r'// Fetch reviews from Firestore.*?vp-ratings-list.*?\}', repl_fetch, js, flags=re.DOTALL)
 
 with open('src/main.js', 'w', encoding='utf-8') as f:
     f.write(js)
+print("Updated src/main.js successfully")

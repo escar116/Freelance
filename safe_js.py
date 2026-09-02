@@ -3,7 +3,7 @@
 with open('src/main.js', 'r', encoding='utf-8') as f:
     js = f.read()
 
-# 1. Replace renderReviewsProfile safely
+# 1. Replace renderReviewsProfile
 start1 = js.find('function renderReviewsProfile(reviews) {')
 end1 = js.find('window.openViewProfileDialog = async function(userId)')
 
@@ -52,11 +52,24 @@ js = js.replace(
     "if (document.getElementById('vp-ratings-list')) document.getElementById('vp-ratings-list').innerHTML = '';\n  if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';\n  if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';\n  if (document.getElementById('vp-ratings-count')) document.getElementById('vp-ratings-count').textContent = '0';\n  [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });"
 )
 
-# 3. Carefully replace just the block after `for (let r of reviews) { ... }` in View Profile
-start2 = js.find('let sum = 0;\n    reviews.forEach(r => sum += r.rating);')
-end2 = js.find('} catch(e) {\n    console.error("Error loading user profile", e);\n  }', start2)
+# 3. Safely replace view profile reviews fetch block
+start2 = js.find('// Fetch reviews from Firestore')
+end2 = js.find('} catch(e) {', start2)
 
-new_vp = """if (reviews.length === 0) {
+new_fetch = """// Fetch reviews from Firestore
+    const reviewsSnap = await getDocs(query(collection(firestore, "reviews"), where("targetUserId", "==", userId)));
+    const reviews = reviewsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    for (let r of reviews) {
+      if (!r.reviewerName && r.reviewerId) {
+        try {
+          const res = await getUserProfile(dc, { id: r.reviewerId });
+          if (res.data.user) r.reviewerName = res.data.user.fullName;
+        } catch(e) {}
+      }
+    }
+    
+    if (reviews.length === 0) {
       document.getElementById('vp-ratings-avg').textContent = '0.0';
       document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
       document.getElementById('vp-ratings-count').textContent = '0';
@@ -85,7 +98,7 @@ new_vp = """if (reviews.length === 0) {
     }
   """
 
-js = js[:start2] + new_vp + js[end2:]
+js = js[:start2] + new_fetch + js[end2:]
 
 with open('src/main.js', 'w', encoding='utf-8') as f:
     f.write(js)
