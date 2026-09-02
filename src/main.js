@@ -1563,15 +1563,13 @@ async function loadProfile() {
 
 function renderReviewsProfile(reviews) {
   if (!reviews || reviews.length === 0) {
-    if (document.getElementById('vp-ratings-avg')) document.getElementById('vp-ratings-avg').textContent = '0.0';
-    if (document.getElementById('vp-ratings-avg-stars')) document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
+    if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = '0.0';
+    if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★★★★★';
     if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = '0';
-    if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
-    
+    if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem 0;">No reviews yet.</div>';
     [1,2,3,4,5].forEach(r => {
       const pb = document.getElementById('pb-' + r);
       if (pb) pb.style.width = '0%';
-      
     });
     return;
   }
@@ -1580,6 +1578,7 @@ function renderReviewsProfile(reviews) {
   const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
   reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
   const avg = sum / reviews.length;
+  
   if (document.getElementById('ratings-avg-score')) document.getElementById('ratings-avg-score').textContent = avg.toFixed(1);
   if (document.getElementById('ratings-avg-stars')) document.getElementById('ratings-avg-stars').textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
   if (document.getElementById('ratings-total-count')) document.getElementById('ratings-total-count').textContent = reviews.length.toLocaleString();
@@ -1587,17 +1586,33 @@ function renderReviewsProfile(reviews) {
   [1,2,3,4,5].forEach(r => {
     const pb = document.getElementById('pb-' + r);
     if (pb) pb.style.width = ((counts[r] / reviews.length) * 100) + '%';
-    
   });
   
   const html = reviews.map(r => {
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
     const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
-    return '<div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong style="color: var(--text-heading);">' + name + '</strong><span class="font-bold" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-sm mt-2 text-muted">' + (r.comment || '') + '</p></div>';
+    const initial = name.charAt(0).toUpperCase();
+    const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Just now';
+    return `
+    <div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #1a73e8; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 1.1rem;">${initial}</div>
+                <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
+            </div>
+            <div style="color: var(--text-muted); cursor: pointer; padding: 4px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <span style="color: #1a73e8; font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
+            <span class="text-xs text-muted">${dateStr}</span>
+        </div>
+        <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
+    </div>`;
   }).join('');
   
   if (document.getElementById('profile-feedback-list')) document.getElementById('profile-feedback-list').innerHTML = html;
-  
 }
   
 window.openViewProfileDialog = async function(userId) {
@@ -1693,20 +1708,49 @@ window.openViewProfileDialog = async function(userId) {
       }
     }
     
-    let sum = 0;
-    reviews.forEach(r => sum += r.rating);
-    const avg = reviews.length > 0 ? (sum / reviews.length).toFixed(1) : '0.0';
-    
-    document.getElementById('vp-ratings-avg').textContent = avg;
-    document.getElementById('vp-ratings-count').textContent = 'Based on ' + reviews.length + ' reviews';
-    
     if (reviews.length === 0) {
-      document.getElementById('vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted">No reviews yet.</div>';
+      document.getElementById('vp-ratings-avg').textContent = '0.0';
+      document.getElementById('vp-ratings-avg-stars').textContent = '★★★★★';
+      document.getElementById('vp-ratings-count').textContent = '0';
+      document.getElementById('vp-ratings-list').innerHTML = '<div class="empty-state text-center text-muted" style="padding: 2rem 0;">No reviews yet.</div>';
+      [1,2,3,4,5].forEach(r => { const pb = document.getElementById('vp-pb-' + r); if (pb) pb.style.width = '0%'; });
     } else {
+      let sum = 0;
+      const counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+      reviews.forEach(r => { sum += r.rating; counts[r.rating] = (counts[r.rating] || 0) + 1; });
+      const avg = sum / reviews.length;
+      
+      document.getElementById('vp-ratings-avg').textContent = avg.toFixed(1);
+      document.getElementById('vp-ratings-avg-stars').textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+      document.getElementById('vp-ratings-count').textContent = reviews.length.toLocaleString();
+      
+      [1,2,3,4,5].forEach(r => {
+        const pb = document.getElementById('vp-pb-' + r);
+        if (pb) pb.style.width = ((counts[r] / reviews.length) * 100) + '%';
+      });
+      
       document.getElementById('vp-ratings-list').innerHTML = reviews.map(r => {
         const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
         const name = r.reviewerName || (r.reviewer ? r.reviewer.fullName : 'Student');
-        return '<div class="feedback-item mb-3 pb-3" style="border-bottom: 1px solid var(--border-card);"><div class="flex justify-between items-start"><strong class="text-sm" style="color: var(--text-heading);">' + name + '</strong><span class="text-xs" style="color: var(--color-amber);">' + stars + '</span></div><p class="text-xs mt-1 text-muted">' + (r.comment || '') + '</p></div>';
+        const initial = name.charAt(0).toUpperCase();
+        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Just now';
+        return `
+        <div class="feedback-item mb-4 pb-4" style="border-bottom: 1px solid var(--border-card);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #1a73e8; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; font-size: 1.1rem;">${initial}</div>
+                    <strong style="color: var(--text-heading); font-size: 0.95rem;">${name}</strong>
+                </div>
+                <div style="color: var(--text-muted); cursor: pointer; padding: 4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="color: #1a73e8; font-size: 0.85rem; letter-spacing: 1px;">${stars}</span>
+                <span class="text-xs text-muted">${dateStr}</span>
+            </div>
+            <p class="text-sm" style="color: var(--text-heading); line-height: 1.5; margin: 0; word-break: break-word;">${r.comment || ''}</p>
+        </div>`;
       }).join('');
     }
     

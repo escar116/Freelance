@@ -541,94 +541,20 @@
                      5. SECTION: FIND SERVICES (SCREEN 7 REPLICA)
                      ========================================================================== -->
                 <section id="section-services" class="content-section hidden">
-                    <div class="page-header-flex" style="align-items: center;">
-                        <div>
-                            <h1 class="page-title">Services</h1>
-                            <p class="text-muted">Post and apply for quick, on-demand technical services.</p>
-                        </div>
-                        <button type="button" id="btn-post-request" class="btn btn-purple">
-                            + Post a Service
-                        </button>
-                    </div>
-
-                    <div class="requests-layout">
-                        <!-- Filter Sidebar Panel -->
-                        <aside class="filter-panel">
-                            <h3 class="filter-heading">Filters</h3>
-
-                            <div class="form-group mt-3">
-                                <label class="form-label" for="filter-search">Search Keywords</label>
-                                <input type="text" id="filter-search" class="form-control"
-                                    placeholder="Search services...">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="filter-category">Category</label>
-                                <select id="filter-category" class="form-control">
-                                    <option value="">All Categories</option>
-                                    <option value="Software Development">Software Development</option>
-                                    <option value="Programming">Programming</option>
-                                    <option value="Embedded Systems">Embedded Systems</option>
-                                    <option value="PCB & Hardware Design">PCB & Hardware Design</option>
-                                    <option value="IoT">IoT</option>
-                                    <option value="AI & Data">AI & Data</option>
-                                    <option value="UI/UX">UI/UX</option>
-                                    <option value="Graphic Design">Graphic Design</option>
-                                    <option value="Technical Documentation">Technical Documentation</option>
-                                    <option value="CAD & 3D Modeling">CAD & 3D Modeling</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Max budget: <strong
-                                        id="filter-budget-value">₱20,000</strong></label>
-                                <input type="range" id="filter-budget" class="range-slider" min="500" max="50000"
-                                    step="500" value="20000">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="filter-sort">Sort By</label>
-                                <select id="filter-sort" class="form-control">
-                                    <option value="newest">Newest First</option>
-                                    <option value="price_asc">Price: Low to High</option>
-                                    <option value="price_desc">Price: High to Low</option>
-                                </select>
-                            </div>
-
-                            <button type="button" id="btn-reset-filters"
-                                class="link-btn-text text-sm mt-3 block text-center">Reset filters</button>
-                        </aside>
-
-                        <!-- Services Feed Grid -->
-                        <div class="requests-results-col">
-                            <div class="results-header-bar">
-                                <span id="requests-count" class="text-muted">Loading available services...</span>
-                            </div>
-                            <div id="requests-grid" class="requests-grid">
-                                <div class="loader"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ==========================================================================
-                     NEW SECTION: MENTORING
-                     ========================================================================== -->
-                <section id="section-mentoring" class="content-section hidden">
-                    <div class="page-header-flex" style="align-items: center;">
-                        <div>
-                            <h1 class="page-title">Mentoring Hub</h1>
-                            <p class="text-muted">Find experts and propose 1-on-1 mentoring sessions</p>
-                        </div>
-                    </div>
-                    <div class="search-filter-panel mb-4" style="display: flex; justify-content: flex-end;">
-                        <div class="search-bar mentoring-search">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                                  <circle cx="11" cy="11" r="8"></circle>
-                                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                              </svg>
-                            <input type="text" id="mentoring-search-input" class="search-input" placeholder="Search by name, or skills...">
-                        </div>
+                    <div class="page-header-flex" style="align-items: center; justify-content: space-between; display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                          <div>
+                              <h1 class="page-title" style="margin-bottom: 0.25rem;">Mentoring Hub</h1>
+                              <p class="text-muted" style="margin: 0;">Find experts and propose 1-on-1 mentoring sessions</p>
+                          </div>
+                          <div class="search-filter-panel" style="margin: 0;">
+                              <div class="search-bar mentoring-search">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                  <input type="text" id="mentoring-search-input" class="search-input" placeholder="Search by name, or skills...">
+                              </div>
+                          </div>
                       </div>
 
                       <div class="glass-panel" style="padding: 1.5rem;">
@@ -817,29 +743,29 @@
                                 <div style="display: flex; align-items: center; gap: 1.5rem;">
                                     <div style="text-align: center;">
                                         <h2 class="font-bold" style="font-size: 3.5rem; line-height: 1; margin: 0; color: var(--text-heading);" id="ratings-avg-score">0.0</h2>
-                                        <div style="color: var(--color-amber); font-size: 1.25rem; margin-top: 0.25rem;" id="ratings-avg-stars">★★★★★</div>
+                                        <div style="color: #1a73e8; font-size: 1.25rem; letter-spacing: 2px; margin-top: 0.25rem;" id="ratings-avg-stars">★★★★★</div>
                                         <div class="text-xs text-muted mt-1" id="ratings-total-count">0</div>
                                     </div>
                                     <div style="flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
                                         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                             <span style="width: 10px;">5</span>
-                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-5" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                            <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="pb-5" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                             <span style="width: 10px;">4</span>
-                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-4" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                            <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="pb-4" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                             <span style="width: 10px;">3</span>
-                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-3" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                            <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="pb-3" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                             <span style="width: 10px;">2</span>
-                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-2" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                            <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="pb-2" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                             <span style="width: 10px;">1</span>
-                                            <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="pb-1" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                            <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="pb-1" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1348,29 +1274,29 @@
                     <div style="display: flex; align-items: center; gap: 1.5rem;">
                         <div style="text-align: center;">
                             <h2 class="font-bold" style="font-size: 3.5rem; line-height: 1; margin: 0; color: var(--text-heading);" id="vp-ratings-avg">0.0</h2>
-                            <div style="color: var(--color-amber); font-size: 1.25rem; margin-top: 0.25rem;" id="vp-ratings-avg-stars">★★★★★</div>
+                            <div style="color: #1a73e8; font-size: 1.25rem; letter-spacing: 2px; margin-top: 0.25rem;" id="vp-ratings-avg-stars">★★★★★</div>
                             <div class="text-xs text-muted mt-1" id="vp-ratings-count">0</div>
                         </div>
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 0.4rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                 <span style="width: 10px;">5</span>
-                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-5" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="vp-pb-5" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                 <span style="width: 10px;">4</span>
-                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-4" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="vp-pb-4" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                 <span style="width: 10px;">3</span>
-                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-3" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="vp-pb-3" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                 <span style="width: 10px;">2</span>
-                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-2" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="vp-pb-2" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: bold;">
                                 <span style="width: 10px;">1</span>
-                                <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;"><div id="vp-pb-1" style="background: var(--color-purple); width: 0%; height: 100%; border-radius: 4px; transition: width 0.3s;"></div></div>
+                                <div style="flex: 1; background: #e8eaed; height: 10px; border-radius: 10px; overflow: hidden;"><div id="vp-pb-1" style="background: #1a73e8; width: 0%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div></div>
                             </div>
                         </div>
                     </div>
