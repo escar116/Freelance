@@ -126,7 +126,7 @@ button {
 }
 
 .decor-pcb-top {
-    top: 50%; transform: translateY(-50%);
+    top: 0;
     right: 4%;
     width: 360px;
     opacity: 0.18;
@@ -140,7 +140,7 @@ button {
 }
 
 .decor-side-traces {
-    top: 50%; transform: translateY(-50%);
+    top: 0;
     bottom: 0;
     right: 0;
     width: 44px;
@@ -411,7 +411,7 @@ button {
 
 .sidebar-nav {
     position: fixed;
-    top: 50%; transform: translateY(-50%);
+    top: 0;
     left: 0;
     bottom: 0;
     width: var(--sidebar-width);
@@ -1764,7 +1764,7 @@ dialog::backdrop {
     .sidebar-nav {
         position: fixed;
         left: -100%;
-        top: 50%; transform: translateY(-50%);
+        top: 0;
         bottom: 0;
         width: 240px;
     }
