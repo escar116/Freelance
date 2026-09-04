@@ -565,16 +565,18 @@ async function loadDashboard(isSilent = false) {
   }
 
   try {
-    const [reqRes, appRes, myPostRes, convRes] = await Promise.all([
+    const [reqRes, appRes, myPostRes, convRes, usersRes] = await Promise.all([
       listHelpRequests(dc, SERVER_ONLY),
       userData?.id ? listApplicationsByApplicant(dc, { userId: userData.id }, SERVER_ONLY) : { data: { applications: [] } },
       userData?.id ? listMyHelpRequestsWithApplications(dc, { userId: userData.id }, SERVER_ONLY) : { data: { helpRequests: [] } },
-      userData?.id ? listConversations(dc, { userId: userData.id }, SERVER_ONLY) : { data: { conversations: [] } }
+      userData?.id ? listConversations(dc, { userId: userData.id }, SERVER_ONLY) : { data: { conversations: [] } },
+      listAllUsers(dc, SERVER_ONLY)
     ]);
     const requests = reqRes.data.helpRequests || [];
     const applications = appRes.data.applications || [];
     const myPostedJobs = myPostRes.data.helpRequests || [];
     const conversations = convRes.data.conversations || [];
+    const allUsers = usersRes.data.users || [];
 
     const activeApps = applications.filter(a => a.status === 'PENDING' || a.status === 'APPROVED').length;
     const posterCompleted = myPostedJobs.filter(j => j.status === 'COMPLETED').length;
