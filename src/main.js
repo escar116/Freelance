@@ -647,6 +647,85 @@ async function loadDashboard(isSilent = false) {
       });
     }
 
+
+        // Recommended Mentors Feed (2 with rating, 1 without)
+    const mentorsEl = $('#dashboard-mentors');
+    if (mentorsEl) {
+      if (!isSilent) mentorsEl.innerHTML = '<div class="loader"></div>';
+      
+      try {
+        // Fetch all reviews from Firestore to figure out ratings
+        const allReviewsSnap = await getDocs(collection(firestore, "reviews"));
+        const userRatings = {};
+        allReviewsSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.targetUserId) {
+                if (!userRatings[data.targetUserId]) userRatings[data.targetUserId] = { sum: 0, count: 0 };
+                userRatings[data.targetUserId].sum += data.rating;
+                userRatings[data.targetUserId].count += 1;
+            }
+        });
+        
+        const otherUsers = allUsers.filter(u => u.id !== userData?.id);
+        const withRating = otherUsers.filter(u => userRatings[u.id]);
+        const withoutRating = otherUsers.filter(u => !userRatings[u.id]);
+        
+        // Shuffle arrays
+        const shuffledWith = withRating.sort(() => 0.5 - Math.random());
+        const shuffledWithout = withoutRating.sort(() => 0.5 - Math.random());
+        
+        // Pick 2 with rating, 1 without (if available)
+        let selectedMentors = [];
+        if (shuffledWith.length >= 2) {
+            selectedMentors.push(shuffledWith[0], shuffledWith[1]);
+        } else {
+            selectedMentors.push(...shuffledWith);
+        }
+        
+        if (shuffledWithout.length >= 1) {
+            selectedMentors.push(shuffledWithout[0]);
+        }
+        
+        // Fill remaining if needed to get 3
+        while (selectedMentors.length < 3 && (shuffledWith.length + shuffledWithout.length) > selectedMentors.length) {
+            const unused = [...shuffledWith, ...shuffledWithout].filter(u => !selectedMentors.includes(u));
+            if (unused.length) selectedMentors.push(unused[0]);
+            else break;
+        }
+        
+        // Shuffle the final 3
+        selectedMentors = selectedMentors.sort(() => 0.5 - Math.random());
+        
+        if (selectedMentors.length === 0) {
+          mentorsEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1.5rem;">No mentors available right now.</div>';
+        } else {
+          mentorsEl.innerHTML = '';
+          const mColors = ['job-icon-purple', 'job-icon-cyan', 'job-icon-green'];
+          selectedMentors.forEach((m, idx) => {
+            const item = document.createElement('div');
+            item.className = 'job-list-item';
+            
+            const rData = userRatings[m.id];
+            const rScore = rData ? (rData.sum / rData.count).toFixed(1) : 'New';
+            const rIcon = rData ? '<span class="text-amber">★</span>' : '';
+            
+            item.innerHTML = `
+              <div class="job-icon-box ${mColors[idx % mColors.length]}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <div class="job-item-info">
+                <h3 class="job-item-title">${m.fullName}</h3>
+                <p class="job-item-subtext">${m.preferredRole || 'Student'} • ${rScore} ${rIcon}</p>
+              </div>
+            `;
+            mentorsEl.appendChild(item);
+          });
+        }
+      } catch (err) {
+        mentorsEl.innerHTML = '<div class="empty-state text-center text-muted">Could not load mentors.</div>';
+      }
+    }
+
     // Recent Applications Feed
     const recentAppsEl = $('#dashboard-recent-apps');
     if (!isSilent) recentAppsEl.innerHTML = '';

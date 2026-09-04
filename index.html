@@ -496,15 +496,28 @@
 
                     <!-- 2-Column Main Feed (Recommended Jobs Left + Stacked Recent Right) -->
                     <div class="dashboard-main-grid mt-6">
-                        <!-- Left: Recommended Jobs Card -->
-                        <div class="dash-card">
-                            <div class="dash-card-header">
-                                <h2 class="dash-card-title">Recommended Services</h2>
-                                <button type="button" class="view-all-link" id="dash-view-all-jobs">View all</button>
+                        <!-- Left: Recommended Services & Mentors Stack -->
+                        <div class="dash-left-stack" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <!-- Recommended Services -->
+                            <div class="dash-card">
+                                <div class="dash-card-header">
+                                    <h2 class="dash-card-title">Recommended Services</h2>
+                                    <button type="button" class="view-all-link" id="dash-view-all-jobs">View all</button>
+                                </div>
+                                <div id="dashboard-listings" class="jobs-list-feed">
+                                    <div class="loader"></div>
+                                </div>
                             </div>
 
-                            <div id="dashboard-listings" class="jobs-list-feed">
-                                <div class="loader"></div>
+                            <!-- Recommended Mentors -->
+                            <div class="dash-card">
+                                <div class="dash-card-header">
+                                    <h2 class="dash-card-title">Recommended Mentors</h2>
+                                    <button type="button" class="view-all-link" id="dash-view-all-mentors">View all</button>
+                                </div>
+                                <div id="dashboard-mentors" class="jobs-list-feed">
+                                    <div class="loader"></div>
+                                </div>
                             </div>
                         </div>
 
