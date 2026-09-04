@@ -618,12 +618,16 @@ async function loadDashboard(isSilent = false) {
     // Recommended Services Feed
     const listEl = $('#dashboard-listings');
     if (!isSilent) listEl.innerHTML = '';
-    if (requests.length === 0) {
+    
+    // Filter out jobs the user posted themselves, and only show OPEN jobs
+    const recommended = requests.filter(r => (r.status === 'OPEN' || !r.status) && r.requester?.id !== userData?.id);
+    
+    if (recommended.length === 0) {
       listEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1.5rem;">No services available right now. Be the first to post!</div>';
     } else {
       listEl.innerHTML = '';
       const colors = ['job-icon-green', 'job-icon-purple', 'job-icon-cyan'];
-      requests.slice(0, 3).forEach((r, idx) => {
+      recommended.slice(0, 3).forEach((r, idx) => {
         const item = document.createElement('div');
         item.className = 'job-list-item';
         item.innerHTML = `
