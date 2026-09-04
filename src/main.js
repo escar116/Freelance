@@ -1749,8 +1749,31 @@ window.openViewProfileDialog = async function(userId) {
   // ── Mentoring ────────────────────────────────────────────────────────────────
   async function loadMentoring() {
     const grid = document.getElementById('mentoring-users-grid');
-    if (grid.children.length === 0 || grid.querySelector('.loader')) {
-      grid.innerHTML = '<div class="loader"></div>';
+    if (grid.children.length === 0 || grid.querySelector('.skeleton-loader') || grid.querySelector('.loader')) {
+      const skeletonCard = `
+        <div class="job-card" style="box-shadow: none; border: 1px solid var(--border-light);">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="skeleton-loader skeleton-avatar" style="width: 44px; height: 44px;"></div>
+            <div style="flex: 1;">
+              <div class="skeleton-loader skeleton-line-short" style="margin-bottom: 6px;"></div>
+              <div class="skeleton-loader skeleton-line-xs" style="margin-bottom: 0;"></div>
+            </div>
+          </div>
+          <div class="skeleton-loader skeleton-line" style="margin-bottom: 8px;"></div>
+          
+          <div class="flex gap-2 mb-4">
+            <div class="skeleton-loader skeleton-badge" style="width: 50px;"></div>
+            <div class="skeleton-loader skeleton-badge" style="width: 60px;"></div>
+            <div class="skeleton-loader skeleton-badge" style="width: 40px;"></div>
+          </div>
+          
+          <div class="flex justify-between gap-3 mt-auto border-t" style="padding-top: 1rem; border-color: var(--border-light);">
+            <div class="skeleton-loader" style="width: 48%; height: 36px; border-radius: 999px;"></div>
+            <div class="skeleton-loader" style="width: 48%; height: 36px; border-radius: 999px;"></div>
+          </div>
+        </div>
+      `;
+      grid.innerHTML = skeletonCard.repeat(6);
     }
     
     try {
