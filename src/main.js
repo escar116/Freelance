@@ -593,7 +593,10 @@ async function loadDashboard(isSilent = false) {
 
     $('#stat-applied').textContent = activeApps;
     $('#stat-completed').textContent = completedJobs;
-    $('#stat-earnings').textContent = totalSpent > 0 ? `${peso(totalEarnings)} Earned / ${peso(totalSpent)} Spent` : peso(totalEarnings);
+    $('#stat-earnings').innerHTML = totalSpent > 0 
+    ? `<div style="font-size: 1.75rem;">${peso(totalEarnings)} <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-green);">Earned</span></div>
+       <div style="font-size: 1.15rem; color: var(--text-heading); margin-top: 0.15rem;">${peso(totalSpent)} <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">Spent</span></div>` 
+    : peso(totalEarnings);
     
     // Fetch real rating from Firestore
     let realRating = '0.0';
@@ -772,7 +775,7 @@ function renderServices(requests, appliedIds = new Set()) {
           <small class="text-muted">Budget</small>
           <div class="request-card-price">${peso(r.budget)}</div>
         </div>
-        <button type="button" class="btn ${isMine ? 'btn-outline' : hasApplied ? 'btn-outline' : 'btn-purple'} btn-sm apply-btn"
+        <button type="button" class="btn ${isMine ? 'btn-mine' : hasApplied ? 'btn-applied' : 'btn-purple'} btn-sm apply-btn"
                 ${isMine || hasApplied ? 'disabled' : ''}>
           ${isMine ? 'Your Post' : hasApplied ? 'Applied' : 'Apply Now'}
         </button>
@@ -1538,7 +1541,7 @@ async function loadProfile() {
         
         const skillsDisplay = document.getElementById('profile-skills-display');
         if (skillsDisplay && userData.skills.length > 0) {
-          skillsDisplay.innerHTML = userData.skills.map(s => `<span class="skill-pill" style="display:inline-block; margin:2px; background:var(--bg-card); color:var(--text-heading); border:1px solid var(--border-card); padding:4px 10px; border-radius:999px; font-size:12px;">${s}</span>`).join('');
+          skillsDisplay.innerHTML = userData.skills.map(s => `<span class="skill-pill" style="display:inline-block; margin:2px; background:var(--accent-purple-light); color:var(--primary-purple); border:1px solid rgba(79, 70, 229, 0.2); font-weight:600; padding:4px 10px; border-radius:999px; font-size:12px;">${s}</span>`).join('');
         }
       }
     } catch(e) {
@@ -1988,7 +1991,7 @@ window.openViewProfileDialog = async function(userId) {
             if (skills.length === 0) {
               skillsDisplay.innerHTML = '<p class="text-muted text-sm">No skills added yet.</p>';
             } else {
-              skillsDisplay.innerHTML = skills.map(s => `<span class="skill-pill" style="display:inline-block; margin:2px; background:var(--bg-card); color:var(--text-heading); border:1px solid var(--border-card); padding:4px 10px; border-radius:999px; font-size:12px;">${s}</span>`).join('');
+              skillsDisplay.innerHTML = skills.map(s => `<span class="skill-pill" style="display:inline-block; margin:2px; background:var(--accent-purple-light); color:var(--primary-purple); border:1px solid rgba(79, 70, 229, 0.2); font-weight:600; padding:4px 10px; border-radius:999px; font-size:12px;">${s}</span>`).join('');
             }
           }
           
