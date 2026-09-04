@@ -1688,7 +1688,7 @@ dialog::backdrop {
     margin-top: 1.5rem;
 }
 
-.dialog-close-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; font-size: 2rem; font-weight: bold; transition: 0.2s; }
+.modal-header .dialog-close-btn { background: none; border: none; color: var(--text-heading); cursor: pointer; font-size: 2rem; font-weight: bold; transition: 0.2s; line-height: 1; padding: 0; }
 
 .star-rating {
     display: flex;

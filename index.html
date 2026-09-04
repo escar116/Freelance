@@ -1069,8 +1069,8 @@
                 <div class="form-row">
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-category">Category</label>
-                        <select id="nr-category" class="form-control" required>
-<option value="" disabled selected>Select Category / Skill</option>
+                        <input list="nr-category-options" id="nr-category" class="form-control" required placeholder="Select Category / Skill">
+<datalist id="nr-category-options">
                             <option value="3D Design">3D Design</option>
                             <option value="AI & Data">AI & Data</option>
                             <option value="Altium Designer">Altium Designer</option>
@@ -1131,7 +1131,7 @@
                             <option value="UI/UX Design">UI/UX Design</option>
                             <option value="Webpage Development">Webpage Development</option>
                             <option value="Other">Other</option>
-                        </select>
+                        </datalist>
                     </div>
                     <div class="form-group flex-1">
                         <label class="form-label" for="nr-urgency">Urgency</label>
@@ -1154,7 +1154,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline dialog-close-btn">Cancel</button>
-                    <button type="submit" id="new-request-submit" class="btn btn-purple">Publish Job</button>
+                    <button type="submit" id="new-request-submit" class="btn btn-purple">Publish Service</button>
                 </div>
             </form>
         </div>
