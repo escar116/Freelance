@@ -561,7 +561,7 @@ async function loadDashboard(isSilent = false) {
   const welcomeEl = $('#dashboard-welcome');
   if (welcomeEl) {
     const firstName = (userData?.fullName || 'Student').split(' ')[0];
-    welcomeEl.textContent = `Welcome back, ${firstName}! 👋`;
+    welcomeEl.textContent = `Welcome back, ${firstName}!`;
   }
 
   try {
