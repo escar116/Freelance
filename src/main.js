@@ -714,7 +714,7 @@ function setupDashboardLinks() {
 
 // ── Find Services ────────────────────────────────────────────────────────────
 let allRequests = [];
-let requestFilters = { q: '', category: '', maxPrice: 20000, sort: 'newest' };
+let requestFilters = { q: '', category: '', maxPrice: Infinity, sort: 'newest' };
 
 async function loadServices(isSilent = false) {
   const grid = $('#requests-grid');
@@ -802,7 +802,7 @@ function setupServiceFilters() {
     renderServices(allRequests);
   });
 
-  $('#filter-category')?.addEventListener('change', (e) => {
+  $('#filter-category')?.addEventListener('input', (e) => {
     requestFilters.category = e.target.value;
     renderServices(allRequests);
   });
@@ -813,8 +813,7 @@ function setupServiceFilters() {
   });
 
   $('#filter-budget')?.addEventListener('input', (e) => {
-    requestFilters.maxPrice = Number(e.target.value);
-    $('#filter-budget-value').textContent = peso(requestFilters.maxPrice);
+    requestFilters.maxPrice = e.target.value ? Number(e.target.value) : Infinity;
     renderServices(allRequests);
   });
 
@@ -824,8 +823,8 @@ function setupServiceFilters() {
     $('#filter-search').value = '';
     $('#filter-category').value = '';
     $('#filter-sort').value = 'newest';
-    if ($('#filter-budget')) $('#filter-budget').value = 20000;
-    if ($('#filter-budget-value')) $('#filter-budget-value').textContent = '₱20,000';
+    if ($('#filter-budget')) $('#filter-budget').value = '';
+    requestFilters.maxPrice = Infinity;
     renderServices(allRequests);
   });
 }
