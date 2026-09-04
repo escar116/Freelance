@@ -657,73 +657,105 @@ async function loadDashboard(isSilent = false) {
       
       try {
         // Fetch all reviews from Firestore to figure out ratings
-        const allReviewsSnap = await getDocs(collection(firestore, "reviews"));
-        const userRatings = {};
-        allReviewsSnap.forEach(doc => {
-            const data = doc.data();
-            if (data.targetUserId) {
-                if (!userRatings[data.targetUserId]) userRatings[data.targetUserId] = { sum: 0, count: 0 };
-                userRatings[data.targetUserId].sum += data.rating;
-                userRatings[data.targetUserId].count += 1;
-            }
-        });
         
-        const otherUsers = allUsers.filter(u => u.id !== userData?.id);
-        const withRating = otherUsers.filter(u => userRatings[u.id]);
-        const withoutRating = otherUsers.filter(u => !userRatings[u.id]);
-        
-        // Shuffle arrays
-        const shuffledWith = withRating.sort(() => 0.5 - Math.random());
-        const shuffledWithout = withoutRating.sort(() => 0.5 - Math.random());
-        
-        // Pick 2 with rating, 1 without (if available)
-        let selectedMentors = [];
-        if (shuffledWith.length >= 2) {
-            selectedMentors.push(shuffledWith[0], shuffledWith[1]);
-        } else {
-            selectedMentors.push(...shuffledWith);
-        }
-        
-        if (shuffledWithout.length >= 1) {
-            selectedMentors.push(shuffledWithout[0]);
-        }
-        
-        // Fill remaining if needed to get 3
-        while (selectedMentors.length < 3 && (shuffledWith.length + shuffledWithout.length) > selectedMentors.length) {
-            const unused = [...shuffledWith, ...shuffledWithout].filter(u => !selectedMentors.includes(u));
-            if (unused.length) selectedMentors.push(unused[0]);
-            else break;
-        }
-        
-        // Shuffle the final 3
-        selectedMentors = selectedMentors.sort(() => 0.5 - Math.random());
-        
-        if (selectedMentors.length === 0) {
-          mentorsEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1.5rem;">No mentors available right now.</div>';
-        } else {
-          mentorsEl.innerHTML = '';
-          const mColors = ['job-icon-purple', 'job-icon-cyan', 'job-icon-green'];
-          selectedMentors.forEach((m, idx) => {
-            const item = document.createElement('div');
-            item.className = 'job-list-item';
-            
-            const rData = userRatings[m.id];
-            const rScore = rData ? (rData.sum / rData.count).toFixed(1) : 'New';
-            const rIcon = rData ? '<span class="text-amber">★</span>' : '';
-            
-            item.innerHTML = `
-              <div class="job-icon-box ${mColors[idx % mColors.length]}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              </div>
-              <div class="job-item-info">
-                <h3 class="job-item-title">${m.fullName}</h3>
-                <p class="job-item-subtext">${m.preferredRole || 'Student'} • ${rScore} ${rIcon}</p>
-              </div>
-            `;
-            mentorsEl.appendChild(item);
+          // Fetch all reviews and profiles from Firestore
+          const [allReviewsSnap, profilesSnap] = await Promise.all([
+             getDocs(collection(firestore, "reviews")),
+             getDocs(collection(firestore, "user_profiles"))
+          ]);
+          
+          const userRatings = {};
+          allReviewsSnap.forEach(doc => {
+              const data = doc.data();
+              if (data.targetUserId) {
+                  if (!userRatings[data.targetUserId]) userRatings[data.targetUserId] = { sum: 0, count: 0 };
+                  userRatings[data.targetUserId].sum += data.rating;
+                  userRatings[data.targetUserId].count += 1;
+              }
           });
-        }
-      } catch (err) {
+
+          const userProfiles = {};
+          profilesSnap.forEach(doc => { userProfiles[doc.id] = doc.data(); });
+          
+          const otherUsers = allUsers.filter(u => u.id !== userData?.id);
+          const withRating = otherUsers.filter(u => userRatings[u.id]);
+          const withoutRating = otherUsers.filter(u => !userRatings[u.id]);
+          
+          // Shuffle arrays
+          const shuffledWith = withRating.sort(() => 0.5 - Math.random());
+          const shuffledWithout = withoutRating.sort(() => 0.5 - Math.random());
+          
+          // Pick 2 with rating, 1 without (if available)
+          let selectedMentors = [];
+          if (shuffledWith.length >= 2) {
+              selectedMentors.push(shuffledWith[0], shuffledWith[1]);
+          } else {
+              selectedMentors.push(...shuffledWith);
+          }
+          
+          if (shuffledWithout.length >= 1) {
+              selectedMentors.push(shuffledWithout[0]);
+          }
+          
+          // Fill remaining if needed to get 3
+          while (selectedMentors.length < 3 && (shuffledWith.length + shuffledWithout.length) > selectedMentors.length) {
+              const unused = [...shuffledWith, ...shuffledWithout].filter(u => !selectedMentors.includes(u));
+              if (unused.length) selectedMentors.push(unused[0]);
+              else break;
+          }
+          
+          // Shuffle the final 3
+          selectedMentors = selectedMentors.sort(() => 0.5 - Math.random());
+          
+          if (selectedMentors.length === 0) {
+            mentorsEl.innerHTML = '<div class="empty-state text-center text-muted" style="padding: 1.5rem;">No mentors available right now.</div>';
+          } else {
+            mentorsEl.innerHTML = '';
+            const mColors = ['job-icon-purple', 'job-icon-cyan', 'job-icon-green'];
+            selectedMentors.forEach((m, idx) => {
+              const item = document.createElement('div');
+              item.className = 'job-list-item';
+              item.style.cursor = 'pointer';
+              item.style.transition = 'background 0.2s';
+              item.onmouseenter = () => item.style.background = 'var(--bg-main)';
+              item.onmouseleave = () => item.style.background = 'transparent';
+              
+              const rData = userRatings[m.id];
+              const rScore = rData ? (rData.sum / rData.count).toFixed(1) : 'New';
+              const rIcon = rData ? '<span class="text-amber">★</span>' : '';
+              
+              const skills = userProfiles[m.id]?.skills || [];
+              let skillsHtml = '';
+              if (skills.length > 0) {
+                 skillsHtml = '<div class="mt-1 flex flex-wrap gap-1 items-center">' + skills.slice(0, 3).map(s => `<span class="badge" style="background: rgba(255,255,255,0.05); font-size: 0.65rem; padding: 0.1rem 0.4rem; white-space: nowrap; border: 1px solid var(--border-light); color: var(--text-muted);">${s}</span>`).join('') + (skills.length > 3 ? '<span class="text-xs text-muted" style="font-size: 0.65rem;">+' + (skills.length - 3) + '</span>' : '') + '</div>';
+              }
+              
+              item.innerHTML = `
+                <div class="job-icon-box ${mColors[idx % mColors.length]}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div class="job-item-info" style="display: flex; flex-direction: column; justify-content: center;">
+                  <h3 class="job-item-title">${m.fullName}</h3>
+                  <p class="job-item-subtext" style="margin-bottom: 2px;">${m.preferredRole || 'Student'} • ${rScore} ${rIcon}</p>
+                  ${skillsHtml}
+                </div>
+                <div style="margin-left: auto; color: var(--text-muted);">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
+                </div>
+              `;
+              
+              item.addEventListener('click', () => {
+                 navigateTo('mentoring');
+                 activeMentoringTarget = m;
+                 document.getElementById('mentoring-target-name').textContent = m.fullName;
+                 document.getElementById('mentoring-apply-form').reset();
+                 document.getElementById('dialog-mentoring-apply').showModal();
+              });
+
+              mentorsEl.appendChild(item);
+            });
+          }
+} catch (err) {
         mentorsEl.innerHTML = '<div class="empty-state text-center text-muted">Could not load mentors.</div>';
       }
     }
